@@ -1,4 +1,4 @@
-package infrastruture
+package infrastructure
 
 import (
 	"desktop/internal/auth/domain"

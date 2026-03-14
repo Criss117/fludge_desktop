@@ -5,7 +5,7 @@ import (
 	"desktop/internal/auth/application"
 	"desktop/internal/auth/application/dtos"
 	"desktop/internal/auth/domain"
-	"desktop/internal/auth/infrastruture"
+	"desktop/internal/auth/infrastructure"
 	"desktop/internal/shared/db"
 )
 
@@ -21,8 +21,8 @@ type AuthHandler struct {
 }
 
 func NewAuthHandler(ctx *context.Context, queries *db.Queries, callback OnStateChange) *AuthHandler {
-	operatorRepository := infrastruture.NewSQLiteOperatorRepository(ctx, queries)
-	appStateRepository := infrastruture.NewSQLiteAppStateRepository(ctx, queries)
+	operatorRepository := infrastructure.NewSQLiteOperatorRepository(ctx, queries)
+	appStateRepository := infrastructure.NewSQLiteAppStateRepository(ctx, queries)
 
 	// use cases
 	findAllOperatorsUseCase := application.NewFindAllOperatorsUseCase(operatorRepository)

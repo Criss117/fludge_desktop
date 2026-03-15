@@ -53,8 +53,10 @@ type Customer struct {
 }
 
 type Member struct {
+	ID             string        `json:"id"`
 	OrganizationID string        `json:"organization_id"`
 	OperatorID     string        `json:"operator_id"`
+	Role           string        `json:"role"`
 	CreatedAt      int64         `json:"created_at"`
 	UpdatedAt      int64         `json:"updated_at"`
 	DeletedAt      sql.NullInt64 `json:"deleted_at"`
@@ -142,6 +144,7 @@ type Team struct {
 }
 
 type TeamMember struct {
+	ID             string        `json:"id"`
 	TeamID         string        `json:"team_id"`
 	OperatorID     string        `json:"operator_id"`
 	OrganizationID string        `json:"organization_id"`

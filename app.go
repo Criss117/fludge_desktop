@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"desktop/internal/auth"
-	authDomain "desktop/internal/auth/domain"
+	"desktop/internal/appstate"
+	"desktop/internal/iam"
 	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/platform"
 	_ "embed"
@@ -18,10 +18,10 @@ var ddl string
 
 // App struct
 type App struct {
-	ctx         context.Context
-	authHandler auth.AuthHandler
-	appState    *authDomain.AppState
-	mu          sync.RWMutex
+	ctx          context.Context
+	IamHandler   iam.IamHandler
+	SessionState *appstate.SessionState
+	mu           sync.RWMutex
 }
 
 // NewApp creates a new App application struct
@@ -29,35 +29,8 @@ func NewApp() *App {
 	return &App{}
 }
 
-// // startup is called when the app starts. The context is saved
-// // so we can call the runtime methods
-// func (a *App) startup(ctx context.Context) {
-// 	a.ctx = ctx
-
-// 	conn, err := platform.NewDatabase("pos.db", ddl, &ctx)
-
-// 	if err != nil {
-// 		log.Fatal("error abriendo DB:", err)
-// 	}
-
-// 	queries := db.New(conn)
-
-// 	a.authHandler = *auth.NewAuthHandler(&ctx, queries, func(as *authDomain.AppState) {
-// 		a.mu.Lock()
-// 		a.appState = as
-// 		a.mu.Unlock()
-// 	})
-
-// 	state, err := a.authHandler.FindAppStateUseCase.ExecuteWithoutParsing()
-// 	if err != nil {
-// 		log.Fatal("error obteniendo estado de la aplicación:", err)
-// 	}
-
-// 	a.mu.Lock()
-// 	a.appState = state
-// 	a.mu.Unlock()
-// }
-
+// startup is called when the app starts. The context is saved
+// so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	log.Println("▶ abriendo DB...")
@@ -71,22 +44,41 @@ func (a *App) startup(ctx context.Context) {
 
 	queries := db.New(conn)
 
-	a.authHandler = *auth.NewAuthHandler(&ctx, queries, func(as *authDomain.AppState) {
+	a.IamHandler = *iam.NewIamHandler(ctx, queries, func(event iam.StateChangeEvent) {
 		a.mu.Lock()
-		a.appState = as
-		a.mu.Unlock()
+		defer a.mu.Unlock()
+
+		switch event.Type {
+		case iam.OnStateChangeTypeSignUp:
+			a.SessionState = appstate.BuildSessionState(
+				nil,
+				event.Operator,
+				nil,
+				nil,
+			)
+		case iam.OnStateChangeTypeSignIn:
+			a.SessionState = appstate.BuildSessionState(
+				nil,
+				event.Operator,
+				nil,
+				event.Teams,
+			)
+		}
 	})
 
 	log.Println("✓ authHandler creado")
 
-	state, err := a.authHandler.FindAppStateUseCase.ExecuteWithoutParsing()
-	if err != nil {
-		log.Println("✗ error appState:", err)
-		return
-	}
-	log.Println("✓ appState:", state)
+	// if err != nil {
+	// 	log.Println("✗ error appState:", err)
+	// 	return
+	// }
 
-	a.mu.Lock()
-	a.appState = state
-	a.mu.Unlock()
+}
+
+// Greet returns a greeting for the given name
+func (a *App) GetSession() *appstate.ResponseSessionState {
+	return appstate.ResponseSessionStateFromDomain(
+		a.SessionState.ActiveOrganization,
+		a.SessionState.ActiveOperator.Operator,
+	)
 }

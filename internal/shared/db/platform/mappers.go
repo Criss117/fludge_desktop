@@ -5,6 +5,34 @@ import (
 	"time"
 )
 
+func TimeToInt64(t time.Time) int64 {
+	return t.UnixMilli()
+}
+
+func TimeFromInt64(t int64) time.Time {
+	return time.UnixMilli(t)
+}
+
+func TimeToInt64Nullable(t *time.Time) *int64 {
+	if t == nil {
+		return nil
+	}
+
+	date := t.UnixMilli()
+
+	return &date
+}
+
+func TimeFromInt64Nullable(t *int64) *time.Time {
+	if t == nil {
+		return nil
+	}
+
+	date := time.UnixMilli(*t)
+
+	return &date
+}
+
 func FromMillisNullable(ms sql.NullInt64) *time.Time {
 	if !ms.Valid {
 		return nil

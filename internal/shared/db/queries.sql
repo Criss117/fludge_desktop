@@ -15,6 +15,11 @@ SELECT * FROM operator
 WHERE username = ?
 LIMIT 1;
 
+-- name: FindOneOperatorById :many
+SELECT * FROM operator 
+WHERE id = ?
+LIMIT 1;
+
 -- name: FindManyOperatorsByEmailOrUsername :many
 SELECT * FROM operator 
 WHERE email = ? OR username = ?;
@@ -32,3 +37,38 @@ SELECT * FROM app_state WHERE id = "local" LIMIT 1;
 
 -- name: UpdateAppState :exec
 UPDATE app_state SET active_organization_id = ?, active_operator_id = ?, updated_at = ? WHERE id = "local";
+
+-------------------------------------------------------------------------------
+-- Organization
+-------------------------------------------------------------------------------
+
+-- name: FindOneOrganizationByID :many
+SELECT * FROM organization WHERE id = ?;
+
+
+-------------------------------------------------------------------------------
+-- Member
+-------------------------------------------------------------------------------
+
+-- name: FindAllMembersByOrganizationId :many
+SELECT * FROM member WHERE organization_id = ?;
+
+-- name: FindOneMemberById :many
+SELECT * FROM member WHERE id = ?;
+
+-------------------------------------------------------------------------------
+-- Team
+-------------------------------------------------------------------------------
+
+-- name: FindAllTeamsByOrganizationId :many
+SELECT * FROM team WHERE organization_id = ?;
+
+-- name: FindAllTeamsMembersByTeamId :many
+SELECT * FROM team_member WHERE team_id = ?;
+
+-- name: FindAllTeamsByOperatorId :many
+SELECT team.*
+FROM team_member
+INNER JOIN team ON team.id = team_member.team_id
+WHERE team_member.operator_id = ?
+GROUP BY team.id;

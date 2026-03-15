@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS "app_state" (
     "updated_at"             integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
     FOREIGN KEY ("active_organization_id") REFERENCES "organization"("id") ON DELETE SET NULL,
     FOREIGN KEY ("active_operator_id")     REFERENCES "operator"("id")     ON DELETE SET NULL,
-    CONSTRAINT "singleton" CHECK("id" = 'local')
+    CONSTRAINT "app_state_singleton" CHECK("id" = 'local')
 );
 
 INSERT OR IGNORE INTO "app_state" ("id", "updated_at")
@@ -52,15 +52,18 @@ VALUES ('local', cast(unixepoch('subsecond') * 1000 as integer));
 
 
 CREATE TABLE IF NOT EXISTS "member" (
-    "organization_id" text NOT NULL,
-    "operator_id"     text NOT NULL,
+    "id"              text    PRIMARY KEY NOT NULL,
+    "organization_id" text    NOT NULL,
+    "operator_id"     text    NOT NULL,
+    "role"            text    NOT NULL,
     "created_at"      integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
     "updated_at"      integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
     "deleted_at"      integer,
-    PRIMARY KEY ("organization_id", "operator_id"),
     FOREIGN KEY ("organization_id") REFERENCES "organization"("id") ON DELETE CASCADE,
-    FOREIGN KEY ("operator_id")     REFERENCES "operator"("id")     ON DELETE CASCADE
+    FOREIGN KEY ("operator_id")     REFERENCES "operator"("id")     ON DELETE CASCADE,
+    CONSTRAINT "member_role_valid" CHECK("role" IN ('ROOT', 'MEMBER'))
 );
+
 
 
 CREATE TABLE IF NOT EXISTS "team" (
@@ -79,13 +82,13 @@ CREATE INDEX IF NOT EXISTS "team_organization_id_idx" ON "team" ("organization_i
 
 
 CREATE TABLE IF NOT EXISTS "team_member" (
-    "team_id"         text NOT NULL,
-    "operator_id"     text NOT NULL,
-    "organization_id" text NOT NULL,
+    "id"              text    PRIMARY KEY NOT NULL,
+    "team_id"         text    NOT NULL,
+    "operator_id"     text    NOT NULL,
+    "organization_id" text    NOT NULL,
     "created_at"      integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
     "updated_at"      integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
     "deleted_at"      integer,
-    PRIMARY KEY ("team_id", "operator_id", "organization_id"),
     FOREIGN KEY ("team_id")         REFERENCES "team"("id")         ON DELETE CASCADE,
     FOREIGN KEY ("operator_id")     REFERENCES "operator"("id")     ON DELETE CASCADE,
     FOREIGN KEY ("organization_id") REFERENCES "organization"("id") ON DELETE CASCADE

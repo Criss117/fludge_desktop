@@ -40,6 +40,45 @@ func (q *Queries) CreateOperator(ctx context.Context, arg CreateOperatorParams) 
 	return err
 }
 
+const findAllMembersByOrganizationId = `-- name: FindAllMembersByOrganizationId :many
+
+SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at FROM member WHERE organization_id = ?
+`
+
+// -----------------------------------------------------------------------------
+// Member
+// -----------------------------------------------------------------------------
+func (q *Queries) FindAllMembersByOrganizationId(ctx context.Context, organizationID string) ([]Member, error) {
+	rows, err := q.db.QueryContext(ctx, findAllMembersByOrganizationId, organizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Member
+	for rows.Next() {
+		var i Member
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrganizationID,
+			&i.OperatorID,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const findAllOperators = `-- name: FindAllOperators :many
 
 SELECT id, name, email, username, pin, is_root, created_at, updated_at, deleted_at FROM operator
@@ -64,6 +103,120 @@ func (q *Queries) FindAllOperators(ctx context.Context) ([]Operator, error) {
 			&i.Username,
 			&i.Pin,
 			&i.IsRoot,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findAllTeamsByOperatorId = `-- name: FindAllTeamsByOperatorId :many
+SELECT team.id, team.name, team.organization_id, team.permissions, team.description, team.created_at, team.updated_at, team.deleted_at
+FROM team_member
+INNER JOIN team ON team.id = team_member.team_id
+WHERE team_member.operator_id = ?
+`
+
+func (q *Queries) FindAllTeamsByOperatorId(ctx context.Context, operatorID string) ([]Team, error) {
+	rows, err := q.db.QueryContext(ctx, findAllTeamsByOperatorId, operatorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Team
+	for rows.Next() {
+		var i Team
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.OrganizationID,
+			&i.Permissions,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findAllTeamsByOrganizationId = `-- name: FindAllTeamsByOrganizationId :many
+
+SELECT id, name, organization_id, permissions, description, created_at, updated_at, deleted_at FROM team WHERE organization_id = ?
+`
+
+// -----------------------------------------------------------------------------
+// Team
+// -----------------------------------------------------------------------------
+func (q *Queries) FindAllTeamsByOrganizationId(ctx context.Context, organizationID string) ([]Team, error) {
+	rows, err := q.db.QueryContext(ctx, findAllTeamsByOrganizationId, organizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Team
+	for rows.Next() {
+		var i Team
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.OrganizationID,
+			&i.Permissions,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findAllTeamsMembersByTeamId = `-- name: FindAllTeamsMembersByTeamId :many
+SELECT id, team_id, operator_id, organization_id, created_at, updated_at, deleted_at FROM team_member WHERE team_id = ?
+`
+
+func (q *Queries) FindAllTeamsMembersByTeamId(ctx context.Context, teamID string) ([]TeamMember, error) {
+	rows, err := q.db.QueryContext(ctx, findAllTeamsMembersByTeamId, teamID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []TeamMember
+	for rows.Next() {
+		var i TeamMember
+		if err := rows.Scan(
+			&i.ID,
+			&i.TeamID,
+			&i.OperatorID,
+			&i.OrganizationID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -144,6 +297,41 @@ func (q *Queries) FindManyOperatorsByEmailOrUsername(ctx context.Context, arg Fi
 	return items, nil
 }
 
+const findOneMemberById = `-- name: FindOneMemberById :many
+SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at FROM member WHERE id = ?
+`
+
+func (q *Queries) FindOneMemberById(ctx context.Context, id string) ([]Member, error) {
+	rows, err := q.db.QueryContext(ctx, findOneMemberById, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Member
+	for rows.Next() {
+		var i Member
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrganizationID,
+			&i.OperatorID,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const findOneOperatorByEmail = `-- name: FindOneOperatorByEmail :many
 SELECT id, name, email, username, pin, is_root, created_at, updated_at, deleted_at FROM operator 
 WHERE email = ?
@@ -152,6 +340,45 @@ LIMIT 1
 
 func (q *Queries) FindOneOperatorByEmail(ctx context.Context, email string) ([]Operator, error) {
 	rows, err := q.db.QueryContext(ctx, findOneOperatorByEmail, email)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Operator
+	for rows.Next() {
+		var i Operator
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Username,
+			&i.Pin,
+			&i.IsRoot,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findOneOperatorById = `-- name: FindOneOperatorById :many
+SELECT id, name, email, username, pin, is_root, created_at, updated_at, deleted_at FROM operator 
+WHERE id = ?
+LIMIT 1
+`
+
+func (q *Queries) FindOneOperatorById(ctx context.Context, id string) ([]Operator, error) {
+	rows, err := q.db.QueryContext(ctx, findOneOperatorById, id)
 	if err != nil {
 		return nil, err
 	}
@@ -205,6 +432,50 @@ func (q *Queries) FindOneOperatorByUsername(ctx context.Context, username string
 			&i.Username,
 			&i.Pin,
 			&i.IsRoot,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findOneOrganizationByID = `-- name: FindOneOrganizationByID :many
+
+SELECT id, name, slug, logo, metadata, legal_name, address, contact_phone, contact_email, created_at, updated_at, deleted_at FROM organization WHERE id = ?
+`
+
+// -----------------------------------------------------------------------------
+// Organization
+// -----------------------------------------------------------------------------
+func (q *Queries) FindOneOrganizationByID(ctx context.Context, id string) ([]Organization, error) {
+	rows, err := q.db.QueryContext(ctx, findOneOrganizationByID, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Organization
+	for rows.Next() {
+		var i Organization
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slug,
+			&i.Logo,
+			&i.Metadata,
+			&i.LegalName,
+			&i.Address,
+			&i.ContactPhone,
+			&i.ContactEmail,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,

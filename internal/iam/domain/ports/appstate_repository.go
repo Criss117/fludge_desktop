@@ -7,5 +7,5 @@ import (
 
 type AppStateRepository interface {
 	Get(ctx context.Context) (*aggregates.AppState, error)
-	// Update(appState *aggregates.AppState) error
+	Update(ctx context.Context, appState *aggregates.AppState) error
 }

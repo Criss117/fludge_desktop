@@ -23,7 +23,7 @@ func NewSignUpUseCase(
 	}
 }
 
-func (uc *SignUpUseCase) Execute(ctx context.Context, cmd *commands.SignUpCommand) (*aggregates.Operator, error) {
+func (uc *SignUpUseCase) Execute(ctx context.Context, cmd *commands.SignUpCommand) (*aggregates.AppState, error) {
 	existingOperator, errByUsername := uc.operatorRepo.FindOneByUsername(ctx, cmd.Username)
 
 	if errByUsername != nil {
@@ -62,5 +62,19 @@ func (uc *SignUpUseCase) Execute(ctx context.Context, cmd *commands.SignUpComman
 		return nil, errCreating
 	}
 
-	return newOperator, nil
+	currentAppState, errAppState := uc.appStateRepo.Get(ctx)
+
+	if errAppState != nil {
+		return nil, errAppState
+	}
+
+	currentAppState.SetActiveOperator(existingOperator)
+
+	errUpdateAppState := uc.appStateRepo.Update(ctx, currentAppState)
+
+	if errUpdateAppState != nil {
+		return nil, errUpdateAppState
+	}
+
+	return currentAppState, nil
 }

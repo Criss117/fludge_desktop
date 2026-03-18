@@ -9,6 +9,7 @@ import (
 	"desktop/internal/iam/domain/ports"
 	"desktop/internal/iam/infrastructure/repositories"
 	"desktop/internal/shared/db"
+	"log"
 )
 
 type OnStateChangeType string
@@ -28,7 +29,7 @@ const (
 	OnStateChangeTypeRefetch            OnStateChangeType = "refetch"
 )
 
-type OnStateChange func(event StateChangeEvent)
+type OnStateChange func(appState *aggregates.AppState)
 
 type IamHandler struct {
 	ctx                    context.Context
@@ -36,6 +37,7 @@ type IamHandler struct {
 	organizationRepository ports.OrganizationRepository
 	operatorRepository     ports.OperatorRepository
 	appStateRepository     ports.AppStateRepository
+	getAppStateUseCase     *usecases.GetAppStateUseCase
 }
 
 func NewIamHandler(ctx context.Context, queries *db.Queries, onStateChange OnStateChange) *IamHandler {
@@ -47,62 +49,101 @@ func NewIamHandler(ctx context.Context, queries *db.Queries, onStateChange OnSta
 		operatorRepository,
 	)
 
+	getAppStateUseCase := usecases.NewGetAppStateUseCase(appStateRepository, organizationRepository)
+
 	return &IamHandler{
 		ctx:                    ctx,
 		onStateChange:          onStateChange,
 		organizationRepository: organizationRepository,
 		operatorRepository:     operatorRepository,
 		appStateRepository:     appStateRepository,
+		getAppStateUseCase:     getAppStateUseCase,
 	}
 }
 
-func (h *IamHandler) SignUp(signUpDtp *commands.SignUpCommand) (*responses.OperatorResponse, error) {
+func (h *IamHandler) SignUp(signUpDtp *commands.SignUpCommand) (*responses.ResponseAppState, error) {
 	signUpUseCase := usecases.NewSignUpUseCase(h.operatorRepository, h.appStateRepository)
 
-	operator, err := signUpUseCase.Execute(h.ctx, signUpDtp)
+	newAppState, err := signUpUseCase.Execute(h.ctx, signUpDtp)
 
 	if err != nil {
 		return nil, err
 	}
 
-	h.onStateChange(StateChangeEvent{
-		Type:     OnStateChangeTypeSignUp,
-		Operator: operator,
-	})
+	h.onStateChange(newAppState)
 
-	return responses.OperatorResponseFromDomain(operator), nil
+	return responses.ResponseAppStateFromDomain(newAppState), nil
 }
 
-func (h *IamHandler) SignIn(signInDto *commands.SignInCommand) (*responses.SignInResponse, error) {
+func (h *IamHandler) SignIn(signInDto *commands.SignInCommand) (*responses.ResponseAppState, error) {
+	log.Println("✓ SignIn 1")
 	signInUseCase := usecases.NewSignInUseCase(h.operatorRepository, h.appStateRepository)
 
-	signInResponse, err := signInUseCase.Execute(h.ctx, signInDto)
+	log.Println("✓ SignIn 2")
+	newAppState, err := signInUseCase.Execute(h.ctx, signInDto)
 
 	if err != nil {
 		return nil, err
 	}
 
-	h.onStateChange(StateChangeEvent{
-		Type:     OnStateChangeTypeSignIn,
-		Operator: signInResponse.Operator,
-		Teams:    signInResponse.Teams,
-	})
+	log.Println("✓ SignIn 3")
+	h.onStateChange(newAppState)
 
-	operatorResponse := responses.OperatorResponseFromDomain(signInResponse.Operator)
-	teamResponse := make([]responses.TeamResponse, len(signInResponse.Teams))
+	log.Println("✓ SignIn 4")
+	return responses.ResponseAppStateFromDomain(newAppState), nil
+}
 
-	for i, team := range signInResponse.Teams {
-		teamResponse[i] = *responses.TeamResponseFromDomain(team)
+func (h *IamHandler) SignOut() error {
+	signOutUseCase := usecases.NewSignOutUseCase(h.appStateRepository)
+	err := signOutUseCase.Execute(h.ctx)
+
+	if err != nil {
+		return err
 	}
 
-	h.onStateChange(StateChangeEvent{
-		Type:     OnStateChangeTypeSignIn,
-		Operator: signInResponse.Operator,
-		Teams:    signInResponse.Teams,
-	})
+	appState, err := h.getAppStateUseCase.Execute(h.ctx)
 
-	return &responses.SignInResponse{
-		ActiveOperator: *operatorResponse,
-		ActiveTeams:    teamResponse,
-	}, nil
+	if err != nil {
+		return err
+	}
+
+	h.onStateChange(appState)
+
+	return nil
+}
+
+func (h *IamHandler) SwitchOrganization(switchOrganizationDto *commands.SwitchOrganizationCommand) error {
+	switchOrganizationUseCase := usecases.NewSwitchOrganizationUseCase(h.organizationRepository, h.appStateRepository)
+
+	_, err := switchOrganizationUseCase.Execute(h.ctx, switchOrganizationDto)
+
+	if err != nil {
+		return err
+	}
+
+	appState, err := h.getAppStateUseCase.Execute(h.ctx)
+
+	if err != nil {
+		return err
+	}
+
+	h.onStateChange(appState)
+
+	return nil
+}
+
+func (h *IamHandler) GetAppState() (*responses.ResponseAppState, error) {
+	appState, err := h.getAppStateUseCase.Execute(h.ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if appState == nil {
+		return nil, nil
+	}
+
+	h.onStateChange(appState)
+
+	return responses.ResponseAppStateFromDomain(appState), nil
 }

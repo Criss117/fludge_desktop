@@ -2,6 +2,7 @@ package platform
 
 import (
 	"database/sql"
+	"log"
 	"time"
 )
 
@@ -81,17 +82,21 @@ func BoolToInt(value bool) int64 {
 }
 
 func ToStringNullable(s *string) sql.NullString {
+	log.Println("✓ ToStringNullable 1", s)
 	if s == nil {
 		return sql.NullString{
-			Valid: false,
+			String: "",
+			Valid:  false,
 		}
 	}
 
+	log.Println("✓ ToStringNullable 2", s)
 	str := sql.NullString{
 		String: *s,
 		Valid:  true,
 	}
 
+	log.Println("✓ ToStringNullable 3", str)
 	return str
 }
 

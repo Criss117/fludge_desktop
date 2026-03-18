@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
     const appState =
       await context.queryClient.ensureQueryData(appStateQueryOptions);
 
-    if (appState.activeOperator) {
+    if (appState?.activeOperator) {
       throw redirect({
         to: "/select-organization",
       });

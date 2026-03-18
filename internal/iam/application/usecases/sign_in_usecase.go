@@ -8,11 +8,6 @@ import (
 	"desktop/internal/iam/domain/ports"
 )
 
-type SignInResponse struct {
-	Operator *aggregates.Operator
-	Teams    []*aggregates.Team
-}
-
 type SignInUseCase struct {
 	operatorRepo ports.OperatorRepository
 	appStateRepo ports.AppStateRepository
@@ -29,14 +24,14 @@ func NewSignInUseCase(
 	}
 }
 
-func (uc *SignInUseCase) Execute(ctx context.Context, cmd *commands.SignInCommand) (*SignInResponse, error) {
+func (uc *SignInUseCase) Execute(ctx context.Context, cmd *commands.SignInCommand) (*aggregates.AppState, error) {
 	existingOperator, errByUsername := uc.operatorRepo.FindOneByUsername(ctx, cmd.Username)
 
 	if errByUsername != nil {
 		return nil, errByUsername
 	}
 
-	if existingOperator != nil {
+	if existingOperator == nil {
 		return nil, derrors.ErrOperatorNotFound
 	}
 
@@ -44,18 +39,19 @@ func (uc *SignInUseCase) Execute(ctx context.Context, cmd *commands.SignInComman
 		return nil, derrors.ErrInvalidCredentials
 	}
 
-	if existingOperator.IsRoot() {
-		return &SignInResponse{Operator: existingOperator}, nil
+	currentAppState, errAppState := uc.appStateRepo.Get(ctx)
+
+	if errAppState != nil {
+		return nil, errAppState
 	}
 
-	teams, errTeams := uc.teamRepo.FindAllByOperatorId(ctx, existingOperator.ID())
+	currentAppState.SetActiveOperator(existingOperator)
 
-	if errTeams != nil {
-		return nil, errTeams
+	err := uc.appStateRepo.Update(ctx, currentAppState)
+
+	if err != nil {
+		return nil, err
 	}
 
-	return &SignInResponse{
-		Operator: existingOperator,
-		Teams:    teams,
-	}, nil
+	return currentAppState, nil
 }

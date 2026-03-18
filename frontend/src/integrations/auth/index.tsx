@@ -1,5 +1,5 @@
 import { createContext, use } from "react";
-import { FindAppState, SignIn } from "@wails/go/auth/AuthHandler";
+import { SignIn, GetAppState } from "@wails/go/iam/IamHandler";
 import {
   queryOptions,
   useMutation,
@@ -7,19 +7,27 @@ import {
   useSuspenseQuery,
   type UseMutationResult,
 } from "@tanstack/react-query";
-import type { dtos } from "@wails/go/models";
+import type { responses } from "@wails/go/models";
 import type { SignInSchema } from "@auth/application/validators/operator-form.validators";
 
-type AppState = Awaited<ReturnType<typeof FindAppState>>;
+type AppState = Awaited<ReturnType<typeof GetAppState>>;
 
 interface Context {
   appState: AppState;
-  signIn: UseMutationResult<dtos.AppStateDTO, Error, dtos.SignInDTO, unknown>;
+  signIn: UseMutationResult<
+    responses.ResponseAppState,
+    Error,
+    {
+      pin: string;
+      username: string;
+    },
+    unknown
+  >;
 }
 
 export const appStateQueryOptions = queryOptions({
   queryKey: ["auth", "app-state"],
-  queryFn: FindAppState,
+  queryFn: GetAppState,
   refetchOnWindowFocus: true,
 });
 

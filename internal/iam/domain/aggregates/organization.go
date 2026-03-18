@@ -168,22 +168,27 @@ func (o *Organization) RemoveMember(member *Member) error {
 }
 
 func (o *Organization) ToValues() PrimitiveOrganization {
-	contactEmail := o.contactEmail.Value()
+	var contactEmail *string = nil
 
-	primitiveMembers := make([]*PrimitiveMember, len(o.members))
-	primitiveTeams := make([]*PrimitiveTeam, len(o.teams))
-
-	for i, member := range o.members {
-		memberValues := member.ToValues()
-
-		primitiveMembers[i] = &memberValues
+	if o.contactEmail != nil {
+		cEmail := o.contactEmail.Value()
+		contactEmail = &cEmail
 	}
 
-	for i, team := range o.teams {
-		teamValues := team.ToValues()
+	// primitiveMembers := make([]*PrimitiveMember, len(o.members))
+	// primitiveTeams := make([]*PrimitiveTeam, len(o.teams))
 
-		primitiveTeams[i] = &teamValues
-	}
+	// for i, member := range o.members {
+	// 	memberValues := member.ToValues()
+
+	// 	primitiveMembers[i] = &memberValues
+	// }
+
+	// for i, team := range o.teams {
+	// 	teamValues := team.ToValues()
+
+	// 	primitiveTeams[i] = &teamValues
+	// }
 
 	return PrimitiveOrganization{
 		ID:           o.id,
@@ -193,11 +198,11 @@ func (o *Organization) ToValues() PrimitiveOrganization {
 		Address:      o.address,
 		Logo:         o.logo,
 		ContactPhone: o.contactPhone,
-		ContactEmail: &contactEmail,
+		ContactEmail: contactEmail,
 		CreatedAt:    o.createdAt,
 		UpdatedAt:    o.updatedAt,
 		DeletedAt:    o.deletedAt,
-		Members:      primitiveMembers,
-		Teams:        primitiveTeams,
+		Members:      nil,
+		Teams:        nil,
 	}
 }

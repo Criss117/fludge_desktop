@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"desktop/internal/appstate"
 	"desktop/internal/iam"
+	iamAggregates "desktop/internal/iam/domain/aggregates"
 	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/platform"
 	_ "embed"
@@ -20,7 +20,7 @@ var ddl string
 type App struct {
 	ctx          context.Context
 	IamHandler   iam.IamHandler
-	SessionState *appstate.SessionState
+	SessionState *iamAggregates.AppState
 	mu           sync.RWMutex
 }
 
@@ -44,41 +44,30 @@ func (a *App) startup(ctx context.Context) {
 
 	queries := db.New(conn)
 
-	a.IamHandler = *iam.NewIamHandler(ctx, queries, func(event iam.StateChangeEvent) {
+	a.IamHandler = *iam.NewIamHandler(ctx, queries, func(appState *iamAggregates.AppState) {
 		a.mu.Lock()
 		defer a.mu.Unlock()
 
-		switch event.Type {
-		case iam.OnStateChangeTypeSignUp:
-			a.SessionState = appstate.BuildSessionState(
-				nil,
-				event.Operator,
-				nil,
-				nil,
-			)
-		case iam.OnStateChangeTypeSignIn:
-			a.SessionState = appstate.BuildSessionState(
-				nil,
-				event.Operator,
-				nil,
-				event.Teams,
-			)
+		if appState == nil {
+			log.Println("✗ error getting app state")
+			return
 		}
+
+		a.SessionState = appState
 	})
 
-	log.Println("✓ authHandler creado")
+	log.Println("✓ IamHandler creado")
 
 	// if err != nil {
 	// 	log.Println("✗ error appState:", err)
 	// 	return
 	// }
 
-}
+	_, errAppState := a.IamHandler.GetAppState()
 
-// Greet returns a greeting for the given name
-func (a *App) GetSession() *appstate.ResponseSessionState {
-	return appstate.ResponseSessionStateFromDomain(
-		a.SessionState.ActiveOrganization,
-		a.SessionState.ActiveOperator.Operator,
-	)
+	if errAppState != nil {
+		log.Println("✗ error getting app state:", err)
+		return
+	}
+
 }

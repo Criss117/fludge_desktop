@@ -99,18 +99,37 @@ func OrganizationToDomain(
 }
 
 func AppStateToDomain(
-	dbAppState *db.AppState,
+	dbAppState db.AppState,
 	activeOperator *aggregates.Operator,
+	activeOrganization *aggregates.Organization,
 ) aggregates.AppState {
-	var activeOrganizationId *string = nil
-
-	if dbAppState.ActiveOrganizationID.Valid {
-		activeOrganizationId = &dbAppState.ActiveOrganizationID.String
-	}
 
 	return aggregates.NewAppState(
-		activeOrganizationId,
+		activeOrganization,
 		activeOperator,
 		platform.FromMillis(dbAppState.UpdatedAt),
 	)
+}
+
+func AppStateFromDomain(appState *aggregates.AppState) *db.AppState {
+	appStateValues := appState.ToValues()
+
+	var activeOrganizationId *string = nil
+	var activeOperatorId *string = nil
+
+	if appStateValues.ActiveOrganization != nil {
+		activeOrganizationId = &appStateValues.ActiveOrganization.ID
+	}
+
+	if appStateValues.ActiveOperator != nil {
+		activeOperatorId = &appStateValues.ActiveOperator.ID
+	}
+
+	app := db.AppState{
+		ActiveOrganizationID: platform.ToStringNullable(activeOrganizationId),
+		ActiveOperatorID:     platform.ToStringNullable(activeOperatorId),
+		UpdatedAt:            platform.ToMillis(appStateValues.UpdatedAt),
+	}
+
+	return &app
 }

@@ -33,6 +33,17 @@ func (sql *SqliteAppStateRepository) Get(ctx context.Context) (*aggregates.AppSt
 	}
 
 	var activeOperator *aggregates.Operator = nil
+	var activeOrganization *aggregates.Organization = nil
+
+	if dbAppState.ActiveOrganizationID.Valid {
+		organization, err := sql.OrganizationRepository.FindOneByID(ctx, dbAppState.ActiveOrganizationID.String)
+
+		if err != nil {
+			return nil, err
+		}
+
+		activeOrganization = organization
+	}
 
 	if dbAppState.ActiveOperatorID.Valid {
 		operator, err := sql.OperatorRepository.FindOneByID(ctx, dbAppState.ActiveOperatorID.String)
@@ -44,8 +55,18 @@ func (sql *SqliteAppStateRepository) Get(ctx context.Context) (*aggregates.AppSt
 		activeOperator = operator
 	}
 
-	currentAppState := AppStateToDomain(&dbAppState, activeOperator)
+	currentAppState := AppStateToDomain(dbAppState, activeOperator, activeOrganization)
 
 	return &currentAppState, nil
 
+}
+
+func (sql *SqliteAppStateRepository) Update(ctx context.Context, appState *aggregates.AppState) error {
+	dbAppState := AppStateFromDomain(appState)
+
+	return sql.queries.UpdateAppState(ctx, db.UpdateAppStateParams{
+		ActiveOrganizationID: dbAppState.ActiveOrganizationID,
+		ActiveOperatorID:     dbAppState.ActiveOperatorID,
+		UpdatedAt:            dbAppState.UpdatedAt,
+	})
 }

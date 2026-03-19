@@ -58,7 +58,17 @@ func MemberToDomain(dbMember *db.Member) *aggregates.Member {
 	)
 }
 
-func OperatorToDomain(dbOperator *db.Operator) *aggregates.Operator {
+func OperatorToDomain(dbOperator *db.Operator, organizations []*aggregates.Organization) *aggregates.Operator {
+	isMemberIn := make([]*aggregates.OperatorOrganization, len(organizations))
+
+	for i, organization := range organizations {
+		isMemberIn[i] = &aggregates.OperatorOrganization{
+			ID:   organization.ID,
+			Slug: organization.Slug.Value(),
+			Name: organization.Name,
+		}
+	}
+
 	return aggregates.ReconstituteOperator(
 		dbOperator.ID,
 		dbOperator.Name,
@@ -69,6 +79,7 @@ func OperatorToDomain(dbOperator *db.Operator) *aggregates.Operator {
 		platform.FromMillis(dbOperator.CreatedAt),
 		platform.FromMillis(dbOperator.UpdatedAt),
 		platform.FromMillisNullable(dbOperator.DeletedAt),
+		isMemberIn,
 	)
 }
 
@@ -112,23 +123,21 @@ func AppStateToDomain(
 }
 
 func AppStateFromDomain(appState *aggregates.AppState) *db.AppState {
-	appStateValues := appState.ToValues()
-
 	var activeOrganizationId *string = nil
 	var activeOperatorId *string = nil
 
-	if appStateValues.ActiveOrganization != nil {
-		activeOrganizationId = &appStateValues.ActiveOrganization.ID
+	if appState.ActiveOrganization != nil {
+		activeOrganizationId = &appState.ActiveOrganization.ID
 	}
 
-	if appStateValues.ActiveOperator != nil {
-		activeOperatorId = &appStateValues.ActiveOperator.ID
+	if appState.ActiveOperator != nil {
+		activeOperatorId = &appState.ActiveOperator.ID
 	}
 
 	app := db.AppState{
 		ActiveOrganizationID: platform.ToStringNullable(activeOrganizationId),
 		ActiveOperatorID:     platform.ToStringNullable(activeOperatorId),
-		UpdatedAt:            platform.ToMillis(appStateValues.UpdatedAt),
+		UpdatedAt:            platform.ToMillis(appState.UpdatedAt),
 	}
 
 	return &app

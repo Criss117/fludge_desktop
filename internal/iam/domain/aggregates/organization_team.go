@@ -7,43 +7,31 @@ import (
 	"time"
 )
 
-type PrimitiveTeam struct {
+type Team struct {
 	ID             string
 	Name           string
 	OrganizationID string
-	Permissions    []string
+	Permissions    []valueobjects.Permission
 	Description    *string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      *time.Time
-	Members        []*PrimitiveTeamMember
-}
-
-type Team struct {
-	id             string
-	name           string
-	organizationID string
-	permissions    []valueobjects.Permission
-	description    *string
-	createdAt      time.Time
-	updatedAt      time.Time
-	deletedAt      *time.Time
-	members        []*TeamMember
+	Members        []*TeamMember
 }
 
 func DefaultTeam(organizationID string) *Team {
 	description := "Este equipo es el administrador de la organización"
 
 	return &Team{
-		id:             lib.GenerateUUID(),
-		name:           "Administradores",
-		organizationID: organizationID,
-		permissions:    valueobjects.AllPermissions(),
-		description:    &description,
-		createdAt:      time.Now(),
-		updatedAt:      time.Now(),
-		deletedAt:      nil,
-		members:        nil,
+		ID:             lib.GenerateUUID(),
+		Name:           "Administradores",
+		OrganizationID: organizationID,
+		Permissions:    valueobjects.AllPermissions(),
+		Description:    &description,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+		DeletedAt:      nil,
+		Members:        nil,
 	}
 }
 
@@ -63,14 +51,14 @@ func NewTeam(
 	}
 
 	return &Team{
-		id:             lib.GenerateUUID(),
-		name:           name,
-		organizationID: organizationID,
-		permissions:    validPermissions,
-		description:    description,
-		createdAt:      time.Now(),
-		updatedAt:      time.Now(),
-		deletedAt:      nil,
+		ID:             lib.GenerateUUID(),
+		Name:           name,
+		OrganizationID: organizationID,
+		Permissions:    validPermissions,
+		Description:    description,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+		DeletedAt:      nil,
 	}, nil
 }
 
@@ -83,43 +71,35 @@ func ReconstituteTeam(
 	members []*TeamMember,
 ) *Team {
 	return &Team{
-		id:             id,
-		name:           name,
-		organizationID: organizationID,
-		permissions:    permissions,
-		description:    description,
-		createdAt:      createdAt,
-		updatedAt:      updatedAt,
-		deletedAt:      deletedAt,
-		members:        members,
+		ID:             id,
+		Name:           name,
+		OrganizationID: organizationID,
+		Permissions:    permissions,
+		Description:    description,
+		CreatedAt:      createdAt,
+		UpdatedAt:      updatedAt,
+		DeletedAt:      deletedAt,
+		Members:        members,
 	}
 }
 
 func (t *Team) Delete() {
 	now := time.Now()
-	t.deletedAt = &now
-	t.updatedAt = now
+	t.DeletedAt = &now
+	t.UpdatedAt = now
 }
 
 func (t *Team) IsActive() bool {
-	if t.deletedAt != nil {
+	if t.DeletedAt != nil {
 		return false
 	}
 
 	return true
 }
 
-func (t *Team) ID() string {
-	return t.id
-}
-
-func (t *Team) Members() []*TeamMember {
-	return t.members
-}
-
 func (t *Team) OperatorIsMember(operatorId string) bool {
-	for _, member := range t.members {
-		if member.OperatorID() == operatorId {
+	for _, member := range t.Members {
+		if member.OperatorID == operatorId {
 			return true
 		}
 	}
@@ -127,40 +107,12 @@ func (t *Team) OperatorIsMember(operatorId string) bool {
 }
 
 func (t *Team) Equals(other *Team) bool {
-	return t.id == other.id
-}
-
-func (t *Team) ToValues() PrimitiveTeam {
-	permissions := make([]string, len(t.permissions))
-
-	for i, p := range t.permissions {
-		permissions[i] = p.Value()
-	}
-
-	members := make([]*PrimitiveTeamMember, len(t.members))
-
-	for i, member := range t.members {
-		tMember := member.ToValues()
-
-		members[i] = &tMember
-	}
-
-	return PrimitiveTeam{
-		ID:             t.id,
-		Name:           t.name,
-		OrganizationID: t.organizationID,
-		Permissions:    permissions,
-		Description:    t.description,
-		CreatedAt:      t.createdAt,
-		UpdatedAt:      t.updatedAt,
-		DeletedAt:      t.deletedAt,
-		Members:        members,
-	}
+	return t.ID == other.ID
 }
 
 func (t *Team) FindMemberByOperatorId(operatorId string) *TeamMember {
-	for _, member := range t.members {
-		if member.OperatorID() == operatorId {
+	for _, member := range t.Members {
+		if member.OperatorID == operatorId {
 			return member
 		}
 	}
@@ -168,21 +120,21 @@ func (t *Team) FindMemberByOperatorId(operatorId string) *TeamMember {
 }
 
 func (t *Team) AddMember(member *TeamMember) error {
-	if t.FindMemberByOperatorId(member.OperatorID()) != nil {
+	if t.FindMemberByOperatorId(member.OperatorID) != nil {
 		return derrors.ErrTeamMemberAlreadyExists
 	}
 
-	t.members = append(t.members, member)
-	t.updatedAt = time.Now()
+	t.Members = append(t.Members, member)
+	t.UpdatedAt = time.Now()
 
 	return nil
 }
 
 func (t *Team) RemoveMember(member *TeamMember) error {
-	for i, m := range t.members {
+	for i, m := range t.Members {
 		if m.Equals(member) {
-			t.members = append(t.members[:i], t.members[i+1:]...)
-			t.updatedAt = time.Now()
+			t.Members = append(t.Members[:i], t.Members[i+1:]...)
+			t.UpdatedAt = time.Now()
 			return nil
 		}
 	}
@@ -191,5 +143,5 @@ func (t *Team) RemoveMember(member *TeamMember) error {
 }
 
 func (t *Team) CountMembers() int {
-	return len(t.members)
+	return len(t.Members)
 }

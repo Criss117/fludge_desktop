@@ -40,6 +40,40 @@ func (q *Queries) CreateOperator(ctx context.Context, arg CreateOperatorParams) 
 	return err
 }
 
+const createOrganization = `-- name: CreateOrganization :exec
+INSERT INTO organization (id, name, slug, legal_name, address, logo, contact_phone, contact_email, created_at, updated_at) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type CreateOrganizationParams struct {
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	Slug         string         `json:"slug"`
+	LegalName    string         `json:"legal_name"`
+	Address      string         `json:"address"`
+	Logo         sql.NullString `json:"logo"`
+	ContactPhone sql.NullString `json:"contact_phone"`
+	ContactEmail sql.NullString `json:"contact_email"`
+	CreatedAt    int64          `json:"created_at"`
+	UpdatedAt    int64          `json:"updated_at"`
+}
+
+func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganizationParams) error {
+	_, err := q.db.ExecContext(ctx, createOrganization,
+		arg.ID,
+		arg.Name,
+		arg.Slug,
+		arg.LegalName,
+		arg.Address,
+		arg.Logo,
+		arg.ContactPhone,
+		arg.ContactEmail,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
 const findAllMembersByOrganizationId = `-- name: FindAllMembersByOrganizationId :many
 
 SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at FROM member WHERE organization_id = ?
@@ -125,6 +159,7 @@ SELECT team.id, team.name, team.organization_id, team.permissions, team.descript
 FROM team_member
 INNER JOIN team ON team.id = team_member.team_id
 WHERE team_member.operator_id = ?
+GROUP BY team.id
 `
 
 func (q *Queries) FindAllTeamsByOperatorId(ctx context.Context, operatorID string) ([]Team, error) {
@@ -297,8 +332,97 @@ func (q *Queries) FindManyOperatorsByEmailOrUsername(ctx context.Context, arg Fi
 	return items, nil
 }
 
+const findManyOrganizationsBy = `-- name: FindManyOrganizationsBy :many
+SELECT id, name, slug, logo, metadata, legal_name, address, contact_phone, contact_email, created_at, updated_at, deleted_at FROM organization
+WHERE organization.slug = ? OR organization.legal_name = ? OR organization.name = ?
+`
+
+type FindManyOrganizationsByParams struct {
+	Slug      string `json:"slug"`
+	LegalName string `json:"legal_name"`
+	Name      string `json:"name"`
+}
+
+func (q *Queries) FindManyOrganizationsBy(ctx context.Context, arg FindManyOrganizationsByParams) ([]Organization, error) {
+	rows, err := q.db.QueryContext(ctx, findManyOrganizationsBy, arg.Slug, arg.LegalName, arg.Name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Organization
+	for rows.Next() {
+		var i Organization
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slug,
+			&i.Logo,
+			&i.Metadata,
+			&i.LegalName,
+			&i.Address,
+			&i.ContactPhone,
+			&i.ContactEmail,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findManyOrganizationsByOperatorId = `-- name: FindManyOrganizationsByOperatorId :many
+SELECT organization.id, organization.name, organization.slug, organization.logo, organization.metadata, organization.legal_name, organization.address, organization.contact_phone, organization.contact_email, organization.created_at, organization.updated_at, organization.deleted_at FROM member
+INNER JOIN organization ON organization.id = member.organization_id
+WHERE operator_id = ?
+`
+
+func (q *Queries) FindManyOrganizationsByOperatorId(ctx context.Context, operatorID string) ([]Organization, error) {
+	rows, err := q.db.QueryContext(ctx, findManyOrganizationsByOperatorId, operatorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Organization
+	for rows.Next() {
+		var i Organization
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slug,
+			&i.Logo,
+			&i.Metadata,
+			&i.LegalName,
+			&i.Address,
+			&i.ContactPhone,
+			&i.ContactEmail,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const findOneMemberById = `-- name: FindOneMemberById :many
-SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at FROM member WHERE id = ?
+SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at FROM member m WHERE m.id = ?
 `
 
 func (q *Queries) FindOneMemberById(ctx context.Context, id string) ([]Member, error) {
@@ -449,7 +573,7 @@ func (q *Queries) FindOneOperatorByUsername(ctx context.Context, username string
 	return items, nil
 }
 
-const findOneOrganizationByID = `-- name: FindOneOrganizationByID :many
+const findOneOrganizationById = `-- name: FindOneOrganizationById :many
 
 SELECT id, name, slug, logo, metadata, legal_name, address, contact_phone, contact_email, created_at, updated_at, deleted_at FROM organization WHERE id = ?
 `
@@ -457,8 +581,8 @@ SELECT id, name, slug, logo, metadata, legal_name, address, contact_phone, conta
 // -----------------------------------------------------------------------------
 // Organization
 // -----------------------------------------------------------------------------
-func (q *Queries) FindOneOrganizationByID(ctx context.Context, id string) ([]Organization, error) {
-	rows, err := q.db.QueryContext(ctx, findOneOrganizationByID, id)
+func (q *Queries) FindOneOrganizationById(ctx context.Context, id string) ([]Organization, error) {
+	rows, err := q.db.QueryContext(ctx, findOneOrganizationById, id)
 	if err != nil {
 		return nil, err
 	}

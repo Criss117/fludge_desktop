@@ -16,12 +16,12 @@ func ResponseAppStateFromDomain(
 	var activeOrganization *OrganizationResponse = nil
 	var activeOperator *OperatorResponse = nil
 
-	if appState.ActiveOrganization() != nil {
-		activeOrganization = OrganizationResponseFromDomain(appState.ActiveOrganization())
+	if appState.ActiveOrganization != nil {
+		activeOrganization = OrganizationResponseFromDomain(appState.ActiveOrganization)
 	}
 
-	if appState.ActiveOperator() != nil {
-		activeOperator = OperatorResponseFromDomain(appState.ActiveOperator())
+	if appState.ActiveOperator != nil {
+		activeOperator = OperatorResponseFromDomain(appState.ActiveOperator)
 	}
 
 	return &ResponseAppState{

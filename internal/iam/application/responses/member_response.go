@@ -16,15 +16,14 @@ type MemberResponse struct {
 }
 
 func MemberResponseFromDomain(member *aggregates.Member) *MemberResponse {
-	primitiveMember := member.ToValues()
 
 	return &MemberResponse{
-		ID:             primitiveMember.ID,
-		OrganizationID: primitiveMember.OrganizationID,
-		OperatorID:     primitiveMember.OperatorID,
-		Role:           primitiveMember.Role,
-		CreatedAt:      platform.TimeToInt64(primitiveMember.CreatedAt),
-		UpdatedAt:      platform.TimeToInt64(primitiveMember.UpdatedAt),
-		DeletedAt:      platform.TimeToInt64Nullable(primitiveMember.DeletedAt),
+		ID:             member.ID,
+		OrganizationID: member.OrganizationID,
+		OperatorID:     member.OperatorID,
+		Role:           member.Role.Value(),
+		CreatedAt:      platform.TimeToInt64(member.CreatedAt),
+		UpdatedAt:      platform.TimeToInt64(member.UpdatedAt),
+		DeletedAt:      platform.TimeToInt64Nullable(member.DeletedAt),
 	}
 }

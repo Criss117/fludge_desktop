@@ -42,9 +42,21 @@ UPDATE app_state SET active_organization_id = ?, active_operator_id = ?, updated
 -- Organization
 -------------------------------------------------------------------------------
 
--- name: FindOneOrganizationByID :many
+-- name: FindOneOrganizationById :many
 SELECT * FROM organization WHERE id = ?;
 
+-- name: FindManyOrganizationsByOperatorId :many
+SELECT organization.* FROM member
+INNER JOIN organization ON organization.id = member.organization_id
+WHERE operator_id = ?;
+
+-- name: FindManyOrganizationsBy :many
+SELECT * FROM organization
+WHERE organization.slug = ? OR organization.legal_name = ? OR organization.name = ?;
+
+-- name: CreateOrganization :exec
+INSERT INTO organization (id, name, slug, legal_name, address, logo, contact_phone, contact_email, created_at, updated_at) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -------------------------------------------------------------------------------
 -- Member
@@ -54,7 +66,7 @@ SELECT * FROM organization WHERE id = ?;
 SELECT * FROM member WHERE organization_id = ?;
 
 -- name: FindOneMemberById :many
-SELECT * FROM member WHERE id = ?;
+SELECT * FROM member m WHERE m.id = ?;
 
 -------------------------------------------------------------------------------
 -- Team

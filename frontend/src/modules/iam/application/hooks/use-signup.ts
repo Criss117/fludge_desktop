@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { SignUp } from "@wails/go/iam/IamHandler";
 
-import type { SignUpSchema } from "@auth/application/validators/operator-form.validators";
+import type { SignUpSchema } from "@iam/application/validators/operator-form.validators";
 
 export function useSignUp() {
   return useMutation({

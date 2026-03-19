@@ -1,36 +1,41 @@
 package aggregates
 
 import (
+	"desktop/internal/iam/domain/derrors"
 	"desktop/internal/iam/domain/valueobjects"
 	"desktop/internal/shared/lib"
 	"time"
 )
 
-type PrimitiveOperator struct {
-	ID        string
-	Name      string
-	Username  string
-	Email     string
-	Pin       string
-	IsRoot    bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
+type OperatorOrganization struct {
+	ID   string
+	Slug string
+	Name string
 }
 
 type Operator struct {
-	id        string
-	name      string
-	username  string
-	email     valueobjects.Email
-	pin       valueobjects.Pin
-	root      bool
-	createdAt time.Time
-	updatedAt time.Time
-	deletedAt *time.Time
+	ID         string
+	Name       string
+	Username   string
+	Email      valueobjects.Email
+	Pin        valueobjects.Pin
+	Root       bool
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  *time.Time
+	IsMemberIn []*OperatorOrganization
 }
 
-func NewOperator(name, username, email, pin string, isRoot bool) (*Operator, error) {
+func NewOperator(
+	name, username, email, pin string,
+	isRoot bool,
+	isMemberIn []*OperatorOrganization,
+) (*Operator, error) {
+
+	if !isRoot && len(isMemberIn) != 1 {
+		return nil, derrors.ErrOperatorCanBeMemberInOrganization
+	}
+
 	validEmail, errEmail := valueobjects.NewEmail(email)
 
 	if errEmail != nil {
@@ -44,15 +49,16 @@ func NewOperator(name, username, email, pin string, isRoot bool) (*Operator, err
 	}
 
 	return &Operator{
-		id:        lib.GenerateUUID(),
-		name:      name,
-		username:  username,
-		email:     validEmail,
-		pin:       validPin,
-		root:      isRoot,
-		createdAt: time.Now(),
-		updatedAt: time.Now(),
-		deletedAt: nil,
+		ID:         lib.GenerateUUID(),
+		Name:       name,
+		Username:   username,
+		Email:      validEmail,
+		Pin:        validPin,
+		Root:       isRoot,
+		IsMemberIn: isMemberIn,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+		DeletedAt:  nil,
 	}, nil
 }
 
@@ -61,36 +67,34 @@ func ReconstituteOperator(
 	isRoot bool,
 	createdAt, updatedAt time.Time,
 	deletedAt *time.Time,
+	isMemberIn []*OperatorOrganization,
 ) *Operator {
 	return &Operator{
-		id:        id,
-		name:      name,
-		username:  username,
-		pin:       valueobjects.ReconstitutePin(pin),
-		email:     valueobjects.ReconstituteEmail(email),
-		root:      isRoot,
-		createdAt: createdAt,
-		updatedAt: updatedAt,
-		deletedAt: deletedAt,
+		ID:         id,
+		Name:       name,
+		Username:   username,
+		Pin:        valueobjects.ReconstitutePin(pin),
+		Email:      valueobjects.ReconstituteEmail(email),
+		Root:       isRoot,
+		CreatedAt:  createdAt,
+		UpdatedAt:  updatedAt,
+		DeletedAt:  deletedAt,
+		IsMemberIn: isMemberIn,
 	}
-}
-
-func (op *Operator) ID() string {
-	return op.id
 }
 
 func (op *Operator) Delete() {
 	now := time.Now()
-	op.deletedAt = &now
-	op.updatedAt = now
+	op.DeletedAt = &now
+	op.UpdatedAt = now
 }
 
 func (op *Operator) IsRoot() bool {
-	return op.root
+	return op.Root
 }
 
 func (op *Operator) IsActive() bool {
-	if op.deletedAt != nil {
+	if op.DeletedAt != nil {
 		return false
 	}
 
@@ -98,23 +102,9 @@ func (op *Operator) IsActive() bool {
 }
 
 func (op *Operator) ValidatePin(pin string) bool {
-	return op.pin.ValidatePin(pin)
-}
-
-func (op *Operator) ToValues() PrimitiveOperator {
-	return PrimitiveOperator{
-		ID:        op.id,
-		Name:      op.name,
-		Username:  op.username,
-		Email:     op.email.Value(),
-		Pin:       op.pin.Value(),
-		IsRoot:    op.root,
-		CreatedAt: op.createdAt,
-		UpdatedAt: op.updatedAt,
-		DeletedAt: op.deletedAt,
-	}
+	return op.Pin.ValidatePin(pin)
 }
 
 func (op *Operator) Equals(other *Operator) bool {
-	return op.id == other.id
+	return op.ID == other.ID
 }

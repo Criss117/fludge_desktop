@@ -7,36 +7,20 @@ import (
 	"time"
 )
 
-type PrimitiveOrganization struct {
+type Organization struct {
 	ID           string
 	Name         string
-	Slug         string
+	Slug         valueobjects.Slug
 	LegalName    string
 	Address      string
 	Logo         *string
 	ContactPhone *string
-	ContactEmail *string
+	ContactEmail *valueobjects.Email
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    *time.Time
-	Members      []*PrimitiveMember
-	Teams        []*PrimitiveTeam
-}
-
-type Organization struct {
-	id           string
-	name         string
-	slug         valueobjects.Slug
-	legalName    string
-	address      string
-	logo         *string
-	contactPhone *string
-	contactEmail *valueobjects.Email
-	createdAt    time.Time
-	updatedAt    time.Time
-	deletedAt    *time.Time
-	members      []*Member
-	teams        []*Team
+	Members      []*Member
+	Teams        []*Team
 }
 
 func NewOrganization(
@@ -62,18 +46,19 @@ func NewOrganization(
 	defaultTeam := DefaultTeam(organizationId)
 
 	return &Organization{
-		id:           organizationId,
-		name:         name,
-		slug:         validSlug,
-		legalName:    legalName,
-		address:      address,
-		logo:         logo,
-		contactPhone: contactPhone,
-		contactEmail: contactEmailVO,
-		createdAt:    time.Now(),
-		updatedAt:    time.Now(),
-		deletedAt:    nil,
-		teams:        []*Team{defaultTeam},
+		ID:           organizationId,
+		Name:         name,
+		Slug:         validSlug,
+		LegalName:    legalName,
+		Address:      address,
+		Logo:         logo,
+		ContactPhone: contactPhone,
+		ContactEmail: contactEmailVO,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		DeletedAt:    nil,
+		Teams:        []*Team{defaultTeam},
+		Members:      []*Member{},
 	}, nil
 }
 
@@ -98,34 +83,30 @@ func ReconstituteOrganization(
 	}
 
 	return &Organization{
-		id:           id,
-		name:         name,
-		slug:         valueobjects.ReconstituteSlug(slug),
-		legalName:    legalName,
-		address:      address,
-		logo:         logo,
-		contactPhone: contactPhone,
-		contactEmail: contactEmailVO,
-		createdAt:    createdAt,
-		updatedAt:    updatedAt,
-		deletedAt:    deletedAt,
-		members:      members,
-		teams:        teams,
+		ID:           id,
+		Name:         name,
+		Slug:         valueobjects.ReconstituteSlug(slug),
+		LegalName:    legalName,
+		Address:      address,
+		Logo:         logo,
+		ContactPhone: contactPhone,
+		ContactEmail: contactEmailVO,
+		CreatedAt:    createdAt,
+		UpdatedAt:    updatedAt,
+		DeletedAt:    deletedAt,
+		Members:      members,
+		Teams:        teams,
 	}
-}
-
-func (o *Organization) ID() string {
-	return o.id
 }
 
 func (o *Organization) Delete() {
 	now := time.Now()
-	o.deletedAt = &now
-	o.updatedAt = now
+	o.DeletedAt = &now
+	o.UpdatedAt = now
 }
 
 func (o *Organization) IsActive() bool {
-	if o.deletedAt != nil {
+	if o.DeletedAt != nil {
 		return false
 	}
 
@@ -133,8 +114,8 @@ func (o *Organization) IsActive() bool {
 }
 
 func (o *Organization) FindMemberByOperatorId(operatorID string) *Member {
-	for _, member := range o.members {
-		if member.OperatorID() == operatorID {
+	for _, member := range o.Members {
+		if member.OperatorID == operatorID {
 			return member
 		}
 	}
@@ -143,66 +124,26 @@ func (o *Organization) FindMemberByOperatorId(operatorID string) *Member {
 }
 
 func (o *Organization) AddMember(member *Member) error {
-	existingMember := o.FindMemberByOperatorId(member.OperatorID())
+	existingMember := o.FindMemberByOperatorId(member.OperatorID)
 
 	if existingMember != nil {
 		return derrors.ErrMemberAlreadyExists
 	}
 
-	o.members = append(o.members, member)
-	o.updatedAt = time.Now()
+	o.Members = append(o.Members, member)
+	o.UpdatedAt = time.Now()
 
 	return nil
 }
 
 func (o *Organization) RemoveMember(member *Member) error {
-	for i, m := range o.members {
+	for i, m := range o.Members {
 		if m.Equals(member) {
-			o.members = append(o.members[:i], o.members[i+1:]...)
-			o.updatedAt = time.Now()
+			o.Members = append(o.Members[:i], o.Members[i+1:]...)
+			o.UpdatedAt = time.Now()
 			return nil
 		}
 	}
 
 	return derrors.ErrMemberNotFound
-}
-
-func (o *Organization) ToValues() PrimitiveOrganization {
-	var contactEmail *string = nil
-
-	if o.contactEmail != nil {
-		cEmail := o.contactEmail.Value()
-		contactEmail = &cEmail
-	}
-
-	// primitiveMembers := make([]*PrimitiveMember, len(o.members))
-	// primitiveTeams := make([]*PrimitiveTeam, len(o.teams))
-
-	// for i, member := range o.members {
-	// 	memberValues := member.ToValues()
-
-	// 	primitiveMembers[i] = &memberValues
-	// }
-
-	// for i, team := range o.teams {
-	// 	teamValues := team.ToValues()
-
-	// 	primitiveTeams[i] = &teamValues
-	// }
-
-	return PrimitiveOrganization{
-		ID:           o.id,
-		Name:         o.name,
-		Slug:         o.slug.Value(),
-		LegalName:    o.legalName,
-		Address:      o.address,
-		Logo:         o.logo,
-		ContactPhone: o.contactPhone,
-		ContactEmail: contactEmail,
-		CreatedAt:    o.createdAt,
-		UpdatedAt:    o.updatedAt,
-		DeletedAt:    o.deletedAt,
-		Members:      nil,
-		Teams:        nil,
-	}
 }

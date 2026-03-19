@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { SignInScreen } from "@auth/presentation/screen/signin.screen";
-import { appStateQueryOptions } from "@/integrations/auth";
+import { SignInScreen } from "@iam/presentation/screen/signin.screen";
+import { appStateQueryOptions } from "@/integrations/iam";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -8,11 +8,25 @@ export const Route = createFileRoute("/")({
     const appState =
       await context.queryClient.ensureQueryData(appStateQueryOptions);
 
-    if (appState?.activeOperator) {
+    const activeOperator = appState?.activeOperator;
+
+    if (!activeOperator) return;
+
+    if (activeOperator.isRoot) {
+      if (activeOperator.isMemberIn.length === 0)
+        throw redirect({
+          to: "/register-organization",
+        });
+
       throw redirect({
         to: "/select-organization",
       });
     }
+
+    // TODO: Here the operator is not root, redirect to unique organization in isMemberIn
+    throw redirect({
+      to: "/select-organization",
+    });
   },
 });
 

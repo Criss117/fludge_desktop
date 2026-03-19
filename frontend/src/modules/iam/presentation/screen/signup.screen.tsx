@@ -17,9 +17,9 @@ import {
 } from "@shared/components/ui/field";
 import { Button } from "@shared/components/ui/button";
 
-import { useAuthForm } from "@auth/presentation/components/auth-form";
-import { signUpSchema } from "@auth/application/validators/operator-form.validators";
-import { useSignUp } from "@auth/application/hooks/use-signup";
+import { useAuthForm } from "@iam/presentation/components/auth-form";
+import { signUpSchema } from "@iam/application/validators/operator-form.validators";
+import { useSignUp } from "@iam/application/hooks/use-signup";
 
 export function SignUpScreen() {
   const signUp = useSignUp();

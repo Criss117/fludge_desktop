@@ -50,6 +50,7 @@ func (uc *SignUpUseCase) Execute(ctx context.Context, cmd *commands.SignUpComman
 		cmd.Email,
 		cmd.PIN,
 		true,
+		nil,
 	)
 
 	if err != nil {

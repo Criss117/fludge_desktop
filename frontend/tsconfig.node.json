@@ -27,7 +27,7 @@
       "@modules/*": ["./src/modules/*"],
       "@employees/*": ["./src/modules/employees/*"],
       "@teams/*": ["./src/modules/teams/*"],
-      "@auth/*": ["./src/modules/auth/*"],
+      "@iam/*": ["./src/modules/iam/*"],
       "@inventory/*": ["./src/modules/inventory/*"],
       "@shared/*": ["./src/modules/shared/*"],
       "@organizations/*": ["./src/modules/organizations/*"],

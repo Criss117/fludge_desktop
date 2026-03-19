@@ -6,24 +6,14 @@ import (
 	"time"
 )
 
-type PrimitiveMember struct {
+type Member struct {
 	ID             string
 	OrganizationID string
 	OperatorID     string
-	Role           string
+	Role           valueobjects.MemberRole
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      *time.Time
-}
-
-type Member struct {
-	id             string
-	organizationID string
-	operatorID     string
-	role           valueobjects.MemberRole
-	createdAt      time.Time
-	updatedAt      time.Time
-	deletedAt      *time.Time
 }
 
 func NewMember(organizationID, operatorID string, role string) (*Member, error) {
@@ -34,70 +24,46 @@ func NewMember(organizationID, operatorID string, role string) (*Member, error) 
 	}
 
 	return &Member{
-		id:             lib.GenerateUUID(),
-		organizationID: organizationID,
-		operatorID:     operatorID,
-		role:           validRole,
-		createdAt:      time.Now(),
-		updatedAt:      time.Now(),
-		deletedAt:      nil,
+		ID:             lib.GenerateUUID(),
+		OrganizationID: organizationID,
+		OperatorID:     operatorID,
+		Role:           validRole,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+		DeletedAt:      nil,
 	}, nil
 }
 
 func ReconstituteMember(id, organizationID, operatorID string, role string, createdAt, updatedAt time.Time, deletedAt *time.Time) *Member {
 	return &Member{
-		id:             id,
-		organizationID: organizationID,
-		operatorID:     operatorID,
-		role:           valueobjects.ReconstituteMemberRole(role),
-		createdAt:      createdAt,
-		updatedAt:      updatedAt,
-		deletedAt:      deletedAt,
+		ID:             id,
+		OrganizationID: organizationID,
+		OperatorID:     operatorID,
+		Role:           valueobjects.ReconstituteMemberRole(role),
+		CreatedAt:      createdAt,
+		UpdatedAt:      updatedAt,
+		DeletedAt:      deletedAt,
 	}
 }
 
 func (m *Member) Delete() {
 	now := time.Now()
-	m.deletedAt = &now
-	m.updatedAt = now
+	m.DeletedAt = &now
+	m.UpdatedAt = now
 }
 
 func (m *Member) IsRoot() bool {
-	return m.role.IsRoot()
+	return m.Role.IsRoot()
 }
 
 func (m *Member) IsActive() bool {
-	if m.deletedAt != nil {
+	if m.DeletedAt != nil {
 		return false
 	}
 
 	return true
 }
 
-func (m *Member) ID() string {
-	return m.id
-}
-
-func (m *Member) OperatorID() string {
-	return m.operatorID
-}
-
-func (m *Member) OrganizationID() string {
-	return m.organizationID
-}
-
 func (m *Member) Equals(other *Member) bool {
-	return m.id == other.id
-}
-
-func (m *Member) ToValues() PrimitiveMember {
-	return PrimitiveMember{
-		ID:             m.id,
-		OrganizationID: m.organizationID,
-		OperatorID:     m.operatorID,
-		Role:           m.role.Value(),
-		CreatedAt:      m.createdAt,
-		UpdatedAt:      m.updatedAt,
-		DeletedAt:      m.deletedAt,
-	}
+	return m.ID == other.ID
 }

@@ -23,19 +23,20 @@ type OrganizationResponse struct {
 }
 
 func OrganizationResponseFromDomain(organization *aggregates.Organization) *OrganizationResponse {
-	primitiveOrganization := organization.ToValues()
+
+	contactEmail := organization.ContactEmail.Value()
 
 	return &OrganizationResponse{
-		ID:           primitiveOrganization.ID,
-		Name:         primitiveOrganization.Name,
-		Slug:         primitiveOrganization.Slug,
-		Logo:         primitiveOrganization.Logo,
-		LegalName:    primitiveOrganization.LegalName,
-		Address:      primitiveOrganization.Address,
-		ContactPhone: primitiveOrganization.ContactPhone,
-		ContactEmail: primitiveOrganization.ContactEmail,
-		CreatedAt:    platform.TimeToInt64(primitiveOrganization.CreatedAt),
-		UpdatedAt:    platform.TimeToInt64(primitiveOrganization.UpdatedAt),
-		DeletedAt:    platform.TimeToInt64Nullable(primitiveOrganization.DeletedAt),
+		ID:           organization.ID,
+		Name:         organization.Name,
+		Slug:         organization.Slug.Value(),
+		Logo:         organization.Logo,
+		LegalName:    organization.LegalName,
+		Address:      organization.Address,
+		ContactPhone: organization.ContactPhone,
+		ContactEmail: &contactEmail,
+		CreatedAt:    platform.TimeToInt64(organization.CreatedAt),
+		UpdatedAt:    platform.TimeToInt64(organization.UpdatedAt),
+		DeletedAt:    platform.TimeToInt64Nullable(organization.DeletedAt),
 	}
 }

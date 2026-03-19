@@ -12,15 +12,15 @@ import {
 } from "@shared/components/ui/card";
 import { FieldError, FieldGroup } from "@shared/components/ui/field";
 
-import { useAuthForm } from "@auth/presentation/components/auth-form";
-import { signInSchema } from "@auth/application/validators/operator-form.validators";
+import { useAuthForm } from "@iam/presentation/components/auth-form";
+import { signInSchema } from "@iam/application/validators/operator-form.validators";
 
-import { useAuth } from "@/integrations/auth";
+import { useIam } from "@/integrations/iam";
 
 export function SignInScreen() {
   const router = useRouter();
   const [rootError, setRootError] = useState<{ message: string } | null>(null);
-  const { signIn } = useAuth();
+  const { signIn } = useIam();
 
   const form = useAuthForm({
     defaultValues: {

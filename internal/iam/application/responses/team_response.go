@@ -27,41 +27,44 @@ type TeamResponse struct {
 	Members        []TeamMemberResponse
 }
 
-func TeamMemberResponseFromDomain(member *aggregates.TeamMember) *TeamMemberResponse {
-	primitiveTeamMember := member.ToValues()
-
+func TeamMemberResponseFromDomain(teamMember *aggregates.TeamMember) *TeamMemberResponse {
 	return &TeamMemberResponse{
-		ID:             primitiveTeamMember.ID,
-		TeamID:         primitiveTeamMember.TeamID,
-		OperatorID:     primitiveTeamMember.OperatorID,
-		OrganizationID: primitiveTeamMember.OrganizationID,
-		CreatedAt:      platform.TimeToInt64(primitiveTeamMember.CreatedAt),
-		UpdatedAt:      platform.TimeToInt64(primitiveTeamMember.UpdatedAt),
-		DeletedAt:      platform.TimeToInt64Nullable(primitiveTeamMember.DeletedAt),
+		ID:             teamMember.ID,
+		TeamID:         teamMember.TeamID,
+		OperatorID:     teamMember.OperatorID,
+		OrganizationID: teamMember.OrganizationID,
+		CreatedAt:      platform.TimeToInt64(teamMember.CreatedAt),
+		UpdatedAt:      platform.TimeToInt64(teamMember.UpdatedAt),
+		DeletedAt:      platform.TimeToInt64Nullable(teamMember.DeletedAt),
 	}
 }
 
 func TeamResponseFromDomain(team *aggregates.Team) *TeamResponse {
-	primitiveTeam := team.ToValues()
 
-	teamsMembers := make([]TeamMemberResponse, len(primitiveTeam.Members))
+	teamsMembers := make([]TeamMemberResponse, len(team.Members))
 
-	for i, member := range team.Members() {
+	for i, member := range team.Members {
 		tm := TeamMemberResponseFromDomain(member)
 
 		teamsMembers[i] = *tm
 	}
 
+	permissions := make([]string, len(team.Permissions))
+
+	for i, p := range team.Permissions {
+		permissions[i] = p.Value()
+	}
+
 	return &TeamResponse{
-		ID:             primitiveTeam.ID,
-		Name:           primitiveTeam.Name,
-		OrganizationId: primitiveTeam.OrganizationID,
-		Permissions:    primitiveTeam.Permissions,
-		Description:    primitiveTeam.Description,
-		CreatedAt:      platform.TimeToInt64(primitiveTeam.CreatedAt),
-		UpdatedAt:      platform.TimeToInt64(primitiveTeam.UpdatedAt),
-		DeletedAt:      platform.TimeToInt64Nullable(primitiveTeam.DeletedAt),
-		Members:        nil,
+		ID:             team.ID,
+		Name:           team.Name,
+		OrganizationId: team.OrganizationID,
+		Permissions:    permissions,
+		Description:    team.Description,
+		CreatedAt:      platform.TimeToInt64(team.CreatedAt),
+		UpdatedAt:      platform.TimeToInt64(team.UpdatedAt),
+		DeletedAt:      platform.TimeToInt64Nullable(team.DeletedAt),
+		Members:        teamsMembers,
 	}
 
 }

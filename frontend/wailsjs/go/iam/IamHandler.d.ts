@@ -3,7 +3,11 @@
 import {responses} from '../models';
 import {commands} from '../models';
 
+export function FindManyOrganizationsByOperatorId(arg1:string):Promise<Array<responses.OrganizationResponse>>;
+
 export function GetAppState():Promise<responses.ResponseAppState>;
+
+export function RegisterOrganization(arg1:commands.RegisterOrganizationCommand):Promise<responses.OrganizationResponse>;
 
 export function SignIn(arg1:commands.SignInCommand):Promise<responses.ResponseAppState>;
 
@@ -11,4 +15,4 @@ export function SignOut():Promise<void>;
 
 export function SignUp(arg1:commands.SignUpCommand):Promise<responses.ResponseAppState>;
 
-export function SwitchOrganization(arg1:commands.SwitchOrganizationCommand):Promise<void>;
+export function SwitchOrganization(arg1:commands.SwitchOrganizationCommand):Promise<responses.ResponseAppState>;

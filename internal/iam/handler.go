@@ -42,7 +42,7 @@ type IamHandler struct {
 
 func NewIamHandler(ctx context.Context, queries *db.Queries, onStateChange OnStateChange) *IamHandler {
 	organizationRepository := repositories.NewSqliteOrganizationRepository(queries)
-	operatorRepository := repositories.NewSqliteOperatorRepository(queries)
+	operatorRepository := repositories.NewSqliteOperatorRepository(queries, organizationRepository)
 	appStateRepository := repositories.NewSqliteAppStateRepository(
 		queries,
 		organizationRepository,
@@ -112,24 +112,26 @@ func (h *IamHandler) SignOut() error {
 	return nil
 }
 
-func (h *IamHandler) SwitchOrganization(switchOrganizationDto *commands.SwitchOrganizationCommand) error {
+func (h *IamHandler) SwitchOrganization(
+	switchOrganizationDto *commands.SwitchOrganizationCommand,
+) (*responses.ResponseAppState, error) {
 	switchOrganizationUseCase := usecases.NewSwitchOrganizationUseCase(h.organizationRepository, h.appStateRepository)
 
 	_, err := switchOrganizationUseCase.Execute(h.ctx, switchOrganizationDto)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	appState, err := h.getAppStateUseCase.Execute(h.ctx)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	h.onStateChange(appState)
 
-	return nil
+	return responses.ResponseAppStateFromDomain(appState), nil
 }
 
 func (h *IamHandler) GetAppState() (*responses.ResponseAppState, error) {
@@ -146,4 +148,34 @@ func (h *IamHandler) GetAppState() (*responses.ResponseAppState, error) {
 	h.onStateChange(appState)
 
 	return responses.ResponseAppStateFromDomain(appState), nil
+}
+
+func (h *IamHandler) FindManyOrganizationsByOperatorId(operatorId string) ([]*responses.OrganizationResponse, error) {
+	organizations, err := h.organizationRepository.FindByOperator(h.ctx, operatorId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	responseOrganizations := make([]*responses.OrganizationResponse, len(organizations))
+
+	for index, organization := range organizations {
+		responseOrganizations[index] = responses.OrganizationResponseFromDomain(organization)
+	}
+
+	return responseOrganizations, nil
+}
+
+func (h *IamHandler) RegisterOrganization(registerOrganizationDto *commands.RegisterOrganizationCommand) (*responses.OrganizationResponse, error) {
+	registerOrganizationUseCase := usecases.NewRegisterOrganizationUseCase(h.organizationRepository)
+
+	newOrganization, err := registerOrganizationUseCase.Execute(h.ctx, registerOrganizationDto)
+
+	if err != nil {
+		return nil, err
+	}
+
+	h.onStateChange(nil)
+
+	return responses.OrganizationResponseFromDomain(newOrganization), nil
 }

@@ -15,6 +15,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardOrgidRouteImport } from './routes/dashboard/$orgid'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as DashboardOrgidIndexRouteImport } from './routes/dashboard/$orgid/index'
+import { Route as DashboardOrgidClientsRouteImport } from './routes/dashboard/$orgid/clients'
+import { Route as DashboardOrgidInventoryIndexRouteImport } from './routes/dashboard/$orgid/inventory/index'
+import { Route as DashboardOrgidInventorySuppliersRouteImport } from './routes/dashboard/$orgid/inventory/suppliers'
+import { Route as DashboardOrgidInventoryProductsRouteImport } from './routes/dashboard/$orgid/inventory/products'
 
 const SelectOrganizationRoute = SelectOrganizationRouteImport.update({
   id: '/select-organization',
@@ -46,6 +50,29 @@ const DashboardOrgidIndexRoute = DashboardOrgidIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardOrgidRoute,
 } as any)
+const DashboardOrgidClientsRoute = DashboardOrgidClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => DashboardOrgidRoute,
+} as any)
+const DashboardOrgidInventoryIndexRoute =
+  DashboardOrgidInventoryIndexRouteImport.update({
+    id: '/inventory/',
+    path: '/inventory/',
+    getParentRoute: () => DashboardOrgidRoute,
+  } as any)
+const DashboardOrgidInventorySuppliersRoute =
+  DashboardOrgidInventorySuppliersRouteImport.update({
+    id: '/inventory/suppliers',
+    path: '/inventory/suppliers',
+    getParentRoute: () => DashboardOrgidRoute,
+  } as any)
+const DashboardOrgidInventoryProductsRoute =
+  DashboardOrgidInventoryProductsRouteImport.update({
+    id: '/inventory/products',
+    path: '/inventory/products',
+    getParentRoute: () => DashboardOrgidRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,14 +80,22 @@ export interface FileRoutesByFullPath {
   '/select-organization': typeof SelectOrganizationRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/$orgid': typeof DashboardOrgidRouteWithChildren
+  '/dashboard/$orgid/clients': typeof DashboardOrgidClientsRoute
   '/dashboard/$orgid/': typeof DashboardOrgidIndexRoute
+  '/dashboard/$orgid/inventory/products': typeof DashboardOrgidInventoryProductsRoute
+  '/dashboard/$orgid/inventory/suppliers': typeof DashboardOrgidInventorySuppliersRoute
+  '/dashboard/$orgid/inventory/': typeof DashboardOrgidInventoryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/register-organization': typeof RegisterOrganizationRoute
   '/select-organization': typeof SelectOrganizationRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/dashboard/$orgid/clients': typeof DashboardOrgidClientsRoute
   '/dashboard/$orgid': typeof DashboardOrgidIndexRoute
+  '/dashboard/$orgid/inventory/products': typeof DashboardOrgidInventoryProductsRoute
+  '/dashboard/$orgid/inventory/suppliers': typeof DashboardOrgidInventorySuppliersRoute
+  '/dashboard/$orgid/inventory': typeof DashboardOrgidInventoryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,7 +104,11 @@ export interface FileRoutesById {
   '/select-organization': typeof SelectOrganizationRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/$orgid': typeof DashboardOrgidRouteWithChildren
+  '/dashboard/$orgid/clients': typeof DashboardOrgidClientsRoute
   '/dashboard/$orgid/': typeof DashboardOrgidIndexRoute
+  '/dashboard/$orgid/inventory/products': typeof DashboardOrgidInventoryProductsRoute
+  '/dashboard/$orgid/inventory/suppliers': typeof DashboardOrgidInventorySuppliersRoute
+  '/dashboard/$orgid/inventory/': typeof DashboardOrgidInventoryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -79,14 +118,22 @@ export interface FileRouteTypes {
     | '/select-organization'
     | '/auth/sign-up'
     | '/dashboard/$orgid'
+    | '/dashboard/$orgid/clients'
     | '/dashboard/$orgid/'
+    | '/dashboard/$orgid/inventory/products'
+    | '/dashboard/$orgid/inventory/suppliers'
+    | '/dashboard/$orgid/inventory/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/register-organization'
     | '/select-organization'
     | '/auth/sign-up'
+    | '/dashboard/$orgid/clients'
     | '/dashboard/$orgid'
+    | '/dashboard/$orgid/inventory/products'
+    | '/dashboard/$orgid/inventory/suppliers'
+    | '/dashboard/$orgid/inventory'
   id:
     | '__root__'
     | '/'
@@ -94,7 +141,11 @@ export interface FileRouteTypes {
     | '/select-organization'
     | '/auth/sign-up'
     | '/dashboard/$orgid'
+    | '/dashboard/$orgid/clients'
     | '/dashboard/$orgid/'
+    | '/dashboard/$orgid/inventory/products'
+    | '/dashboard/$orgid/inventory/suppliers'
+    | '/dashboard/$orgid/inventory/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -149,15 +200,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOrgidIndexRouteImport
       parentRoute: typeof DashboardOrgidRoute
     }
+    '/dashboard/$orgid/clients': {
+      id: '/dashboard/$orgid/clients'
+      path: '/clients'
+      fullPath: '/dashboard/$orgid/clients'
+      preLoaderRoute: typeof DashboardOrgidClientsRouteImport
+      parentRoute: typeof DashboardOrgidRoute
+    }
+    '/dashboard/$orgid/inventory/': {
+      id: '/dashboard/$orgid/inventory/'
+      path: '/inventory'
+      fullPath: '/dashboard/$orgid/inventory/'
+      preLoaderRoute: typeof DashboardOrgidInventoryIndexRouteImport
+      parentRoute: typeof DashboardOrgidRoute
+    }
+    '/dashboard/$orgid/inventory/suppliers': {
+      id: '/dashboard/$orgid/inventory/suppliers'
+      path: '/inventory/suppliers'
+      fullPath: '/dashboard/$orgid/inventory/suppliers'
+      preLoaderRoute: typeof DashboardOrgidInventorySuppliersRouteImport
+      parentRoute: typeof DashboardOrgidRoute
+    }
+    '/dashboard/$orgid/inventory/products': {
+      id: '/dashboard/$orgid/inventory/products'
+      path: '/inventory/products'
+      fullPath: '/dashboard/$orgid/inventory/products'
+      preLoaderRoute: typeof DashboardOrgidInventoryProductsRouteImport
+      parentRoute: typeof DashboardOrgidRoute
+    }
   }
 }
 
 interface DashboardOrgidRouteChildren {
+  DashboardOrgidClientsRoute: typeof DashboardOrgidClientsRoute
   DashboardOrgidIndexRoute: typeof DashboardOrgidIndexRoute
+  DashboardOrgidInventoryProductsRoute: typeof DashboardOrgidInventoryProductsRoute
+  DashboardOrgidInventorySuppliersRoute: typeof DashboardOrgidInventorySuppliersRoute
+  DashboardOrgidInventoryIndexRoute: typeof DashboardOrgidInventoryIndexRoute
 }
 
 const DashboardOrgidRouteChildren: DashboardOrgidRouteChildren = {
+  DashboardOrgidClientsRoute: DashboardOrgidClientsRoute,
   DashboardOrgidIndexRoute: DashboardOrgidIndexRoute,
+  DashboardOrgidInventoryProductsRoute: DashboardOrgidInventoryProductsRoute,
+  DashboardOrgidInventorySuppliersRoute: DashboardOrgidInventorySuppliersRoute,
+  DashboardOrgidInventoryIndexRoute: DashboardOrgidInventoryIndexRoute,
 }
 
 const DashboardOrgidRouteWithChildren = DashboardOrgidRoute._addFileChildren(

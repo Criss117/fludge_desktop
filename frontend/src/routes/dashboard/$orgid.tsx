@@ -3,6 +3,12 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { appStateQueryOptions } from "@/integrations/iam";
 
 import { SwitchOrganization } from "@wails/go/iam/IamHandler";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@shared/components/ui/sidebar";
+import { AppSidebar } from "@shared/components/app-sidebar";
 
 export const Route = createFileRoute("/dashboard/$orgid")({
   component: RouteComponent,
@@ -37,14 +43,17 @@ export const Route = createFileRoute("/dashboard/$orgid")({
 });
 
 function RouteComponent() {
-  const appState = Route.useLoaderData();
+  const { orgid } = Route.useParams();
 
   return (
-    <div>
-      <pre>
-        <code>{JSON.stringify(appState, null, 2)}</code>
-      </pre>
-      <Outlet />
-    </div>
+    <SidebarProvider>
+      <AppSidebar orgId={orgid} />
+      <SidebarInset>
+        <main>
+          <SidebarTrigger />
+          <Outlet />
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

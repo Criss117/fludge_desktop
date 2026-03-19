@@ -5,7 +5,7 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-
+import { TooltipProvider } from "@shared/components/ui/tooltip";
 export interface RouterAppContext {
   queryClient: QueryClient;
 }
@@ -42,7 +42,9 @@ function RootLayout() {
 
   return (
     <>
-      <Outlet key={location.pathname} />
+      <TooltipProvider>
+        <Outlet key={location.pathname} />
+      </TooltipProvider>
       <TanStackRouterDevtools />
     </>
   );

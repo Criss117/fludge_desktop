@@ -1,0 +1,183 @@
+import { memo } from "react";
+import { Link, useLocation, type LinkProps } from "@tanstack/react-router";
+import {
+  Plus,
+  LayoutDashboard,
+  Package,
+  Users,
+  CirclePile,
+  Container,
+  type LucideIcon,
+} from "lucide-react";
+
+import {
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@shared/components//ui/sidebar";
+import { cn } from "@shared/lib/utils";
+
+const DASHBOARD_PATH_REGEX = /\/dashboard\/[^/]+/;
+
+type NavMenuItem = {
+  title: string;
+  url: NonNullable<LinkProps["to"]>;
+  icon: LucideIcon;
+  elements?: NavMenuItem[];
+};
+
+interface Props {
+  orgId: string;
+}
+
+const navMainItems: NavMenuItem[] = [
+  {
+    title: "Inicio",
+    url: "/dashboard/$orgid",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Inventario",
+    url: "/dashboard/$orgid/inventory",
+    icon: CirclePile,
+    elements: [
+      {
+        title: "Productos",
+        url: "/dashboard/$orgid/inventory/products",
+        icon: Package,
+      },
+      {
+        title: "Proveedores",
+        url: "/dashboard/$orgid/inventory/suppliers",
+        icon: Container,
+      },
+    ],
+  },
+  {
+    title: "Clientes",
+    url: "/dashboard/$orgid/clients",
+    icon: Users,
+  },
+  // {
+  //   title: "Equipos",
+  //   url: "/dashboard/$orgslug/teams",
+  //   icon: Briefcase,
+  // },
+  // {
+  //   title: "Empleados",
+  //   url: "/dashboard/$orgslug/employees",
+  //   icon: UserCog,
+  // },
+];
+
+function SidebarMenuLink({
+  item,
+  orgId,
+}: {
+  item: NavMenuItem;
+  orgId: string;
+}) {
+  const isMatch = useLocation({
+    select: (data) =>
+      data.pathname.replace(DASHBOARD_PATH_REGEX, "") ===
+      item.url.replace("/dashboard/$orgslug", ""),
+  });
+
+  return (
+    <SidebarMenuButton
+      className={cn(
+        isMatch
+          ? "bg-primary text-black hover:bg-primary hover:text-black"
+          : "",
+      )}
+      tooltip={item.title}
+      render={(props) => {
+        return (
+          <Link to={item.url} params={{ orgid: orgId }} {...props}>
+            <item.icon />
+            <span>{item.title}</span>
+          </Link>
+        );
+      }}
+    />
+  );
+}
+
+const GroupItem = memo(function GroupItem({
+  orgId,
+  item,
+}: Props & {
+  item: NavMenuItem;
+}) {
+  // const isMatch = (url: string) =>
+  //   useLocation({
+  //     select: (data) =>
+  //       data.pathname.replace(DASHBOARD_PATH_REGEX, "") ===
+  //       url.replace("/dashboard/$orgId", ""),
+  //   });
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuLink item={item} orgId={orgId} />
+
+      <SidebarMenuSub>
+        {item.elements?.map((subItem) => (
+          <SidebarMenuSubItem key={subItem.title}>
+            <SidebarMenuSubButton
+              className={cn(
+                "dark:[&>svg]:text-white [&>svg]:text-black",
+                // isMatch(subItem.url)
+                //   ? "bg-primary text-black hover:bg-primary hover:text-black dark:[&>svg]:text-black"
+                //   : "",
+              )}
+              render={(props) => (
+                <Link to={subItem.url} params={{ orgid: orgId }} {...props}>
+                  <subItem.icon />
+                  <span>{subItem.title}</span>
+                </Link>
+              )}
+            />
+          </SidebarMenuSubItem>
+        ))}
+      </SidebarMenuSub>
+    </SidebarMenuItem>
+  );
+});
+
+export function NavMain({ orgId }: Props) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupContent className="flex flex-col gap-6">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Quick Create"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 min-w-8 transition-colors"
+            >
+              <Plus />
+              <span>Quick Create</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarMenu>
+          {navMainItems.map((item) => {
+            if (item.elements)
+              return <GroupItem key={item.title} orgId={orgId} item={item} />;
+
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuLink item={item} orgId={orgId} />
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}

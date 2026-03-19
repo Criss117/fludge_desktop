@@ -1,9 +1,35 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/register-organization')({
+import { appStateQueryOptions } from "@/integrations/iam";
+
+import { RegisterOrganizationScreen } from "@organizations/presentation/screens/register-organization.screen";
+
+export const Route = createFileRoute("/register-organization")({
   component: RouteComponent,
-})
+  beforeLoad: async ({ context }) => {
+    const appState =
+      await context.queryClient.ensureQueryData(appStateQueryOptions);
+
+    const activeOperator = appState?.activeOperator;
+
+    if (!activeOperator)
+      throw redirect({
+        to: "/",
+      });
+
+    return {
+      activeOperator,
+    };
+  },
+  loader: async ({ context }) => {
+    return context.activeOperator;
+  },
+});
 
 function RouteComponent() {
-  return <div>Hello "/register-organization"!</div>
+  const activeOperator = Route.useLoaderData();
+
+  return (
+    <RegisterOrganizationScreen organizations={activeOperator.isMemberIn} />
+  );
 }

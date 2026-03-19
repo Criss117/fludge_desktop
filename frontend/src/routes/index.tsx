@@ -12,6 +12,14 @@ export const Route = createFileRoute("/")({
 
     if (!activeOperator) return;
 
+    const activeOrganization = appState?.activeOrganization;
+
+    if (activeOrganization)
+      throw redirect({
+        to: "/dashboard/$orgid",
+        params: { orgid: activeOrganization.id },
+      });
+
     if (activeOperator.isRoot) {
       if (activeOperator.isMemberIn.length === 0)
         throw redirect({

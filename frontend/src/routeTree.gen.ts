@@ -12,9 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SelectOrganizationRouteImport } from './routes/select-organization'
 import { Route as RegisterOrganizationRouteImport } from './routes/register-organization'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardOrgslugRouteImport } from './routes/dashboard/$orgslug'
+import { Route as DashboardOrgidRouteImport } from './routes/dashboard/$orgid'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
-import { Route as DashboardOrgslugIndexRouteImport } from './routes/dashboard/$orgslug/index'
+import { Route as DashboardOrgidIndexRouteImport } from './routes/dashboard/$orgid/index'
 
 const SelectOrganizationRoute = SelectOrganizationRouteImport.update({
   id: '/select-organization',
@@ -31,9 +31,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardOrgslugRoute = DashboardOrgslugRouteImport.update({
-  id: '/dashboard/$orgslug',
-  path: '/dashboard/$orgslug',
+const DashboardOrgidRoute = DashboardOrgidRouteImport.update({
+  id: '/dashboard/$orgid',
+  path: '/dashboard/$orgid',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
@@ -41,10 +41,10 @@ const AuthSignUpRoute = AuthSignUpRouteImport.update({
   path: '/auth/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardOrgslugIndexRoute = DashboardOrgslugIndexRouteImport.update({
+const DashboardOrgidIndexRoute = DashboardOrgidIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => DashboardOrgslugRoute,
+  getParentRoute: () => DashboardOrgidRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -52,15 +52,15 @@ export interface FileRoutesByFullPath {
   '/register-organization': typeof RegisterOrganizationRoute
   '/select-organization': typeof SelectOrganizationRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/dashboard/$orgslug': typeof DashboardOrgslugRouteWithChildren
-  '/dashboard/$orgslug/': typeof DashboardOrgslugIndexRoute
+  '/dashboard/$orgid': typeof DashboardOrgidRouteWithChildren
+  '/dashboard/$orgid/': typeof DashboardOrgidIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/register-organization': typeof RegisterOrganizationRoute
   '/select-organization': typeof SelectOrganizationRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/dashboard/$orgslug': typeof DashboardOrgslugIndexRoute
+  '/dashboard/$orgid': typeof DashboardOrgidIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,8 +68,8 @@ export interface FileRoutesById {
   '/register-organization': typeof RegisterOrganizationRoute
   '/select-organization': typeof SelectOrganizationRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/dashboard/$orgslug': typeof DashboardOrgslugRouteWithChildren
-  '/dashboard/$orgslug/': typeof DashboardOrgslugIndexRoute
+  '/dashboard/$orgid': typeof DashboardOrgidRouteWithChildren
+  '/dashboard/$orgid/': typeof DashboardOrgidIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -78,23 +78,23 @@ export interface FileRouteTypes {
     | '/register-organization'
     | '/select-organization'
     | '/auth/sign-up'
-    | '/dashboard/$orgslug'
-    | '/dashboard/$orgslug/'
+    | '/dashboard/$orgid'
+    | '/dashboard/$orgid/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/register-organization'
     | '/select-organization'
     | '/auth/sign-up'
-    | '/dashboard/$orgslug'
+    | '/dashboard/$orgid'
   id:
     | '__root__'
     | '/'
     | '/register-organization'
     | '/select-organization'
     | '/auth/sign-up'
-    | '/dashboard/$orgslug'
-    | '/dashboard/$orgslug/'
+    | '/dashboard/$orgid'
+    | '/dashboard/$orgid/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -102,7 +102,7 @@ export interface RootRouteChildren {
   RegisterOrganizationRoute: typeof RegisterOrganizationRoute
   SelectOrganizationRoute: typeof SelectOrganizationRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
-  DashboardOrgslugRoute: typeof DashboardOrgslugRouteWithChildren
+  DashboardOrgidRoute: typeof DashboardOrgidRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -128,11 +128,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/$orgslug': {
-      id: '/dashboard/$orgslug'
-      path: '/dashboard/$orgslug'
-      fullPath: '/dashboard/$orgslug'
-      preLoaderRoute: typeof DashboardOrgslugRouteImport
+    '/dashboard/$orgid': {
+      id: '/dashboard/$orgid'
+      path: '/dashboard/$orgid'
+      fullPath: '/dashboard/$orgid'
+      preLoaderRoute: typeof DashboardOrgidRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up': {
@@ -142,33 +142,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/$orgslug/': {
-      id: '/dashboard/$orgslug/'
+    '/dashboard/$orgid/': {
+      id: '/dashboard/$orgid/'
       path: '/'
-      fullPath: '/dashboard/$orgslug/'
-      preLoaderRoute: typeof DashboardOrgslugIndexRouteImport
-      parentRoute: typeof DashboardOrgslugRoute
+      fullPath: '/dashboard/$orgid/'
+      preLoaderRoute: typeof DashboardOrgidIndexRouteImport
+      parentRoute: typeof DashboardOrgidRoute
     }
   }
 }
 
-interface DashboardOrgslugRouteChildren {
-  DashboardOrgslugIndexRoute: typeof DashboardOrgslugIndexRoute
+interface DashboardOrgidRouteChildren {
+  DashboardOrgidIndexRoute: typeof DashboardOrgidIndexRoute
 }
 
-const DashboardOrgslugRouteChildren: DashboardOrgslugRouteChildren = {
-  DashboardOrgslugIndexRoute: DashboardOrgslugIndexRoute,
+const DashboardOrgidRouteChildren: DashboardOrgidRouteChildren = {
+  DashboardOrgidIndexRoute: DashboardOrgidIndexRoute,
 }
 
-const DashboardOrgslugRouteWithChildren =
-  DashboardOrgslugRoute._addFileChildren(DashboardOrgslugRouteChildren)
+const DashboardOrgidRouteWithChildren = DashboardOrgidRoute._addFileChildren(
+  DashboardOrgidRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RegisterOrganizationRoute: RegisterOrganizationRoute,
   SelectOrganizationRoute: SelectOrganizationRoute,
   AuthSignUpRoute: AuthSignUpRoute,
-  DashboardOrgslugRoute: DashboardOrgslugRouteWithChildren,
+  DashboardOrgidRoute: DashboardOrgidRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

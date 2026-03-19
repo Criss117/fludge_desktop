@@ -16,22 +16,16 @@ type Member struct {
 	DeletedAt      *time.Time
 }
 
-func NewMember(organizationID, operatorID string, role string) (*Member, error) {
-	validRole, errRole := valueobjects.NewMemberRole(role)
-
-	if errRole != nil {
-		return nil, errRole
-	}
-
+func NewMember(organizationID, operatorID string, role valueobjects.MemberRole) *Member {
 	return &Member{
 		ID:             lib.GenerateUUID(),
 		OrganizationID: organizationID,
 		OperatorID:     operatorID,
-		Role:           validRole,
+		Role:           role,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 		DeletedAt:      nil,
-	}, nil
+	}
 }
 
 func ReconstituteMember(id, organizationID, operatorID string, role string, createdAt, updatedAt time.Time, deletedAt *time.Time) *Member {

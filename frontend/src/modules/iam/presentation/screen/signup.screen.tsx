@@ -19,10 +19,10 @@ import { Button } from "@shared/components/ui/button";
 
 import { useAuthForm } from "@iam/presentation/components/auth-form";
 import { signUpSchema } from "@iam/application/validators/operator-form.validators";
-import { useSignUp } from "@iam/application/hooks/use-signup";
+import { useIam } from "@/integrations/iam";
 
 export function SignUpScreen() {
-  const signUp = useSignUp();
+  const { signUp } = useIam();
   const router = useRouter();
   const [rootError, setRootError] = useState<{ message: string } | null>(null);
 

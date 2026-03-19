@@ -2,7 +2,6 @@ export namespace commands {
 	
 	export class RegisterOrganizationCommand {
 	    name: string;
-	    slug: string;
 	    legalName: string;
 	    address: string;
 	    logo?: string;
@@ -16,7 +15,6 @@ export namespace commands {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
-	        this.slug = source["slug"];
 	        this.legalName = source["legalName"];
 	        this.address = source["address"];
 	        this.logo = source["logo"];

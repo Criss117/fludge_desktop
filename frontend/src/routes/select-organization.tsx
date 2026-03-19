@@ -14,7 +14,7 @@ export const Route = createFileRoute("/select-organization")({
 
     if (!activeOperator)
       throw redirect({
-        to: "/select-organization",
+        to: "/",
       });
 
     if (activeOperator.isMemberIn.length === 0)

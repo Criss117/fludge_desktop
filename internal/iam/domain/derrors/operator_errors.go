@@ -9,4 +9,5 @@ var (
 	ErrOperatorAlreadyExistsByUsername   = errors.New("El operador ya existe con el mismo nombre de usuario")
 	ErrInvalidCredentials                = errors.New("Credenciales inválidas")
 	ErrOperatorCanBeMemberInOrganization = errors.New("El operador debe ser miembro de una organización")
+	ErrOperatorMustBeRoot                = errors.New("El operador debe ser root")
 )

@@ -7,14 +7,14 @@ type MemberRole struct {
 }
 
 var (
-	MemberRoleRoot   = MemberRole{value: "ROOT"}
-	MemberRoleMember = MemberRole{value: "MEMBER"}
+	MemberRoleRoot     = MemberRole{value: "ROOT"}
+	MemberRoleEmployee = MemberRole{value: "EMPLOYEE"}
 )
 
 func NewMemberRole(role string) (MemberRole, error) {
 	r := MemberRole{value: role}
 	switch r {
-	case MemberRoleRoot, MemberRoleMember:
+	case MemberRoleRoot, MemberRoleEmployee:
 		return r, nil
 	default:
 		return MemberRole{}, derrors.ErrMemberRoleInvalid
@@ -34,7 +34,7 @@ func (mr MemberRole) IsRoot() bool {
 }
 
 func (mr MemberRole) IsMember() bool {
-	return mr == MemberRoleMember
+	return mr.value == MemberRoleEmployee.value
 }
 
 func (mr MemberRole) Equals(other MemberRole) bool {

@@ -24,10 +24,6 @@ func (as *AppState) SwitchOrganization(organization *Organization) error {
 		return derrors.ErrNoActiveOperator
 	}
 
-	if as.ActiveOrganization == nil {
-		return derrors.ErrAppStateNotSetOrganization
-	}
-
 	if organization.FindMemberByOperatorId(as.ActiveOperator.ID) == nil {
 		return derrors.ErrAppStateNotSetOrganization
 	}

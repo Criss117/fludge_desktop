@@ -68,6 +68,10 @@ SELECT * FROM member WHERE organization_id = ?;
 -- name: FindOneMemberById :many
 SELECT * FROM member m WHERE m.id = ?;
 
+-- name: CreateMember :exec
+INSERT INTO member (id, organization_id, operator_id, role, created_at, updated_at) 
+VALUES (?, ?, ?, ?, ?, ?);
+
 -------------------------------------------------------------------------------
 -- Team
 -------------------------------------------------------------------------------

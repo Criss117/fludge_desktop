@@ -10,6 +10,32 @@ import (
 	"database/sql"
 )
 
+const createMember = `-- name: CreateMember :exec
+INSERT INTO member (id, organization_id, operator_id, role, created_at, updated_at) 
+VALUES (?, ?, ?, ?, ?, ?)
+`
+
+type CreateMemberParams struct {
+	ID             string `json:"id"`
+	OrganizationID string `json:"organization_id"`
+	OperatorID     string `json:"operator_id"`
+	Role           string `json:"role"`
+	CreatedAt      int64  `json:"created_at"`
+	UpdatedAt      int64  `json:"updated_at"`
+}
+
+func (q *Queries) CreateMember(ctx context.Context, arg CreateMemberParams) error {
+	_, err := q.db.ExecContext(ctx, createMember,
+		arg.ID,
+		arg.OrganizationID,
+		arg.OperatorID,
+		arg.Role,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
 const createOperator = `-- name: CreateOperator :exec
 INSERT INTO operator (id, name, username, email, pin, is_root, created_at, updated_at) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)

@@ -24,7 +24,7 @@ type Organization struct {
 }
 
 func NewOrganization(
-	name, slug, legalName, address string,
+	name, legalName, address string,
 	logo, contactPhone, contactEmail *string,
 ) (*Organization, error) {
 	var contactEmailVO *valueobjects.Email = nil
@@ -39,7 +39,7 @@ func NewOrganization(
 		contactEmailVO = &validContactEmail
 	}
 
-	validSlug := valueobjects.NewSlug(slug)
+	validSlug := valueobjects.NewSlug(name)
 
 	organizationId := lib.GenerateUUID()
 

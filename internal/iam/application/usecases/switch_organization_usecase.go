@@ -6,6 +6,7 @@ import (
 	"desktop/internal/iam/domain/aggregates"
 	"desktop/internal/iam/domain/derrors"
 	"desktop/internal/iam/domain/ports"
+	"log"
 )
 
 type SwitchOrganizationUseCase struct {
@@ -26,8 +27,8 @@ func NewSwitchOrganizationUseCase(
 func (uc *SwitchOrganizationUseCase) Execute(
 	ctx context.Context,
 	cmd *commands.SwitchOrganizationCommand,
-) (*aggregates.Organization, error) {
-	appState, err := uc.appStateRepo.Get(ctx)
+) (*aggregates.AppState, error) {
+	currentAppState, err := uc.appStateRepo.Get(ctx)
 
 	if err != nil {
 		return nil, err
@@ -43,7 +44,15 @@ func (uc *SwitchOrganizationUseCase) Execute(
 		return nil, derrors.ErrOrganizationNotFound
 	}
 
-	appState.SwitchOrganization(organization)
+	currentAppState.SwitchOrganization(organization)
 
-	return organization, nil
+	log.Println("✓ SwitchOrganizationUseCase: organization switched", currentAppState)
+
+	errUpdateAppState := uc.appStateRepo.Update(ctx, currentAppState)
+
+	if errUpdateAppState != nil {
+		return nil, err
+	}
+
+	return currentAppState, nil
 }

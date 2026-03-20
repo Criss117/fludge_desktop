@@ -1,5 +1,37 @@
 export namespace commands {
 	
+	export class CreateProductCommand {
+	    name: string;
+	    sku: string;
+	    description?: string;
+	    wholesalePrice: number;
+	    salePrice: number;
+	    costPrice: number;
+	    stock: number;
+	    minStock: number;
+	    organizationId: string;
+	    categoryId?: string;
+	    supplierId?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CreateProductCommand(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.sku = source["sku"];
+	        this.description = source["description"];
+	        this.wholesalePrice = source["wholesalePrice"];
+	        this.salePrice = source["salePrice"];
+	        this.costPrice = source["costPrice"];
+	        this.stock = source["stock"];
+	        this.minStock = source["minStock"];
+	        this.organizationId = source["organizationId"];
+	        this.categoryId = source["categoryId"];
+	        this.supplierId = source["supplierId"];
+	    }
+	}
 	export class RegisterOrganizationCommand {
 	    name: string;
 	    legalName: string;
@@ -284,6 +316,46 @@ export namespace responses {
 		    }
 		    return a;
 		}
+	}
+	export class ProductResponse {
+	    id: string;
+	    sku: string;
+	    name: string;
+	    description?: string;
+	    wholesalePrice: number;
+	    salePrice: number;
+	    costPrice: number;
+	    stock: number;
+	    minStock: number;
+	    organizationId: string;
+	    categoryId?: string;
+	    supplierId?: string;
+	    createdAt: number;
+	    updatedAt: number;
+	    deletedAt?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProductResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.sku = source["sku"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.wholesalePrice = source["wholesalePrice"];
+	        this.salePrice = source["salePrice"];
+	        this.costPrice = source["costPrice"];
+	        this.stock = source["stock"];
+	        this.minStock = source["minStock"];
+	        this.organizationId = source["organizationId"];
+	        this.categoryId = source["categoryId"];
+	        this.supplierId = source["supplierId"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.deletedAt = source["deletedAt"];
+	    }
 	}
 	export class ResponseAppState {
 	    activeOrganization?: OrganizationResponse;

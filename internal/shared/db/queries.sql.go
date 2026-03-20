@@ -100,6 +100,48 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganization
 	return err
 }
 
+const createProduct = `-- name: CreateProduct :exec
+INSERT INTO product (id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type CreateProductParams struct {
+	ID             string         `json:"id"`
+	Sku            string         `json:"sku"`
+	Name           string         `json:"name"`
+	Description    sql.NullString `json:"description"`
+	WholesalePrice int64          `json:"wholesale_price"`
+	SalePrice      int64          `json:"sale_price"`
+	CostPrice      int64          `json:"cost_price"`
+	Stock          int64          `json:"stock"`
+	MinStock       int64          `json:"min_stock"`
+	CategoryID     sql.NullString `json:"category_id"`
+	OrganizationID string         `json:"organization_id"`
+	SupplierID     sql.NullString `json:"supplier_id"`
+	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
+}
+
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) error {
+	_, err := q.db.ExecContext(ctx, createProduct,
+		arg.ID,
+		arg.Sku,
+		arg.Name,
+		arg.Description,
+		arg.WholesalePrice,
+		arg.SalePrice,
+		arg.CostPrice,
+		arg.Stock,
+		arg.MinStock,
+		arg.CategoryID,
+		arg.OrganizationID,
+		arg.SupplierID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
 const findAllMembersByOrganizationId = `-- name: FindAllMembersByOrganizationId :many
 
 SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at FROM member WHERE organization_id = ?
@@ -163,6 +205,49 @@ func (q *Queries) FindAllOperators(ctx context.Context) ([]Operator, error) {
 			&i.Username,
 			&i.Pin,
 			&i.IsRoot,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findAllProductsByOrganizationId = `-- name: FindAllProductsByOrganizationId :many
+SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at, deleted_at FROM product WHERE organization_id = ?
+`
+
+func (q *Queries) FindAllProductsByOrganizationId(ctx context.Context, organizationID string) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, findAllProductsByOrganizationId, organizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Product
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sku,
+			&i.Name,
+			&i.Description,
+			&i.WholesalePrice,
+			&i.SalePrice,
+			&i.CostPrice,
+			&i.Stock,
+			&i.MinStock,
+			&i.CategoryID,
+			&i.OrganizationID,
+			&i.SupplierID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -626,6 +711,96 @@ func (q *Queries) FindOneOrganizationById(ctx context.Context, id string) ([]Org
 			&i.Address,
 			&i.ContactPhone,
 			&i.ContactEmail,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findOneProductByName = `-- name: FindOneProductByName :many
+SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at, deleted_at FROM product WHERE lower(name) = lower(?) LIMIT 1
+`
+
+func (q *Queries) FindOneProductByName(ctx context.Context, lower string) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, findOneProductByName, lower)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Product
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sku,
+			&i.Name,
+			&i.Description,
+			&i.WholesalePrice,
+			&i.SalePrice,
+			&i.CostPrice,
+			&i.Stock,
+			&i.MinStock,
+			&i.CategoryID,
+			&i.OrganizationID,
+			&i.SupplierID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findOneProductBySku = `-- name: FindOneProductBySku :many
+
+SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at, deleted_at FROM product WHERE sku = ? LIMIT 1
+`
+
+// -----------------------------------------------------------------------------
+// Prodcut
+// -----------------------------------------------------------------------------
+func (q *Queries) FindOneProductBySku(ctx context.Context, sku string) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, findOneProductBySku, sku)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Product
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sku,
+			&i.Name,
+			&i.Description,
+			&i.WholesalePrice,
+			&i.SalePrice,
+			&i.CostPrice,
+			&i.Stock,
+			&i.MinStock,
+			&i.CategoryID,
+			&i.OrganizationID,
+			&i.SupplierID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,

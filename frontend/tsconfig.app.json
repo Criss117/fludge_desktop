@@ -36,5 +36,6 @@
       "@wails/*": ["./wailsjs/*"]
     }
   },
-  "include": ["src", "public/fonts"]
+  "include": ["src", "public/fonts"],
+  "exclude": ["wails"]
 }

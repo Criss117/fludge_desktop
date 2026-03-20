@@ -210,6 +210,7 @@ CREATE INDEX        IF NOT EXISTS "product_supplier_idx"     ON "product" ("supp
 CREATE INDEX        IF NOT EXISTS "product_organization_idx" ON "product" ("organization_id");
 CREATE INDEX        IF NOT EXISTS "product_stock_idx"        ON "product" ("stock");
 CREATE UNIQUE INDEX IF NOT EXISTS "sku_organization_id_idx"  ON "product" ("sku", "organization_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "name_organization_id_idx" ON "product" ("name", "organization_id");
 
 
 CREATE TABLE IF NOT EXISTS "stock_movement" (

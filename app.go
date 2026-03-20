@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"desktop/internal/catalog"
 	"desktop/internal/iam"
 	iamAggregates "desktop/internal/iam/domain/aggregates"
 	"desktop/internal/shared/db"
@@ -18,10 +19,11 @@ var ddl string
 
 // App struct
 type App struct {
-	ctx          context.Context
-	IamHandler   iam.IamHandler
-	SessionState *iamAggregates.AppState
-	mu           sync.RWMutex
+	ctx            context.Context
+	IamHandler     iam.IamHandler
+	CatalogHandler catalog.CatalogHandler
+	SessionState   *iamAggregates.AppState
+	mu             sync.RWMutex
 }
 
 // NewApp creates a new App application struct
@@ -57,6 +59,10 @@ func (a *App) startup(ctx context.Context) {
 	})
 
 	log.Println("✓ IamHandler creado")
+
+	a.CatalogHandler = *catalog.NewCatalogHandler(ctx, queries)
+
+	log.Println("✓ CatalogHandler creado")
 
 	// if err != nil {
 	// 	log.Println("✗ error appState:", err)

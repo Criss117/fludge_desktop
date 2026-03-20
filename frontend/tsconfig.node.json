@@ -34,5 +34,6 @@
       "@wails/*": ["./wailsjs/*"]
     }
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts"],
+  "exclude": ["wails"]
 }

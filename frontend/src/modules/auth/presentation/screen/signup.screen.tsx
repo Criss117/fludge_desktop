@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { Link } from "@tanstack/react-router";
+
 import {
   Card,
   CardContent,
@@ -5,30 +8,27 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/modules/shared/components/ui/card";
-import { useAuthForm } from "../components/auth-form";
-import { z } from "zod";
-import { FieldGroup } from "@/modules/shared/components/ui/field";
-import { Button } from "@/modules/shared/components/ui/button";
-import { Link } from "@tanstack/react-router";
+} from "@shared/components/ui/card";
+import { FieldGroup } from "@shared/components/ui/field";
+import { Button } from "@shared/components/ui/button";
+
+import { useAuthForm } from "@iam/presentation/components/auth-form";
 
 const createOperatorSchema = z.object({
   name: z
     .string("El nombre es requerido")
     .min(3, "El nombre es muy corto")
     .max(20, "El nombre es muy largo"),
-  email:
+  email: z.string().email("El email es inválido"),
 });
 
 export function SignUpScreen() {
   const form = useAuthForm({
     defaultValues: {
       name: "",
-      email: ""
+      email: "",
     },
-    onSubmit: (values) => {
-      console.log(values);
-    },
+    onSubmit: () => {},
     validators: {
       onSubmit: createOperatorSchema,
     },
@@ -60,7 +60,7 @@ export function SignUpScreen() {
               />
 
               <form.AppField
-                name="e"
+                name="email"
                 children={(field) => <field.NameField />}
               />
             </FieldGroup>

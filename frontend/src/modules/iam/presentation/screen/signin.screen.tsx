@@ -29,9 +29,7 @@ export function SignInScreen() {
     },
     onSubmit: ({ value, formApi }) => {
       signIn.mutate(value, {
-        onSuccess: (data) => {
-          console.log(data);
-
+        onSuccess: () => {
           setRootError(null);
           formApi.reset();
           router.navigate({

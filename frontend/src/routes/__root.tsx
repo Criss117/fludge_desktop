@@ -1,11 +1,9 @@
 import type { QueryClient } from "@tanstack/react-query";
-import {
-  createRootRouteWithContext,
-  Outlet,
-  useLocation,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+
 import { TooltipProvider } from "@shared/components/ui/tooltip";
+
 export interface RouterAppContext {
   queryClient: QueryClient;
 }
@@ -38,12 +36,10 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootLayout() {
-  const location = useLocation();
-
   return (
     <>
       <TooltipProvider>
-        <Outlet key={location.pathname} />
+        <Outlet />
       </TooltipProvider>
       <TanStackRouterDevtools />
     </>

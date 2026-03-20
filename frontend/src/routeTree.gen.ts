@@ -15,10 +15,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardOrgidRouteImport } from './routes/dashboard/$orgid'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as DashboardOrgidIndexRouteImport } from './routes/dashboard/$orgid/index'
+import { Route as DashboardOrgidTeamsRouteImport } from './routes/dashboard/$orgid/teams'
+import { Route as DashboardOrgidEmployeesRouteImport } from './routes/dashboard/$orgid/employees'
 import { Route as DashboardOrgidClientsRouteImport } from './routes/dashboard/$orgid/clients'
 import { Route as DashboardOrgidInventoryIndexRouteImport } from './routes/dashboard/$orgid/inventory/index'
 import { Route as DashboardOrgidInventorySuppliersRouteImport } from './routes/dashboard/$orgid/inventory/suppliers'
 import { Route as DashboardOrgidInventoryProductsRouteImport } from './routes/dashboard/$orgid/inventory/products'
+import { Route as DashboardOrgidInventoryCategoriesRouteImport } from './routes/dashboard/$orgid/inventory/categories'
 
 const SelectOrganizationRoute = SelectOrganizationRouteImport.update({
   id: '/select-organization',
@@ -50,6 +53,16 @@ const DashboardOrgidIndexRoute = DashboardOrgidIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardOrgidRoute,
 } as any)
+const DashboardOrgidTeamsRoute = DashboardOrgidTeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => DashboardOrgidRoute,
+} as any)
+const DashboardOrgidEmployeesRoute = DashboardOrgidEmployeesRouteImport.update({
+  id: '/employees',
+  path: '/employees',
+  getParentRoute: () => DashboardOrgidRoute,
+} as any)
 const DashboardOrgidClientsRoute = DashboardOrgidClientsRouteImport.update({
   id: '/clients',
   path: '/clients',
@@ -73,6 +86,12 @@ const DashboardOrgidInventoryProductsRoute =
     path: '/inventory/products',
     getParentRoute: () => DashboardOrgidRoute,
   } as any)
+const DashboardOrgidInventoryCategoriesRoute =
+  DashboardOrgidInventoryCategoriesRouteImport.update({
+    id: '/inventory/categories',
+    path: '/inventory/categories',
+    getParentRoute: () => DashboardOrgidRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -81,7 +100,10 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/$orgid': typeof DashboardOrgidRouteWithChildren
   '/dashboard/$orgid/clients': typeof DashboardOrgidClientsRoute
+  '/dashboard/$orgid/employees': typeof DashboardOrgidEmployeesRoute
+  '/dashboard/$orgid/teams': typeof DashboardOrgidTeamsRoute
   '/dashboard/$orgid/': typeof DashboardOrgidIndexRoute
+  '/dashboard/$orgid/inventory/categories': typeof DashboardOrgidInventoryCategoriesRoute
   '/dashboard/$orgid/inventory/products': typeof DashboardOrgidInventoryProductsRoute
   '/dashboard/$orgid/inventory/suppliers': typeof DashboardOrgidInventorySuppliersRoute
   '/dashboard/$orgid/inventory/': typeof DashboardOrgidInventoryIndexRoute
@@ -92,7 +114,10 @@ export interface FileRoutesByTo {
   '/select-organization': typeof SelectOrganizationRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/$orgid/clients': typeof DashboardOrgidClientsRoute
+  '/dashboard/$orgid/employees': typeof DashboardOrgidEmployeesRoute
+  '/dashboard/$orgid/teams': typeof DashboardOrgidTeamsRoute
   '/dashboard/$orgid': typeof DashboardOrgidIndexRoute
+  '/dashboard/$orgid/inventory/categories': typeof DashboardOrgidInventoryCategoriesRoute
   '/dashboard/$orgid/inventory/products': typeof DashboardOrgidInventoryProductsRoute
   '/dashboard/$orgid/inventory/suppliers': typeof DashboardOrgidInventorySuppliersRoute
   '/dashboard/$orgid/inventory': typeof DashboardOrgidInventoryIndexRoute
@@ -105,7 +130,10 @@ export interface FileRoutesById {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/$orgid': typeof DashboardOrgidRouteWithChildren
   '/dashboard/$orgid/clients': typeof DashboardOrgidClientsRoute
+  '/dashboard/$orgid/employees': typeof DashboardOrgidEmployeesRoute
+  '/dashboard/$orgid/teams': typeof DashboardOrgidTeamsRoute
   '/dashboard/$orgid/': typeof DashboardOrgidIndexRoute
+  '/dashboard/$orgid/inventory/categories': typeof DashboardOrgidInventoryCategoriesRoute
   '/dashboard/$orgid/inventory/products': typeof DashboardOrgidInventoryProductsRoute
   '/dashboard/$orgid/inventory/suppliers': typeof DashboardOrgidInventorySuppliersRoute
   '/dashboard/$orgid/inventory/': typeof DashboardOrgidInventoryIndexRoute
@@ -119,7 +147,10 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/dashboard/$orgid'
     | '/dashboard/$orgid/clients'
+    | '/dashboard/$orgid/employees'
+    | '/dashboard/$orgid/teams'
     | '/dashboard/$orgid/'
+    | '/dashboard/$orgid/inventory/categories'
     | '/dashboard/$orgid/inventory/products'
     | '/dashboard/$orgid/inventory/suppliers'
     | '/dashboard/$orgid/inventory/'
@@ -130,7 +161,10 @@ export interface FileRouteTypes {
     | '/select-organization'
     | '/auth/sign-up'
     | '/dashboard/$orgid/clients'
+    | '/dashboard/$orgid/employees'
+    | '/dashboard/$orgid/teams'
     | '/dashboard/$orgid'
+    | '/dashboard/$orgid/inventory/categories'
     | '/dashboard/$orgid/inventory/products'
     | '/dashboard/$orgid/inventory/suppliers'
     | '/dashboard/$orgid/inventory'
@@ -142,7 +176,10 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/dashboard/$orgid'
     | '/dashboard/$orgid/clients'
+    | '/dashboard/$orgid/employees'
+    | '/dashboard/$orgid/teams'
     | '/dashboard/$orgid/'
+    | '/dashboard/$orgid/inventory/categories'
     | '/dashboard/$orgid/inventory/products'
     | '/dashboard/$orgid/inventory/suppliers'
     | '/dashboard/$orgid/inventory/'
@@ -200,6 +237,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOrgidIndexRouteImport
       parentRoute: typeof DashboardOrgidRoute
     }
+    '/dashboard/$orgid/teams': {
+      id: '/dashboard/$orgid/teams'
+      path: '/teams'
+      fullPath: '/dashboard/$orgid/teams'
+      preLoaderRoute: typeof DashboardOrgidTeamsRouteImport
+      parentRoute: typeof DashboardOrgidRoute
+    }
+    '/dashboard/$orgid/employees': {
+      id: '/dashboard/$orgid/employees'
+      path: '/employees'
+      fullPath: '/dashboard/$orgid/employees'
+      preLoaderRoute: typeof DashboardOrgidEmployeesRouteImport
+      parentRoute: typeof DashboardOrgidRoute
+    }
     '/dashboard/$orgid/clients': {
       id: '/dashboard/$orgid/clients'
       path: '/clients'
@@ -228,12 +279,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardOrgidInventoryProductsRouteImport
       parentRoute: typeof DashboardOrgidRoute
     }
+    '/dashboard/$orgid/inventory/categories': {
+      id: '/dashboard/$orgid/inventory/categories'
+      path: '/inventory/categories'
+      fullPath: '/dashboard/$orgid/inventory/categories'
+      preLoaderRoute: typeof DashboardOrgidInventoryCategoriesRouteImport
+      parentRoute: typeof DashboardOrgidRoute
+    }
   }
 }
 
 interface DashboardOrgidRouteChildren {
   DashboardOrgidClientsRoute: typeof DashboardOrgidClientsRoute
+  DashboardOrgidEmployeesRoute: typeof DashboardOrgidEmployeesRoute
+  DashboardOrgidTeamsRoute: typeof DashboardOrgidTeamsRoute
   DashboardOrgidIndexRoute: typeof DashboardOrgidIndexRoute
+  DashboardOrgidInventoryCategoriesRoute: typeof DashboardOrgidInventoryCategoriesRoute
   DashboardOrgidInventoryProductsRoute: typeof DashboardOrgidInventoryProductsRoute
   DashboardOrgidInventorySuppliersRoute: typeof DashboardOrgidInventorySuppliersRoute
   DashboardOrgidInventoryIndexRoute: typeof DashboardOrgidInventoryIndexRoute
@@ -241,7 +302,11 @@ interface DashboardOrgidRouteChildren {
 
 const DashboardOrgidRouteChildren: DashboardOrgidRouteChildren = {
   DashboardOrgidClientsRoute: DashboardOrgidClientsRoute,
+  DashboardOrgidEmployeesRoute: DashboardOrgidEmployeesRoute,
+  DashboardOrgidTeamsRoute: DashboardOrgidTeamsRoute,
   DashboardOrgidIndexRoute: DashboardOrgidIndexRoute,
+  DashboardOrgidInventoryCategoriesRoute:
+    DashboardOrgidInventoryCategoriesRoute,
   DashboardOrgidInventoryProductsRoute: DashboardOrgidInventoryProductsRoute,
   DashboardOrgidInventorySuppliersRoute: DashboardOrgidInventorySuppliersRoute,
   DashboardOrgidInventoryIndexRoute: DashboardOrgidInventoryIndexRoute,

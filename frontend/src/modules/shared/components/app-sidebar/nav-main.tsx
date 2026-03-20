@@ -1,5 +1,4 @@
-import { memo } from "react";
-import { Link, useLocation, type LinkProps } from "@tanstack/react-router";
+import { Link, type LinkProps } from "@tanstack/react-router";
 import {
   Plus,
   LayoutDashboard,
@@ -20,9 +19,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@shared/components//ui/sidebar";
-import { cn } from "@shared/lib/utils";
-
-const DASHBOARD_PATH_REGEX = /\/dashboard\/[^/]+/;
 
 type NavMenuItem = {
   title: string;
@@ -30,6 +26,15 @@ type NavMenuItem = {
   icon: LucideIcon;
   elements?: NavMenuItem[];
 };
+
+interface GroupItemProps extends Props {
+  item: NavMenuItem;
+}
+
+interface SidebarMenuLinkProps {
+  item: NavMenuItem;
+  orgId: string;
+}
 
 interface Props {
   orgId: string;
@@ -75,30 +80,26 @@ const navMainItems: NavMenuItem[] = [
   // },
 ];
 
-function SidebarMenuLink({
-  item,
-  orgId,
-}: {
-  item: NavMenuItem;
-  orgId: string;
-}) {
-  const isMatch = useLocation({
-    select: (data) =>
-      data.pathname.replace(DASHBOARD_PATH_REGEX, "") ===
-      item.url.replace("/dashboard/$orgslug", ""),
-  });
-
+function SidebarMenuLink({ item, orgId }: SidebarMenuLinkProps) {
   return (
     <SidebarMenuButton
-      className={cn(
-        isMatch
-          ? "bg-primary text-black hover:bg-primary hover:text-black"
-          : "",
-      )}
       tooltip={item.title}
       render={(props) => {
         return (
-          <Link to={item.url} params={{ orgid: orgId }} {...props}>
+          <Link
+            to={item.url}
+            params={{ orgid: orgId }}
+            activeProps={{
+              className: "border",
+            }}
+            inactiveProps={{
+              className: "border border-transparent",
+            }}
+            activeOptions={{
+              exact: true,
+            }}
+            {...props}
+          >
             <item.icon />
             <span>{item.title}</span>
           </Link>
@@ -108,35 +109,30 @@ function SidebarMenuLink({
   );
 }
 
-const GroupItem = memo(function GroupItem({
-  orgId,
-  item,
-}: Props & {
-  item: NavMenuItem;
-}) {
-  // const isMatch = (url: string) =>
-  //   useLocation({
-  //     select: (data) =>
-  //       data.pathname.replace(DASHBOARD_PATH_REGEX, "") ===
-  //       url.replace("/dashboard/$orgId", ""),
-  //   });
-
+function GroupItem({ orgId, item }: GroupItemProps) {
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem className="space-y-2">
       <SidebarMenuLink item={item} orgId={orgId} />
 
       <SidebarMenuSub>
         {item.elements?.map((subItem) => (
           <SidebarMenuSubItem key={subItem.title}>
             <SidebarMenuSubButton
-              className={cn(
-                "dark:[&>svg]:text-white [&>svg]:text-black",
-                // isMatch(subItem.url)
-                //   ? "bg-primary text-black hover:bg-primary hover:text-black dark:[&>svg]:text-black"
-                //   : "",
-              )}
               render={(props) => (
-                <Link to={subItem.url} params={{ orgid: orgId }} {...props}>
+                <Link
+                  to={subItem.url}
+                  params={{ orgid: orgId }}
+                  activeProps={{
+                    className: "border",
+                  }}
+                  inactiveProps={{
+                    className: "border border-transparent",
+                  }}
+                  activeOptions={{
+                    exact: true,
+                  }}
+                  {...props}
+                >
                   <subItem.icon />
                   <span>{subItem.title}</span>
                 </Link>
@@ -147,7 +143,7 @@ const GroupItem = memo(function GroupItem({
       </SidebarMenuSub>
     </SidebarMenuItem>
   );
-});
+}
 
 export function NavMain({ orgId }: Props) {
   return (
@@ -165,7 +161,7 @@ export function NavMain({ orgId }: Props) {
           </SidebarMenuItem>
         </SidebarMenu>
 
-        <SidebarMenu>
+        <SidebarMenu className="space-y-2">
           {navMainItems.map((item) => {
             if (item.elements)
               return <GroupItem key={item.title} orgId={orgId} item={item} />;

@@ -1,9 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { DashBoardHeader } from "@/modules/shared/components/dashboard-header";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/dashboard/$orgid/')({
+export const Route = createFileRoute("/dashboard/$orgid/")({
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-  return <div>Hello "/dashboard/$orgslug/"!</div>
+  const { orgid } = Route.useParams();
+
+  return (
+    <>
+      <DashBoardHeader.Content orgid={orgid} currentPath="Home">
+        <DashBoardHeader.Home />
+      </DashBoardHeader.Content>
+      <div>Hello "/dashboard/$orgslug/"!</div>
+    </>
+  );
 }

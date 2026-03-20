@@ -3,11 +3,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { appStateQueryOptions } from "@/integrations/iam";
 
 import { SwitchOrganization } from "@wails/go/iam/IamHandler";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@shared/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@shared/components/ui/sidebar";
 import { AppSidebar } from "@shared/components/app-sidebar";
 
 export const Route = createFileRoute("/dashboard/$orgid")({
@@ -24,8 +20,6 @@ export const Route = createFileRoute("/dashboard/$orgid")({
     const newAppState = await SwitchOrganization({
       organizationId: params.orgid,
     });
-
-    console.log(newAppState);
 
     context.queryClient.setQueryData(
       appStateQueryOptions.queryKey,
@@ -50,7 +44,6 @@ function RouteComponent() {
       <AppSidebar orgId={orgid} />
       <SidebarInset>
         <main>
-          <SidebarTrigger />
           <Outlet />
         </main>
       </SidebarInset>

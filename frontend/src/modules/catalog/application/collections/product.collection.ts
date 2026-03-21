@@ -37,7 +37,9 @@ export function productCollectionBuilder(orgId: string) {
     const newProductCollection = createCollection(
       queryCollectionOptions<Product>({
         queryKey: ["organization", orgId, "products"],
-        queryFn: () => FindAllProducts(),
+        queryFn: () => {
+          return FindAllProducts();
+        },
         getKey: (p) => p.id,
         queryClient,
 

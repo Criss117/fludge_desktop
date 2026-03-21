@@ -38,7 +38,8 @@ export function SearchInput({
         onClick={() => onChange("")}
         size="icon-sm"
         variant="ghost"
-        className="absolute right-0 top-1/2 -translate-y-1/2"
+        disabled={value === ""}
+        className="absolute right-0 top-1/2 -translate-y-1/2 active:-translate-y-1/2"
       >
         <X />
       </Button>
@@ -67,6 +68,7 @@ export function SearchInputSkeleton({
       <Button
         onClick={() => {}}
         size="icon-sm"
+        disabled
         variant="ghost"
         className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground"
       >

@@ -33,3 +33,14 @@ export function WithChevronButton({ label, valueKey }: WithChevronButtonProps) {
     </Button>
   );
 }
+
+export function WithChevronButtonSkeleton({
+  label,
+}: Omit<WithChevronButtonProps, "valueKey">) {
+  return (
+    <Button variant="ghost" disabled>
+      <span>{label}</span>
+      <MinusIcon />
+    </Button>
+  );
+}

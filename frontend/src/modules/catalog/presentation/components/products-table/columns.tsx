@@ -1,11 +1,11 @@
 import { createColumnHelper } from "@tanstack/react-table";
 
 import { cn, formatCurrency } from "@shared/lib/utils";
-import type { Product } from "@catalog/application/collections/product.collection";
 import { WithChevronButton } from "./columns-header";
 import { ProductsTableActions } from "./actions";
+import type { ProductWithCategory } from "@catalog/application/hooks/use-products-queries";
 
-const columnHelper = createColumnHelper<Product>();
+const columnHelper = createColumnHelper<ProductWithCategory>();
 
 export const productsTableColumns = [
   columnHelper.accessor((p) => p.sku, {
@@ -21,6 +21,13 @@ export const productsTableColumns = [
     header: "Descripción",
     cell: ({ getValue }) => {
       return <span>{getValue() || "-"}</span>;
+    },
+  }),
+  columnHelper.accessor((p) => p.category, {
+    id: "category",
+    header: "Categoria",
+    cell: ({ getValue }) => {
+      return <span>{getValue()?.name || "-"}</span>;
     },
   }),
   columnHelper.accessor((p) => p.stock, {

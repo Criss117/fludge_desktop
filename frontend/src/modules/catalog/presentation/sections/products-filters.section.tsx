@@ -7,7 +7,10 @@ import {
 
 import { Button } from "@shared/components/ui/button";
 import { Limits, useFilters } from "@shared/store/filters.store";
-import { SearchInput } from "@shared/components/search-input";
+import {
+  SearchInput,
+  SearchInputSkeleton,
+} from "@shared/components/search-input";
 import {
   Select,
   SelectContent,
@@ -116,6 +119,50 @@ export function ProductsFiltersSection({ totalProducts }: Props) {
           disabled={filters.page === maxPage}
           onClick={lastPage}
         >
+          <ChevronsRightIcon />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export function ProductsFiltersSectionSkeleton() {
+  return (
+    <div className="flex justify-between items-start">
+      <div className="w-1/2">
+        <SearchInputSkeleton placeholder="Buscar productos por nombre o codigo" />
+      </div>
+
+      <div className="flex items-center gap-x-2">
+        <Button size="icon-sm" variant="outline" disabled>
+          <ChevronsLeftIcon />
+        </Button>
+        <Button size="icon-sm" variant="outline" disabled>
+          <ChevronLeftIcon />
+        </Button>
+        <Select
+          items={LimitItems}
+          defaultValue={LimitItems[0].value}
+          value={10}
+        >
+          <SelectTrigger size="sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent alignItemWithTrigger>
+            <SelectGroup>
+              {LimitItems.map((limit) => (
+                <SelectItem key={limit.value} value={limit.value}>
+                  <span>{limit.label}</span>
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <Button size="icon-sm" variant="outline" disabled>
+          <ChevronRightIcon />
+        </Button>
+        <Button size="icon-sm" variant="outline" disabled>
           <ChevronsRightIcon />
         </Button>
       </div>

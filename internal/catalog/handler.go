@@ -48,25 +48,6 @@ func (h *CatalogHandler) activeOrganizationID() (string, error) {
 	return appState.ActiveOrganization.ID, nil
 }
 
-func (h *CatalogHandler) CreateProduct(createProductDto *commands.CreateProductCommand) (*responses.ProductResponse, error) {
-
-	activeOrganizationId, err := h.activeOrganizationID()
-
-	if err != nil {
-		return nil, err
-	}
-
-	createProductUseCase := usecases.NewCreateProductUseCase(h.productRepository)
-
-	newProduct, errCreating := createProductUseCase.Execute(h.ctx, activeOrganizationId, createProductDto)
-
-	if errCreating != nil {
-		return nil, errCreating
-	}
-
-	return responses.ProductResponseFromDomain(newProduct), nil
-}
-
 func (h *CatalogHandler) FindAllProducts() ([]*responses.ProductResponse, error) {
 	activeOrganizationId, err := h.activeOrganizationID()
 
@@ -89,4 +70,44 @@ func (h *CatalogHandler) FindAllProducts() ([]*responses.ProductResponse, error)
 	}
 
 	return responseProducts, nil
+}
+
+func (h *CatalogHandler) UpdateProduct(
+	updateProductDto *commands.UpdateProductCommand,
+) (*responses.ProductResponse, error) {
+	activeOrganizationId, err := h.activeOrganizationID()
+
+	if err != nil {
+		return nil, err
+	}
+
+	updateProductUseCase := usecases.NewUpdateProductUseCase(h.productRepository)
+
+	newProduct, errUpdating := updateProductUseCase.Execute(h.ctx, activeOrganizationId, updateProductDto)
+
+	if errUpdating != nil {
+		return nil, errUpdating
+	}
+
+	return responses.ProductResponseFromDomain(newProduct), nil
+}
+
+func (h *CatalogHandler) CreateProduct(
+	createProductDto *commands.CreateProductCommand,
+) (*responses.ProductResponse, error) {
+	activeOrganizationId, err := h.activeOrganizationID()
+
+	if err != nil {
+		return nil, err
+	}
+
+	createProductUseCase := usecases.NewCreateProductUseCase(h.productRepository)
+
+	newProduct, errCreating := createProductUseCase.Execute(h.ctx, activeOrganizationId, createProductDto)
+
+	if errCreating != nil {
+		return nil, errCreating
+	}
+
+	return responses.ProductResponseFromDomain(newProduct), nil
 }

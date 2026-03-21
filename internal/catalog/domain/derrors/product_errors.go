@@ -12,4 +12,5 @@ var (
 	ErrProductSkuAlreadyExists  = errors.New("El SKU ya esta en uso")
 	ErrProductNameAlreadyExists = errors.New("El nombre ya esta en uso")
 	ErrProductNotFound          = errors.New("El producto no existe")
+	ErrProductNameEmpty         = errors.New("El nombre del producto no puede estar vacío")
 )

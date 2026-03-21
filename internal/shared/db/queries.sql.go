@@ -728,12 +728,65 @@ func (q *Queries) FindOneOrganizationById(ctx context.Context, id string) ([]Org
 	return items, nil
 }
 
-const findOneProductByName = `-- name: FindOneProductByName :many
-SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at, deleted_at FROM product WHERE lower(name) = lower(?) LIMIT 1
+const findOneProductById = `-- name: FindOneProductById :many
+SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at, deleted_at FROM product WHERE id = ? AND organization_id = ? LIMIT 1
 `
 
-func (q *Queries) FindOneProductByName(ctx context.Context, lower string) ([]Product, error) {
-	rows, err := q.db.QueryContext(ctx, findOneProductByName, lower)
+type FindOneProductByIdParams struct {
+	ID             string `json:"id"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) FindOneProductById(ctx context.Context, arg FindOneProductByIdParams) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, findOneProductById, arg.ID, arg.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Product
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sku,
+			&i.Name,
+			&i.Description,
+			&i.WholesalePrice,
+			&i.SalePrice,
+			&i.CostPrice,
+			&i.Stock,
+			&i.MinStock,
+			&i.CategoryID,
+			&i.OrganizationID,
+			&i.SupplierID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findOneProductByName = `-- name: FindOneProductByName :many
+SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at, deleted_at FROM product WHERE lower(name) = lower(?) AND organization_id = ? LIMIT 1
+`
+
+type FindOneProductByNameParams struct {
+	LOWER          string `json:"LOWER"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) FindOneProductByName(ctx context.Context, arg FindOneProductByNameParams) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, findOneProductByName, arg.LOWER, arg.OrganizationID)
 	if err != nil {
 		return nil, err
 	}
@@ -773,14 +826,19 @@ func (q *Queries) FindOneProductByName(ctx context.Context, lower string) ([]Pro
 
 const findOneProductBySku = `-- name: FindOneProductBySku :many
 
-SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at, deleted_at FROM product WHERE sku = ? LIMIT 1
+SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at, deleted_at FROM product WHERE sku = ? AND organization_id = ? LIMIT 1
 `
+
+type FindOneProductBySkuParams struct {
+	Sku            string `json:"sku"`
+	OrganizationID string `json:"organization_id"`
+}
 
 // -----------------------------------------------------------------------------
 // Prodcut
 // -----------------------------------------------------------------------------
-func (q *Queries) FindOneProductBySku(ctx context.Context, sku string) ([]Product, error) {
-	rows, err := q.db.QueryContext(ctx, findOneProductBySku, sku)
+func (q *Queries) FindOneProductBySku(ctx context.Context, arg FindOneProductBySkuParams) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, findOneProductBySku, arg.Sku, arg.OrganizationID)
 	if err != nil {
 		return nil, err
 	}
@@ -830,5 +888,56 @@ type UpdateAppStateParams struct {
 
 func (q *Queries) UpdateAppState(ctx context.Context, arg UpdateAppStateParams) error {
 	_, err := q.db.ExecContext(ctx, updateAppState, arg.ActiveOrganizationID, arg.ActiveOperatorID, arg.UpdatedAt)
+	return err
+}
+
+const updateProduct = `-- name: UpdateProduct :exec
+UPDATE product 
+SET sku = ?, 
+name = ?, 
+description = ?, 
+wholesale_price = ?, 
+sale_price = ?, 
+cost_price = ?, 
+stock = ?, 
+min_stock = ?, 
+category_id = ?, 
+supplier_id = ?, 
+updated_at = ? 
+WHERE id = ? AND organization_id = ?
+`
+
+type UpdateProductParams struct {
+	Sku            string         `json:"sku"`
+	Name           string         `json:"name"`
+	Description    sql.NullString `json:"description"`
+	WholesalePrice int64          `json:"wholesale_price"`
+	SalePrice      int64          `json:"sale_price"`
+	CostPrice      int64          `json:"cost_price"`
+	Stock          int64          `json:"stock"`
+	MinStock       int64          `json:"min_stock"`
+	CategoryID     sql.NullString `json:"category_id"`
+	SupplierID     sql.NullString `json:"supplier_id"`
+	UpdatedAt      int64          `json:"updated_at"`
+	ID             string         `json:"id"`
+	OrganizationID string         `json:"organization_id"`
+}
+
+func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) error {
+	_, err := q.db.ExecContext(ctx, updateProduct,
+		arg.Sku,
+		arg.Name,
+		arg.Description,
+		arg.WholesalePrice,
+		arg.SalePrice,
+		arg.CostPrice,
+		arg.Stock,
+		arg.MinStock,
+		arg.CategoryID,
+		arg.SupplierID,
+		arg.UpdatedAt,
+		arg.ID,
+		arg.OrganizationID,
+	)
 	return err
 }

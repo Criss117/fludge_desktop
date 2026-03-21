@@ -9,3 +9,7 @@ export function CreateProduct(arg1) {
 export function FindAllProducts() {
   return window['go']['catalog']['CatalogHandler']['FindAllProducts']();
 }
+
+export function UpdateProduct(arg1) {
+  return window['go']['catalog']['CatalogHandler']['UpdateProduct'](arg1);
+}

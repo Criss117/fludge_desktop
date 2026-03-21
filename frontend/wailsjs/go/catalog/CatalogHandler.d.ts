@@ -6,3 +6,5 @@ import {responses} from '../models';
 export function CreateProduct(arg1:commands.CreateProductCommand):Promise<responses.ProductResponse>;
 
 export function FindAllProducts():Promise<Array<responses.ProductResponse>>;
+
+export function UpdateProduct(arg1:commands.UpdateProductCommand):Promise<responses.ProductResponse>;

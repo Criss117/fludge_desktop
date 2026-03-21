@@ -41,7 +41,7 @@ func (u *CreateProductUseCase) Execute(
 		return nil, errNewProduct
 	}
 
-	existisBySku, errExistisBySku := u.productRepository.FindOneBySku(ctx, newProduct.Sku.Value())
+	existisBySku, errExistisBySku := u.productRepository.FindOneBySku(ctx, organizationId, newProduct.Sku.Value())
 
 	if errExistisBySku != nil {
 		return nil, errExistisBySku
@@ -51,7 +51,7 @@ func (u *CreateProductUseCase) Execute(
 		return nil, derrors.ErrProductSkuAlreadyExists
 	}
 
-	existisByName, errExistisByName := u.productRepository.FindOneByName(ctx, newProduct.Name)
+	existisByName, errExistisByName := u.productRepository.FindOneByName(ctx, organizationId, newProduct.Name)
 
 	if errExistisByName != nil {
 		return nil, errExistisByName
@@ -61,10 +61,8 @@ func (u *CreateProductUseCase) Execute(
 		return nil, derrors.ErrProductNameAlreadyExists
 	}
 
-	errCreating := u.productRepository.Create(ctx, newProduct)
-
-	if errCreating != nil {
-		return nil, errCreating
+	if err := u.productRepository.Create(ctx, newProduct); err != nil {
+		return nil, err
 	}
 
 	return newProduct, nil

@@ -12,3 +12,17 @@ type CreateProductCommand struct {
 	CategoryID     *string `json:"categoryId"`
 	SupplierID     *string `json:"supplierId"`
 }
+
+type UpdateProductCommand struct {
+	ID             string  `json:"id"`
+	Name           string  `json:"name"`
+	Sku            string  `json:"sku"`
+	Description    *string `json:"description"`
+	WholesalePrice int64   `json:"wholesalePrice"`
+	SalePrice      int64   `json:"salePrice"`
+	CostPrice      int64   `json:"costPrice"`
+	Stock          int64   `json:"stock"`
+	MinStock       int64   `json:"minStock"`
+	CategoryID     *string `json:"categoryId"`
+	SupplierID     *string `json:"supplierId"`
+}

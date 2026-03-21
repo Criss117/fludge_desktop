@@ -101,6 +101,23 @@ func ReconstituteProduct(
 	}
 }
 
+func (p *Product) UpdateDetails(name string, sku string, description *string) error {
+	if name == "" {
+		return derrors.ErrProductNameEmpty
+	}
+
+	skuVO, errSku := valueobjects.NewSKU(sku)
+	if errSku != nil {
+		return errSku
+	}
+
+	p.Name = name
+	p.Sku = skuVO
+	p.Description = description
+	p.UpdatedAt = time.Now()
+	return nil
+}
+
 func (p *Product) UpdatePrices(costPrice, salePrice, wholesalePrice int64) error {
 	prices, err := valueobjects.NewPriceSet(costPrice, salePrice, wholesalePrice)
 
@@ -115,12 +132,19 @@ func (p *Product) UpdatePrices(costPrice, salePrice, wholesalePrice int64) error
 	return nil
 }
 
-func (p *Product) UpdateMinStock(minStock int64) {
+func (p *Product) UpdateStock(stock, minStock int64) error {
 	if minStock < 0 {
 		minStock = 0
 	}
+
+	if stock < 0 {
+		return derrors.ErrProductStockNegative
+	}
+
 	p.MinStock = minStock
 	p.UpdatedAt = time.Now()
+
+	return nil
 }
 
 func (p *Product) NeedsReorder() bool {

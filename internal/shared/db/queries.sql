@@ -94,10 +94,10 @@ GROUP BY team.id;
 -------------------------------------------------------------------------------
 
 -- name: FindOneProductBySku :many
-SELECT * FROM product WHERE sku = ? LIMIT 1;
+SELECT * FROM product WHERE sku = ? AND organization_id = ? LIMIT 1;
 
 -- name: FindOneProductByName :many
-SELECT * FROM product WHERE lower(name) = lower(?) LIMIT 1;
+SELECT * FROM product WHERE lower(name) = lower(?) AND organization_id = ? LIMIT 1;
 
 -- name: FindAllProductsByOrganizationId :many
 SELECT * FROM product WHERE organization_id = ?;
@@ -105,3 +105,21 @@ SELECT * FROM product WHERE organization_id = ?;
 -- name: CreateProduct :exec
 INSERT INTO product (id, sku, name, description, wholesale_price, sale_price, cost_price, stock, min_stock, category_id, organization_id, supplier_id, created_at, updated_at) 
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: UpdateProduct :exec
+UPDATE product 
+SET sku = ?, 
+name = ?, 
+description = ?, 
+wholesale_price = ?, 
+sale_price = ?, 
+cost_price = ?, 
+stock = ?, 
+min_stock = ?, 
+category_id = ?, 
+supplier_id = ?, 
+updated_at = ? 
+WHERE id = ? AND organization_id = ?;
+
+-- name: FindOneProductById :many
+SELECT * FROM product WHERE id = ? AND organization_id = ? LIMIT 1;

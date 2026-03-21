@@ -2,9 +2,13 @@ import { Suspense } from "react";
 
 import { FiltersProvider } from "@shared/store/filters.store";
 
-import { ProductsHeaderSection } from "@/modules/catalog/presentation/sections/products-header.section";
-import { ProductsTableSection } from "@/modules/catalog/presentation/sections/products-table.section";
-import { ProductsFiltersSection } from "../sections/products-filter.section";
+import { ProductsHeaderSection } from "@catalog/presentation/sections/products-header.section";
+import { ProductsTableSection } from "@catalog/presentation/sections/products-table.section";
+import { ProductsFiltersSection } from "@/modules/catalog/presentation/sections/products-filters.section";
+import {
+  UpdateProductForm,
+  UpdateProductRoot,
+} from "@catalog/presentation/components/update-product";
 
 export function ProductsScreen() {
   return (
@@ -14,10 +18,10 @@ export function ProductsScreen() {
         <FiltersProvider>
           <ProductsFiltersSection totalProducts={0} />
           <Suspense>
-            {/* <UpdateProductRoot> */}
-            <ProductsTableSection />
-            {/* <UpdateProductForm />
-            </UpdateProductRoot> */}
+            <UpdateProductRoot>
+              <ProductsTableSection />
+              <UpdateProductForm />
+            </UpdateProductRoot>
           </Suspense>
           <ProductsFiltersSection totalProducts={0} />
         </FiltersProvider>

@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@shared/components/ui/dropdown-menu";
 import { Button } from "@shared/components/ui/button";
+
+import { useUpdateProduct } from "@catalog/presentation/components/update-product";
 import type { Product } from "@catalog/application/collections/product.collection";
 
 interface Props {
@@ -16,7 +18,7 @@ interface Props {
 }
 
 export function ProductsTableActions({ product }: Props) {
-  // const { selectProduct } = useUpdateProduct();
+  const { selectProduct } = useUpdateProduct();
   // const { remove } = useMutateProducts();
 
   return (
@@ -31,7 +33,7 @@ export function ProductsTableActions({ product }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuItem
             className="gap-2"
-            // onClick={() => selectProduct(product)}
+            onClick={() => selectProduct(product)}
           >
             <PencilIcon className="h-4 w-4" />
             Editar equipo

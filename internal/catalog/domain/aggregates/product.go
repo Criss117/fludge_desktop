@@ -142,6 +142,7 @@ func (p *Product) UpdateStock(stock, minStock int64) error {
 	}
 
 	p.MinStock = minStock
+	p.Stock = stock
 	p.UpdatedAt = time.Now()
 
 	return nil

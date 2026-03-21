@@ -12,6 +12,7 @@ import { queryClient } from "@/integrations/ts-query";
 import {
   FindAllProducts,
   CreateProduct,
+  UpdateProduct,
 } from "@wails/go/catalog/CatalogHandler";
 
 export type Product = Awaited<ReturnType<typeof FindAllProducts>>[number] & {
@@ -54,34 +55,29 @@ export function productCollectionBuilder(orgId: string) {
             wholesalePrice: values.wholesalePrice,
           });
 
-          console.log("Created product:", cretedProduct);
-
           collection.utils.writeInsert(cretedProduct);
 
           return { refetch: false };
         },
 
-        // onUpdate: async ({ transaction, collection }) => {
-        //   const mutations = transaction.mutations;
+        onUpdate: async ({ transaction, collection }) => {
+          const mutations = transaction.mutations;
 
-        //   const toUpdate = mutations[0].changes;
-        //   const productId = mutations[0].original.id;
+          const changes = mutations[0].changes;
+          const original = mutations[0].original;
 
-        //   const updatedProduct = await orpc.inventory.products.update.call({
-        //     id: productId,
-        //     costPrice: toUpdate.costPrice,
-        //     name: toUpdate.name,
-        //     description: toUpdate.description ?? undefined,
-        //     minStock: toUpdate.minStock,
-        //     salePrice: toUpdate.salePrice,
-        //     sku: toUpdate.sku,
-        //     stock: toUpdate.stock,
-        //     wholesalePrice: toUpdate.wholesalePrice,
-        //   });
+          const productToUpdate = {
+            ...original,
+            ...changes,
+            description: changes.description ?? original.description,
+            minStock: changes.minStock ?? original.minStock,
+          };
 
-        //   collection.utils.writeUpdate(updatedProduct);
-        //   return { refetch: false };
-        // },
+          const updatedProduct = await UpdateProduct(productToUpdate);
+
+          collection.utils.writeUpdate(updatedProduct);
+          return { refetch: false };
+        },
 
         // onDelete: async ({ transaction, collection }) => {
         //   const mutations = transaction.mutations;

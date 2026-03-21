@@ -21,7 +21,7 @@ func NewUpdateProductUseCase(productRepository ports.ProductRepository) *UpdateP
 func (u *UpdateProductUseCase) Execute(
 	ctx context.Context,
 	organizationId string,
-	command *commands.UpdateProductCommand,
+	command *commands.UpdateProduct,
 ) (*aggregates.Product, error) {
 	existingProduct, err := u.productRepository.FindOneById(ctx, organizationId, command.ID)
 

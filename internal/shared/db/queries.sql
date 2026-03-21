@@ -156,3 +156,7 @@ WHERE id = ? AND organization_id = ?;
 -- name: DeleteCategory :exec
 DELETE FROM category 
 WHERE id = ? AND organization_id = ?;
+
+-- name: DeleteManyCategories :exec
+DELETE FROM category 
+WHERE id IN (sqlc.slice('ids')) AND organization_id = ?;

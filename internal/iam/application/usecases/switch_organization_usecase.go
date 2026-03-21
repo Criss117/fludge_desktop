@@ -25,7 +25,7 @@ func NewSwitchOrganizationUseCase(
 
 func (uc *SwitchOrganizationUseCase) Execute(
 	ctx context.Context,
-	cmd *commands.SwitchOrganizationCommand,
+	cmd *commands.SwitchOrganization,
 ) (*aggregates.AppState, error) {
 	currentAppState, err := uc.appStateRepo.Get(ctx)
 

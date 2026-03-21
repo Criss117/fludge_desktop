@@ -1,3 +1,5 @@
+import { PlusIcon } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -5,9 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@shared/components/ui/card";
+import { Button } from "@shared/components/ui/button";
+
 import { CreateProduct } from "@catalog/presentation/components/create-product";
-import { Button } from "@/modules/shared/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { CategoriesList } from "@catalog/presentation/components/category-list";
 
 interface Props {
   totalProducts: number;
@@ -27,8 +30,7 @@ export function ProductsHeaderSection({ totalProducts }: Props) {
       </CardHeader>
       <CardContent className="flex flex-col gap-y-2">
         <CreateProduct />
-        {/* <RegisterProduct />
-        <CategoriesList /> */}
+        <CategoriesList />
       </CardContent>
     </Card>
   );

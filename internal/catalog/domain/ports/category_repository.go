@@ -13,4 +13,5 @@ type CategoryRepository interface {
 	Create(ctx context.Context, organizationId string, category *aggregates.Category) error
 	Update(ctx context.Context, organizationId string, category *aggregates.Category) error
 	Delete(ctx context.Context, organizationId string, categoryId string) error
+	DeleteMany(ctx context.Context, organizationId string, categoryIds []string) error
 }

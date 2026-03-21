@@ -1,17 +1,17 @@
 package commands
 
-type SignInCommand struct {
+type SignIn struct {
 	Username string `json:"username"`
 	PIN      string `json:"pin"`
 }
 
-type SignUpCommand struct {
+type SignUp struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
 	PIN      string `json:"pin"`
 }
 
-type SwitchOrgCommand struct {
+type SwitchOrg struct {
 	OrganizationID string `json:"organizationId"`
 }

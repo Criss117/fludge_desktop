@@ -25,7 +25,6 @@ func NewCatalogHandler(
 	ctx context.Context,
 	queries *db.Queries,
 	getSession GetSessionFunc,
-
 ) *CatalogHandler {
 	productRepository := repositories.NewSQLiteProductRepository(queries)
 	categoryRepository := repositories.NewSQLiteCategoryRepository(queries)
@@ -76,7 +75,7 @@ func (h *CatalogHandler) FindAllProducts() ([]*responses.ProductResponse, error)
 }
 
 func (h *CatalogHandler) UpdateProduct(
-	updateProductDto *commands.UpdateProductCommand,
+	updateProductDto *commands.UpdateProduct,
 ) (*responses.ProductResponse, error) {
 	activeOrganizationId, err := h.activeOrganizationID()
 
@@ -96,7 +95,7 @@ func (h *CatalogHandler) UpdateProduct(
 }
 
 func (h *CatalogHandler) CreateProduct(
-	cmd *commands.CreateProductCommand,
+	cmd *commands.CreateProduct,
 ) (*responses.ProductResponse, error) {
 	activeOrganizationId, err := h.activeOrganizationID()
 
@@ -114,6 +113,10 @@ func (h *CatalogHandler) CreateProduct(
 
 	return responses.ProductResponseFromDomain(newProduct), nil
 }
+
+// -----------------------------------------------------------------------------
+// Categories
+// -----------------------------------------------------------------------------
 
 func (h *CatalogHandler) FindAllCategories() ([]*responses.CategoryResponse, error) {
 	activeOrganizationId, err := h.activeOrganizationID()
@@ -140,7 +143,7 @@ func (h *CatalogHandler) FindAllCategories() ([]*responses.CategoryResponse, err
 }
 
 func (h *CatalogHandler) CreateCategory(
-	cmd *commands.CreateCategoryCommand,
+	cmd *commands.CreateCategory,
 ) (*responses.CategoryResponse, error) {
 	activeOrganizationId, err := h.activeOrganizationID()
 
@@ -157,4 +160,38 @@ func (h *CatalogHandler) CreateCategory(
 	}
 
 	return responses.CategoryResponseFromDomain(newCategory), nil
+}
+
+func (h *CatalogHandler) UpdateCategory(
+	updateCategoryDto *commands.UpdateCategory,
+) (*responses.CategoryResponse, error) {
+	activeOrganizationId, err := h.activeOrganizationID()
+
+	if err != nil {
+		return nil, err
+	}
+
+	updateCategoryUseCase := usecases.NewUpdateCategoryUseCase(h.categoryRepository)
+
+	newCategory, errUpdating := updateCategoryUseCase.Execute(h.ctx, activeOrganizationId, updateCategoryDto)
+
+	if errUpdating != nil {
+		return nil, errUpdating
+	}
+
+	return responses.CategoryResponseFromDomain(newCategory), nil
+}
+
+func (h *CatalogHandler) DeleteManyCategories(
+	cmd *commands.DeleteManyCategories,
+) error {
+	activeOrganizationId, err := h.activeOrganizationID()
+
+	if err != nil {
+		return err
+	}
+
+	deleteManyCategoriesUseCase := usecases.NewDeleteCategoryUseCase(h.categoryRepository)
+
+	return deleteManyCategoriesUseCase.Execute(h.ctx, activeOrganizationId, cmd)
 }

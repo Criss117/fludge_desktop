@@ -24,7 +24,7 @@ func NewSignInUseCase(
 	}
 }
 
-func (uc *SignInUseCase) Execute(ctx context.Context, cmd *commands.SignInCommand) (*aggregates.AppState, error) {
+func (uc *SignInUseCase) Execute(ctx context.Context, cmd *commands.SignIn) (*aggregates.AppState, error) {
 	existingOperator, errByUsername := uc.operatorRepo.FindOneByUsername(ctx, cmd.Username)
 
 	if errByUsername != nil {

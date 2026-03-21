@@ -3,12 +3,16 @@
 import {commands} from '../models';
 import {responses} from '../models';
 
-export function CreateCategory(arg1:commands.CreateCategoryCommand):Promise<responses.CategoryResponse>;
+export function CreateCategory(arg1:commands.CreateCategory):Promise<responses.CategoryResponse>;
 
-export function CreateProduct(arg1:commands.CreateProductCommand):Promise<responses.ProductResponse>;
+export function CreateProduct(arg1:commands.CreateProduct):Promise<responses.ProductResponse>;
+
+export function DeleteManyCategories(arg1:commands.DeleteManyCategories):Promise<void>;
 
 export function FindAllCategories():Promise<Array<responses.CategoryResponse>>;
 
 export function FindAllProducts():Promise<Array<responses.ProductResponse>>;
 
-export function UpdateProduct(arg1:commands.UpdateProductCommand):Promise<responses.ProductResponse>;
+export function UpdateCategory(arg1:commands.UpdateCategory):Promise<responses.CategoryResponse>;
+
+export function UpdateProduct(arg1:commands.UpdateProduct):Promise<responses.ProductResponse>;

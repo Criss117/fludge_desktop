@@ -1,5 +1,5 @@
 package commands
 
-type SwitchOrganizationCommand struct {
+type SwitchOrganization struct {
 	OrganizationID string `json:"organizationId"`
 }

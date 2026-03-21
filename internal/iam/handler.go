@@ -67,7 +67,7 @@ func NewIamHandler(
 	}
 }
 
-func (h *IamHandler) SignUp(signUpDtp *commands.SignUpCommand) (*responses.ResponseAppState, error) {
+func (h *IamHandler) SignUp(signUpDtp *commands.SignUp) (*responses.ResponseAppState, error) {
 	signUpUseCase := usecases.NewSignUpUseCase(h.operatorRepository, h.appStateRepository)
 
 	newAppState, err := signUpUseCase.Execute(h.ctx, signUpDtp)
@@ -81,7 +81,7 @@ func (h *IamHandler) SignUp(signUpDtp *commands.SignUpCommand) (*responses.Respo
 	return responses.ResponseAppStateFromDomain(newAppState), nil
 }
 
-func (h *IamHandler) SignIn(signInDto *commands.SignInCommand) (*responses.ResponseAppState, error) {
+func (h *IamHandler) SignIn(signInDto *commands.SignIn) (*responses.ResponseAppState, error) {
 	signInUseCase := usecases.NewSignInUseCase(h.operatorRepository, h.appStateRepository)
 
 	newAppState, err := signInUseCase.Execute(h.ctx, signInDto)
@@ -115,7 +115,7 @@ func (h *IamHandler) SignOut() error {
 }
 
 func (h *IamHandler) SwitchOrganization(
-	switchOrganizationDto *commands.SwitchOrganizationCommand,
+	switchOrganizationDto *commands.SwitchOrganization,
 ) (*responses.ResponseAppState, error) {
 	switchOrganizationUseCase := usecases.NewSwitchOrganizationUseCase(h.organizationRepository, h.appStateRepository)
 
@@ -163,7 +163,7 @@ func (h *IamHandler) FindManyOrganizationsByOperatorId(operatorId string) ([]*re
 }
 
 func (h *IamHandler) RegisterOrganization(
-	registerOrganizationDto *commands.RegisterOrganizationCommand,
+	registerOrganizationDto *commands.RegisterOrganization,
 ) (*responses.OrganizationResponse, error) {
 	registerOrganizationUseCase := usecases.NewRegisterOrganizationUseCase(
 		h.organizationRepository,
@@ -181,7 +181,7 @@ func (h *IamHandler) RegisterOrganization(
 		return nil, err
 	}
 
-	_, errSwitchOrganization := h.SwitchOrganization(&commands.SwitchOrganizationCommand{
+	_, errSwitchOrganization := h.SwitchOrganization(&commands.SwitchOrganization{
 		OrganizationID: newOrganization.ID,
 	})
 

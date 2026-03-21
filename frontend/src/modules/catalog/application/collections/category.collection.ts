@@ -12,6 +12,7 @@ import { queryClient } from "@/integrations/ts-query";
 import {
   FindAllCategories,
   CreateCategory,
+  UpdateCategory,
 } from "@wails/go/catalog/CatalogHandler";
 
 export type Category = Awaited<ReturnType<typeof FindAllCategories>>[number] & {
@@ -53,32 +54,22 @@ export function categoryCollectionBuilder(orgId: string) {
           return { refetch: false };
         },
 
-        // onDelete: async ({ transaction, collection }) => {
-        //   const values = transaction.mutations.map((m) => m.original.id);
+        onUpdate: async ({ transaction, collection }) => {
+          const changes = transaction.mutations[0].changes;
+          const original = transaction.mutations[0].original;
 
-        //   await orpc.inventory.categories.delete.call({
-        //     ids: values,
-        //   });
+          const categoryToUpdate = {
+            ...original,
+            ...changes,
+            description: changes.description ?? original.description,
+          };
 
-        //   collection.utils.writeDelete(values);
+          const updatedCategory = await UpdateCategory(categoryToUpdate);
 
-        //   return { refetch: false };
-        // },
+          collection.utils.writeUpdate(updatedCategory);
 
-        // onUpdate: async ({ transaction, collection }) => {
-        //   const values = transaction.mutations[0].changes;
-        //   const categoryId = transaction.mutations[0].original.id;
-
-        //   const updatedCategory = await orpc.inventory.categories.update.call({
-        //     id: categoryId,
-        //     name: values.name,
-        //     description: values.description,
-        //   });
-
-        //   collection.utils.writeUpdate(updatedCategory);
-
-        //   return { refetch: false };
-        // },
+          return { refetch: false };
+        },
       }),
     );
 

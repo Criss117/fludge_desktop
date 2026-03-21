@@ -10,12 +10,20 @@ export function CreateProduct(arg1) {
   return window['go']['catalog']['CatalogHandler']['CreateProduct'](arg1);
 }
 
+export function DeleteManyCategories(arg1) {
+  return window['go']['catalog']['CatalogHandler']['DeleteManyCategories'](arg1);
+}
+
 export function FindAllCategories() {
   return window['go']['catalog']['CatalogHandler']['FindAllCategories']();
 }
 
 export function FindAllProducts() {
   return window['go']['catalog']['CatalogHandler']['FindAllProducts']();
+}
+
+export function UpdateCategory(arg1) {
+  return window['go']['catalog']['CatalogHandler']['UpdateCategory'](arg1);
 }
 
 export function UpdateProduct(arg1) {

@@ -21,7 +21,7 @@ func NewCreateCategoryUseCase(categoryRepository ports.CategoryRepository) *Crea
 func (u *CreateCategoryUseCase) Execute(
 	ctx context.Context,
 	organizationId string,
-	command *commands.CreateCategoryCommand,
+	command *commands.CreateCategory,
 ) (*aggregates.Category, error) {
 	newCategory, errNewCategory := aggregates.NewCategory(
 		command.Name,

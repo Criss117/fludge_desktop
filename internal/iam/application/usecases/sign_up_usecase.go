@@ -23,7 +23,7 @@ func NewSignUpUseCase(
 	}
 }
 
-func (uc *SignUpUseCase) Execute(ctx context.Context, cmd *commands.SignUpCommand) (*aggregates.AppState, error) {
+func (uc *SignUpUseCase) Execute(ctx context.Context, cmd *commands.SignUp) (*aggregates.AppState, error) {
 	existingOperator, errByUsername := uc.operatorRepo.FindOneByUsername(ctx, cmd.Username)
 
 	if errByUsername != nil {

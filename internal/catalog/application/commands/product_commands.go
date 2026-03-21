@@ -1,6 +1,6 @@
 package commands
 
-type CreateProductCommand struct {
+type CreateProduct struct {
 	Name           string  `json:"name"`
 	Sku            string  `json:"sku"`
 	Description    *string `json:"description"`
@@ -13,7 +13,7 @@ type CreateProductCommand struct {
 	SupplierID     *string `json:"supplierId"`
 }
 
-type UpdateProductCommand struct {
+type UpdateProduct struct {
 	ID             string  `json:"id"`
 	Name           string  `json:"name"`
 	Sku            string  `json:"sku"`

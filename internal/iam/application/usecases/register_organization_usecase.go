@@ -27,7 +27,7 @@ func NewRegisterOrganizationUseCase(
 func (uc *RegisterOrganizationUseCase) Execute(
 	ctx context.Context,
 	activeOperator aggregates.Operator,
-	cmd *commands.RegisterOrganizationCommand,
+	cmd *commands.RegisterOrganization,
 ) (*aggregates.Organization, error) {
 	if !activeOperator.IsRoot() {
 		return nil, derrors.ErrOperatorMustBeRoot

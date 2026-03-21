@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"strings"
 )
 
 const createCategory = `-- name: CreateCategory :exec
@@ -180,6 +181,32 @@ type DeleteCategoryParams struct {
 
 func (q *Queries) DeleteCategory(ctx context.Context, arg DeleteCategoryParams) error {
 	_, err := q.db.ExecContext(ctx, deleteCategory, arg.ID, arg.OrganizationID)
+	return err
+}
+
+const deleteManyCategories = `-- name: DeleteManyCategories :exec
+DELETE FROM category 
+WHERE id IN (/*SLICE:ids*/?) AND organization_id = ?
+`
+
+type DeleteManyCategoriesParams struct {
+	Ids            []string `json:"ids"`
+	OrganizationID string   `json:"organization_id"`
+}
+
+func (q *Queries) DeleteManyCategories(ctx context.Context, arg DeleteManyCategoriesParams) error {
+	query := deleteManyCategories
+	var queryParams []interface{}
+	if len(arg.Ids) > 0 {
+		for _, v := range arg.Ids {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:ids*/?", strings.Repeat(",?", len(arg.Ids))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:ids*/?", "NULL", 1)
+	}
+	queryParams = append(queryParams, arg.OrganizationID)
+	_, err := q.db.ExecContext(ctx, query, queryParams...)
 	return err
 }
 

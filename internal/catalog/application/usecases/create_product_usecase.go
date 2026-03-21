@@ -21,7 +21,7 @@ func NewCreateProductUseCase(productRepository ports.ProductRepository) *CreateP
 func (u *CreateProductUseCase) Execute(
 	ctx context.Context,
 	organizationId string,
-	command *commands.CreateProductCommand,
+	command *commands.CreateProduct,
 ) (*aggregates.Product, error) {
 	newProduct, errNewProduct := aggregates.NewProduct(
 		command.Sku,

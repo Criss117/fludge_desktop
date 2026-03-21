@@ -50,18 +50,15 @@ func ReconstituteCategory(
 	}
 }
 
-func (c *Category) UpdateName(name string) error {
+func (c *Category) UpdateDetails(name string, description *string) error {
 	if len(strings.TrimSpace(name)) < 2 {
 		return derrors.ErrCategoryNameTooShort
 	}
+
+	c.Description = description
 	c.Name = strings.TrimSpace(name)
 	c.UpdatedAt = time.Now()
 	return nil
-}
-
-func (c *Category) UpdateDescription(description *string) {
-	c.Description = description
-	c.UpdatedAt = time.Now()
 }
 
 func (c *Category) Delete() {

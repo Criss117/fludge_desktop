@@ -1,11 +1,11 @@
 export namespace commands {
 	
-	export class CreateCategoryCommand {
+	export class CreateCategory {
 	    name: string;
 	    description?: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new CreateCategoryCommand(source);
+	        return new CreateCategory(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -14,7 +14,7 @@ export namespace commands {
 	        this.description = source["description"];
 	    }
 	}
-	export class CreateProductCommand {
+	export class CreateProduct {
 	    name: string;
 	    sku: string;
 	    description?: string;
@@ -27,7 +27,7 @@ export namespace commands {
 	    supplierId?: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new CreateProductCommand(source);
+	        return new CreateProduct(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -44,7 +44,19 @@ export namespace commands {
 	        this.supplierId = source["supplierId"];
 	    }
 	}
-	export class RegisterOrganizationCommand {
+	export class DeleteManyCategories {
+	    ids: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteManyCategories(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ids = source["ids"];
+	    }
+	}
+	export class RegisterOrganization {
 	    name: string;
 	    legalName: string;
 	    address: string;
@@ -53,7 +65,7 @@ export namespace commands {
 	    contactEmail?: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new RegisterOrganizationCommand(source);
+	        return new RegisterOrganization(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -66,12 +78,12 @@ export namespace commands {
 	        this.contactEmail = source["contactEmail"];
 	    }
 	}
-	export class SignInCommand {
+	export class SignIn {
 	    username: string;
 	    pin: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new SignInCommand(source);
+	        return new SignIn(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -80,14 +92,14 @@ export namespace commands {
 	        this.pin = source["pin"];
 	    }
 	}
-	export class SignUpCommand {
+	export class SignUp {
 	    name: string;
 	    email: string;
 	    username: string;
 	    pin: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new SignUpCommand(source);
+	        return new SignUp(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -98,11 +110,11 @@ export namespace commands {
 	        this.pin = source["pin"];
 	    }
 	}
-	export class SwitchOrganizationCommand {
+	export class SwitchOrganization {
 	    organizationId: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new SwitchOrganizationCommand(source);
+	        return new SwitchOrganization(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -110,7 +122,23 @@ export namespace commands {
 	        this.organizationId = source["organizationId"];
 	    }
 	}
-	export class UpdateProductCommand {
+	export class UpdateCategory {
+	    id: string;
+	    name: string;
+	    description?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	    }
+	}
+	export class UpdateProduct {
 	    id: string;
 	    name: string;
 	    sku: string;
@@ -124,7 +152,7 @@ export namespace commands {
 	    supplierId?: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new UpdateProductCommand(source);
+	        return new UpdateProduct(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -152,6 +180,9 @@ export namespace responses {
 	    name: string;
 	    description?: string;
 	    organizationId: string;
+	    createdAt: number;
+	    updatedAt: number;
+	    deletedAt?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CategoryResponse(source);
@@ -163,6 +194,9 @@ export namespace responses {
 	        this.name = source["name"];
 	        this.description = source["description"];
 	        this.organizationId = source["organizationId"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.deletedAt = source["deletedAt"];
 	    }
 	}
 	export class MemberResponse {

@@ -110,3 +110,10 @@ func (r *SQLiteCategoryRepository) Delete(ctx context.Context, organizationId st
 		OrganizationID: organizationId,
 	})
 }
+
+func (r *SQLiteCategoryRepository) DeleteMany(ctx context.Context, organizationId string, categoryIds []string) error {
+	return r.queries.DeleteManyCategories(ctx, db.DeleteManyCategoriesParams{
+		Ids:            categoryIds,
+		OrganizationID: organizationId,
+	})
+}

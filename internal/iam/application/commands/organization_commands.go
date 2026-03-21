@@ -1,6 +1,6 @@
 package commands
 
-type RegisterOrganizationCommand struct {
+type RegisterOrganization struct {
 	Name         string  `json:"name"`
 	LegalName    string  `json:"legalName"`
 	Address      string  `json:"address"`

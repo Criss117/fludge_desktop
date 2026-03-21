@@ -2,8 +2,9 @@ import { Suspense } from "react";
 
 import { FiltersProvider } from "@shared/store/filters.store";
 
-import { ProductsHeaderSection } from "@catalog/presentation/sections/product-header.section";
-import { ProductsTableSection } from "@catalog/presentation/sections/product-table.section";
+import { ProductsHeaderSection } from "@/modules/catalog/presentation/sections/products-header.section";
+import { ProductsTableSection } from "@/modules/catalog/presentation/sections/products-table.section";
+import { ProductsFiltersSection } from "../sections/products-filter.section";
 
 export function ProductsScreen() {
   return (
@@ -11,18 +12,14 @@ export function ProductsScreen() {
       <ProductsHeaderSection totalProducts={0} />
       <div className="space-y-4">
         <FiltersProvider>
-          <Suspense>
-            {/* <ProductsFiltersSection totalProducts={totalProducts} /> */}
-          </Suspense>
+          <ProductsFiltersSection totalProducts={0} />
           <Suspense>
             {/* <UpdateProductRoot> */}
             <ProductsTableSection />
             {/* <UpdateProductForm />
             </UpdateProductRoot> */}
           </Suspense>
-          <Suspense>
-            {/* <ProductsFiltersSection totalProducts={totalProducts} /> */}
-          </Suspense>
+          <ProductsFiltersSection totalProducts={0} />
         </FiltersProvider>
       </div>
     </div>

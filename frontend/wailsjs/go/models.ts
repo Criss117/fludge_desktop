@@ -1,5 +1,19 @@
 export namespace commands {
 	
+	export class CreateCategoryCommand {
+	    name: string;
+	    description?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CreateCategoryCommand(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.description = source["description"];
+	    }
+	}
 	export class CreateProductCommand {
 	    name: string;
 	    sku: string;
@@ -133,6 +147,24 @@ export namespace commands {
 
 export namespace responses {
 	
+	export class CategoryResponse {
+	    id: string;
+	    name: string;
+	    description?: string;
+	    organizationId: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CategoryResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.organizationId = source["organizationId"];
+	    }
+	}
 	export class MemberResponse {
 	    id: string;
 	    organizationId: string;

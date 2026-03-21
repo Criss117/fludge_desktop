@@ -15,9 +15,10 @@ import (
 type GetSessionFunc func() *iamAggregates.AppState
 
 type CatalogHandler struct {
-	ctx               context.Context
-	productRepository ports.ProductRepository
-	getSession        GetSessionFunc
+	ctx                context.Context
+	productRepository  ports.ProductRepository
+	categoryRepository ports.CategoryRepository
+	getSession         GetSessionFunc
 }
 
 func NewCatalogHandler(
@@ -27,11 +28,13 @@ func NewCatalogHandler(
 
 ) *CatalogHandler {
 	productRepository := repositories.NewSQLiteProductRepository(queries)
+	categoryRepository := repositories.NewSQLiteCategoryRepository(queries)
 
 	return &CatalogHandler{
-		ctx:               ctx,
-		productRepository: productRepository,
-		getSession:        getSession,
+		ctx:                ctx,
+		productRepository:  productRepository,
+		categoryRepository: categoryRepository,
+		getSession:         getSession,
 	}
 }
 
@@ -93,7 +96,7 @@ func (h *CatalogHandler) UpdateProduct(
 }
 
 func (h *CatalogHandler) CreateProduct(
-	createProductDto *commands.CreateProductCommand,
+	cmd *commands.CreateProductCommand,
 ) (*responses.ProductResponse, error) {
 	activeOrganizationId, err := h.activeOrganizationID()
 
@@ -103,11 +106,55 @@ func (h *CatalogHandler) CreateProduct(
 
 	createProductUseCase := usecases.NewCreateProductUseCase(h.productRepository)
 
-	newProduct, errCreating := createProductUseCase.Execute(h.ctx, activeOrganizationId, createProductDto)
+	newProduct, errCreating := createProductUseCase.Execute(h.ctx, activeOrganizationId, cmd)
 
 	if errCreating != nil {
 		return nil, errCreating
 	}
 
 	return responses.ProductResponseFromDomain(newProduct), nil
+}
+
+func (h *CatalogHandler) FindAllCategories() ([]*responses.CategoryResponse, error) {
+	activeOrganizationId, err := h.activeOrganizationID()
+
+	if err != nil {
+		return nil, err
+	}
+
+	findAllCategoriesUseCase := usecases.NewFindAllCategoriesUseCase(h.categoryRepository)
+
+	categories, err := findAllCategoriesUseCase.Execute(h.ctx, activeOrganizationId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	responseCategories := make([]*responses.CategoryResponse, len(categories))
+
+	for index, category := range categories {
+		responseCategories[index] = responses.CategoryResponseFromDomain(category)
+	}
+
+	return responseCategories, nil
+}
+
+func (h *CatalogHandler) CreateCategory(
+	cmd *commands.CreateCategoryCommand,
+) (*responses.CategoryResponse, error) {
+	activeOrganizationId, err := h.activeOrganizationID()
+
+	if err != nil {
+		return nil, err
+	}
+
+	createCategoryUseCase := usecases.NewCreateCategoryUseCase(h.categoryRepository)
+
+	newCategory, errNewCategory := createCategoryUseCase.Execute(h.ctx, activeOrganizationId, cmd)
+
+	if errNewCategory != nil {
+		return nil, errNewCategory
+	}
+
+	return responses.CategoryResponseFromDomain(newCategory), nil
 }

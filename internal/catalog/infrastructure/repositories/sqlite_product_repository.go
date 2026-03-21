@@ -98,7 +98,7 @@ func (r *SQLiteProductRepository) FindOneById(
 	return ProductToDomain(&product), nil
 }
 
-func (r *SQLiteProductRepository) Create(ctx context.Context, product *aggregates.Product) error {
+func (r *SQLiteProductRepository) Create(ctx context.Context, organizationId string, product *aggregates.Product) error {
 	return r.queries.CreateProduct(ctx, db.CreateProductParams{
 		ID:             product.ID,
 		Sku:            product.Sku.Value(),
@@ -110,14 +110,14 @@ func (r *SQLiteProductRepository) Create(ctx context.Context, product *aggregate
 		Stock:          product.Stock,
 		MinStock:       product.MinStock,
 		CategoryID:     platform.ToStringNullable(product.CategoryID),
-		OrganizationID: product.OrganizationID,
+		OrganizationID: organizationId,
 		SupplierID:     platform.ToStringNullable(product.SupplierID),
 		CreatedAt:      platform.ToMillis(product.CreatedAt),
 		UpdatedAt:      platform.ToMillis(product.UpdatedAt),
 	})
 }
 
-func (r *SQLiteProductRepository) Update(ctx context.Context, product *aggregates.Product) error {
+func (r *SQLiteProductRepository) Update(ctx context.Context, organizationId string, product *aggregates.Product) error {
 	return r.queries.UpdateProduct(ctx, db.UpdateProductParams{
 		Sku:            product.Sku.Value(),
 		Name:           product.Name,
@@ -131,6 +131,6 @@ func (r *SQLiteProductRepository) Update(ctx context.Context, product *aggregate
 		SupplierID:     platform.ToStringNullable(product.SupplierID),
 		UpdatedAt:      platform.ToMillis(product.UpdatedAt),
 		ID:             product.ID,
-		OrganizationID: product.OrganizationID,
+		OrganizationID: organizationId,
 	})
 }

@@ -77,7 +77,7 @@ func (u *UpdateProductUseCase) Execute(
 		return nil, err
 	}
 
-	if err := u.productRepository.Update(ctx, existingProduct); err != nil {
+	if err := u.productRepository.Update(ctx, organizationId, existingProduct); err != nil {
 		return nil, err
 	}
 

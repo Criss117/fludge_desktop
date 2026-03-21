@@ -123,3 +123,36 @@ WHERE id = ? AND organization_id = ?;
 
 -- name: FindOneProductById :many
 SELECT * FROM product WHERE id = ? AND organization_id = ? LIMIT 1;
+
+-------------------------------------------------------------------------------
+-- Category
+-------------------------------------------------------------------------------
+
+-- name: FindAllCategories :many
+SELECT * FROM category WHERE organization_id = ?;
+
+-- name: FindOneCategoryById :many
+SELECT * FROM category WHERE id = ? AND organization_id = ? LIMIT 1;
+
+-- name: FindOneCategoryByName :many
+SELECT * FROM category WHERE lower(name) = lower(?) AND organization_id = ? LIMIT 1;
+
+-- name: CreateCategory :exec
+INSERT INTO category (id, name, description, organization_id, created_at, updated_at) 
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: UpdateCategory :exec
+UPDATE category 
+SET name = ?, 
+description = ?, 
+updated_at = ? 
+WHERE id = ? AND organization_id = ?;
+
+-- name: SoftDeleteCategory :exec
+UPDATE category 
+SET deleted_at = ? 
+WHERE id = ? AND organization_id = ?;
+
+-- name: DeleteCategory :exec
+DELETE FROM category 
+WHERE id = ? AND organization_id = ?;

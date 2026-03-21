@@ -10,6 +10,32 @@ import (
 	"database/sql"
 )
 
+const createCategory = `-- name: CreateCategory :exec
+INSERT INTO category (id, name, description, organization_id, created_at, updated_at) 
+VALUES (?, ?, ?, ?, ?, ?)
+`
+
+type CreateCategoryParams struct {
+	ID             string         `json:"id"`
+	Name           string         `json:"name"`
+	Description    sql.NullString `json:"description"`
+	OrganizationID string         `json:"organization_id"`
+	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
+}
+
+func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) error {
+	_, err := q.db.ExecContext(ctx, createCategory,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.OrganizationID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
 const createMember = `-- name: CreateMember :exec
 INSERT INTO member (id, organization_id, operator_id, role, created_at, updated_at) 
 VALUES (?, ?, ?, ?, ?, ?)
@@ -140,6 +166,60 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) er
 		arg.UpdatedAt,
 	)
 	return err
+}
+
+const deleteCategory = `-- name: DeleteCategory :exec
+DELETE FROM category 
+WHERE id = ? AND organization_id = ?
+`
+
+type DeleteCategoryParams struct {
+	ID             string `json:"id"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) DeleteCategory(ctx context.Context, arg DeleteCategoryParams) error {
+	_, err := q.db.ExecContext(ctx, deleteCategory, arg.ID, arg.OrganizationID)
+	return err
+}
+
+const findAllCategories = `-- name: FindAllCategories :many
+
+SELECT id, name, description, organization_id, created_at, updated_at, deleted_at FROM category WHERE organization_id = ?
+`
+
+// -----------------------------------------------------------------------------
+// Category
+// -----------------------------------------------------------------------------
+func (q *Queries) FindAllCategories(ctx context.Context, organizationID string) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, findAllCategories, organizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Category
+	for rows.Next() {
+		var i Category
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.OrganizationID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const findAllMembersByOrganizationId = `-- name: FindAllMembersByOrganizationId :many
@@ -532,6 +612,86 @@ func (q *Queries) FindManyOrganizationsByOperatorId(ctx context.Context, operato
 	return items, nil
 }
 
+const findOneCategoryById = `-- name: FindOneCategoryById :many
+SELECT id, name, description, organization_id, created_at, updated_at, deleted_at FROM category WHERE id = ? AND organization_id = ? LIMIT 1
+`
+
+type FindOneCategoryByIdParams struct {
+	ID             string `json:"id"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) FindOneCategoryById(ctx context.Context, arg FindOneCategoryByIdParams) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, findOneCategoryById, arg.ID, arg.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Category
+	for rows.Next() {
+		var i Category
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.OrganizationID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findOneCategoryByName = `-- name: FindOneCategoryByName :many
+SELECT id, name, description, organization_id, created_at, updated_at, deleted_at FROM category WHERE lower(name) = lower(?) AND organization_id = ? LIMIT 1
+`
+
+type FindOneCategoryByNameParams struct {
+	LOWER          string `json:"LOWER"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) FindOneCategoryByName(ctx context.Context, arg FindOneCategoryByNameParams) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, findOneCategoryByName, arg.LOWER, arg.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Category
+	for rows.Next() {
+		var i Category
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.OrganizationID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const findOneMemberById = `-- name: FindOneMemberById :many
 SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at FROM member m WHERE m.id = ?
 `
@@ -876,6 +1036,23 @@ func (q *Queries) FindOneProductBySku(ctx context.Context, arg FindOneProductByS
 	return items, nil
 }
 
+const softDeleteCategory = `-- name: SoftDeleteCategory :exec
+UPDATE category 
+SET deleted_at = ? 
+WHERE id = ? AND organization_id = ?
+`
+
+type SoftDeleteCategoryParams struct {
+	DeletedAt      sql.NullInt64 `json:"deleted_at"`
+	ID             string        `json:"id"`
+	OrganizationID string        `json:"organization_id"`
+}
+
+func (q *Queries) SoftDeleteCategory(ctx context.Context, arg SoftDeleteCategoryParams) error {
+	_, err := q.db.ExecContext(ctx, softDeleteCategory, arg.DeletedAt, arg.ID, arg.OrganizationID)
+	return err
+}
+
 const updateAppState = `-- name: UpdateAppState :exec
 UPDATE app_state SET active_organization_id = ?, active_operator_id = ?, updated_at = ? WHERE id = "local"
 `
@@ -888,6 +1065,33 @@ type UpdateAppStateParams struct {
 
 func (q *Queries) UpdateAppState(ctx context.Context, arg UpdateAppStateParams) error {
 	_, err := q.db.ExecContext(ctx, updateAppState, arg.ActiveOrganizationID, arg.ActiveOperatorID, arg.UpdatedAt)
+	return err
+}
+
+const updateCategory = `-- name: UpdateCategory :exec
+UPDATE category 
+SET name = ?, 
+description = ?, 
+updated_at = ? 
+WHERE id = ? AND organization_id = ?
+`
+
+type UpdateCategoryParams struct {
+	Name           string         `json:"name"`
+	Description    sql.NullString `json:"description"`
+	UpdatedAt      int64          `json:"updated_at"`
+	ID             string         `json:"id"`
+	OrganizationID string         `json:"organization_id"`
+}
+
+func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
+	_, err := q.db.ExecContext(ctx, updateCategory,
+		arg.Name,
+		arg.Description,
+		arg.UpdatedAt,
+		arg.ID,
+		arg.OrganizationID,
+	)
 	return err
 }
 

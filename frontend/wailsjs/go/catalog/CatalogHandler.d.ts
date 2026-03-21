@@ -3,7 +3,11 @@
 import {commands} from '../models';
 import {responses} from '../models';
 
+export function CreateCategory(arg1:commands.CreateCategoryCommand):Promise<responses.CategoryResponse>;
+
 export function CreateProduct(arg1:commands.CreateProductCommand):Promise<responses.ProductResponse>;
+
+export function FindAllCategories():Promise<Array<responses.CategoryResponse>>;
 
 export function FindAllProducts():Promise<Array<responses.ProductResponse>>;
 

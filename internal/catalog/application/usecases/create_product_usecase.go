@@ -61,7 +61,7 @@ func (u *CreateProductUseCase) Execute(
 		return nil, derrors.ErrProductNameAlreadyExists
 	}
 
-	if err := u.productRepository.Create(ctx, newProduct); err != nil {
+	if err := u.productRepository.Create(ctx, organizationId, newProduct); err != nil {
 		return nil, err
 	}
 

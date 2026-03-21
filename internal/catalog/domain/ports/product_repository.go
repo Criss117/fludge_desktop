@@ -6,8 +6,8 @@ import (
 )
 
 type ProductRepository interface {
-	Create(ctx context.Context, product *aggregates.Product) error
-	Update(ctx context.Context, product *aggregates.Product) error
+	Create(ctx context.Context, organizationId string, product *aggregates.Product) error
+	Update(ctx context.Context, organizationId string, product *aggregates.Product) error
 	// Delete(ctx context.Context, product *aggregates.Product) error
 
 	FindOneBySku(ctx context.Context, organizationId, sku string) (*aggregates.Product, error)

@@ -1,18 +1,26 @@
-import { useLiveQuery } from "@tanstack/react-db";
-
-import { useAppState } from "@/integrations/iam";
+import { useFilters } from "@shared/store/filters.store";
 
 import { ProductsTable } from "@catalog/presentation/components/products-table";
-import { useProductCollection } from "@catalog/application/hooks/use-product-collection";
+import { useFindManyProducts } from "@catalog/application/hooks/use-products-queries";
 
 export function ProductsTableSection() {
-  const { activeOrganization } = useAppState();
-  const productCollection = useProductCollection();
+  const { filters } = useFilters();
 
-  const { data } = useLiveQuery((q) => q.from({ productCollection }));
+  const products = useFindManyProducts({
+    limit: filters.limit,
+    name: filters.query,
+    sku: filters.query,
+    orderBy: {
+      costPrice: filters.orderBy.get("costPrice"),
+      salePrice: filters.orderBy.get("salePrice"),
+      stock: filters.orderBy.get("stock"),
+      wholesalePrice: filters.orderBy.get("wholesalePrice"),
+    },
+    page: filters.page,
+  });
 
   return (
-    <ProductsTable.Root products={data} orgId={activeOrganization.id}>
+    <ProductsTable.Root products={products}>
       <ProductsTable.Content />
     </ProductsTable.Root>
   );

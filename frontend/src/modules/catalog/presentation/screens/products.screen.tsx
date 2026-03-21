@@ -9,21 +9,24 @@ import {
   UpdateProductForm,
   UpdateProductRoot,
 } from "@catalog/presentation/components/update-product";
+import { useCountProductsQuery } from "@catalog/application/hooks/use-products-queries";
 
 export function ProductsScreen() {
+  const totalProducts = useCountProductsQuery();
+
   return (
     <div className="px-5 mt-4 mb-8 space-y-8">
-      <ProductsHeaderSection totalProducts={0} />
+      <ProductsHeaderSection totalProducts={totalProducts} />
       <div className="space-y-4">
         <FiltersProvider>
-          <ProductsFiltersSection totalProducts={0} />
+          <ProductsFiltersSection totalProducts={totalProducts} />
           <Suspense>
             <UpdateProductRoot>
               <ProductsTableSection />
               <UpdateProductForm />
             </UpdateProductRoot>
           </Suspense>
-          <ProductsFiltersSection totalProducts={0} />
+          <ProductsFiltersSection totalProducts={totalProducts} />
         </FiltersProvider>
       </div>
     </div>

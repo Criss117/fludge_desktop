@@ -25,3 +25,15 @@ func ProductToDomain(dbProduct *db.Product) *aggregates.Product {
 		platform.FromMillisNullable(dbProduct.DeletedAt),
 	)
 }
+
+func CategoryToDomain(dbCategory *db.Category) *aggregates.Category {
+	return aggregates.ReconstituteCategory(
+		dbCategory.ID,
+		dbCategory.Name,
+		platform.FromStringNullable(dbCategory.Description),
+		dbCategory.OrganizationID,
+		platform.FromMillis(dbCategory.CreatedAt),
+		platform.FromMillis(dbCategory.UpdatedAt),
+		platform.FromMillisNullable(dbCategory.DeletedAt),
+	)
+}

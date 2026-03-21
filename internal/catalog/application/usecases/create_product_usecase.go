@@ -18,7 +18,11 @@ func NewCreateProductUseCase(productRepository ports.ProductRepository) *CreateP
 	}
 }
 
-func (u *CreateProductUseCase) Execute(ctx context.Context, command *commands.CreateProductCommand) (*aggregates.Product, error) {
+func (u *CreateProductUseCase) Execute(
+	ctx context.Context,
+	organizationId string,
+	command *commands.CreateProductCommand,
+) (*aggregates.Product, error) {
 	newProduct, errNewProduct := aggregates.NewProduct(
 		command.Sku,
 		command.Name,
@@ -29,7 +33,7 @@ func (u *CreateProductUseCase) Execute(ctx context.Context, command *commands.Cr
 		command.Stock,
 		command.MinStock,
 		command.CategoryID,
-		command.OrganizationID,
+		organizationId,
 		command.SupplierID,
 	)
 

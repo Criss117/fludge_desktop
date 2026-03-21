@@ -47,6 +47,21 @@ export const appStateQueryOptions = queryOptions({
 
 const IamContext = createContext<Context | null>(null);
 
+export function useAppState() {
+  const { appState } = useIam();
+
+  const activeOrganization = appState.activeOrganization;
+  const activeOperator = appState.activeOperator;
+
+  if (!activeOrganization || !activeOperator)
+    throw new Error("useAppState must be used within a IamProvider");
+
+  return {
+    activeOrganization,
+    activeOperator,
+  };
+}
+
 export function useIam() {
   const context = use(IamContext);
 

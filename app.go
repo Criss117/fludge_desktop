@@ -60,7 +60,19 @@ func (a *App) startup(ctx context.Context) {
 
 	log.Println("✓ IamHandler creado")
 
-	a.CatalogHandler = *catalog.NewCatalogHandler(ctx, queries)
+	_, errAppState := a.IamHandler.GetAppState()
+
+	if errAppState != nil {
+		log.Println("✗ error getting app state:", err)
+		return
+	}
+
+	a.CatalogHandler = *catalog.NewCatalogHandler(ctx, queries, func() *iamAggregates.AppState {
+		a.mu.RLock()
+		defer a.mu.RUnlock()
+
+		return a.SessionState
+	})
 
 	log.Println("✓ CatalogHandler creado")
 
@@ -68,12 +80,5 @@ func (a *App) startup(ctx context.Context) {
 	// 	log.Println("✗ error appState:", err)
 	// 	return
 	// }
-
-	_, errAppState := a.IamHandler.GetAppState()
-
-	if errAppState != nil {
-		log.Println("✗ error getting app state:", err)
-		return
-	}
 
 }

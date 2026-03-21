@@ -26,7 +26,7 @@ func (r *SQLiteProductRepository) FindOneBySku(ctx context.Context, sku string) 
 	}
 
 	if len(dbProducts) == 0 {
-		return nil, derrors.ErrProductNotFound
+		return nil, nil
 	}
 
 	product := dbProducts[0]
@@ -42,7 +42,7 @@ func (r *SQLiteProductRepository) FindOneByName(ctx context.Context, name string
 	}
 
 	if len(dbProducts) == 0 {
-		return nil, derrors.ErrProductNotFound
+		return nil, nil
 	}
 
 	product := dbProducts[0]
@@ -67,4 +67,24 @@ func (r *SQLiteProductRepository) Create(ctx context.Context, product *aggregate
 		CreatedAt:      platform.ToMillis(product.CreatedAt),
 		UpdatedAt:      platform.ToMillis(product.UpdatedAt),
 	})
+}
+
+func (r *SQLiteProductRepository) FindAllProducts(ctx context.Context, organizationId string) ([]*aggregates.Product, error) {
+	dbProducts, err := r.queries.FindAllProductsByOrganizationId(ctx, organizationId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(dbProducts) == 0 {
+		return nil, derrors.ErrProductNotFound
+	}
+
+	products := make([]*aggregates.Product, len(dbProducts))
+
+	for index, dbProduct := range dbProducts {
+		products[index] = ProductToDomain(&dbProduct)
+	}
+
+	return products, nil
 }

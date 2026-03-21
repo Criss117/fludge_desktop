@@ -5,3 +5,7 @@
 export function CreateProduct(arg1) {
   return window['go']['catalog']['CatalogHandler']['CreateProduct'](arg1);
 }
+
+export function FindAllProducts() {
+  return window['go']['catalog']['CatalogHandler']['FindAllProducts']();
+}

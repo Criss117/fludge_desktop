@@ -23,3 +23,19 @@ export function slugify(text: string): string {
       .replace(/^-+|-+$/g, "")
   );
 }
+
+export const inputNumberHelper = {
+  value: (value: string, isTouched: boolean) =>
+    value.toString() === "0" && !isTouched ? "" : value.toString(),
+  onChange: (value: string) => {
+    const val = value === "" ? undefined : Number(value);
+    return val?.toString() || "";
+  },
+};
+
+export function formatCurrency(value: number) {
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "COP",
+  }).format(value);
+}

@@ -28,7 +28,7 @@
       "@employees/*": ["./src/modules/employees/*"],
       "@teams/*": ["./src/modules/teams/*"],
       "@iam/*": ["./src/modules/iam/*"],
-      "@inventory/*": ["./src/modules/inventory/*"],
+      "@catalog/*": ["./src/modules/catalog/*"],
       "@shared/*": ["./src/modules/shared/*"],
       "@organizations/*": ["./src/modules/organizations/*"],
       "@wails/*": ["./wailsjs/*"]

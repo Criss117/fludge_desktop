@@ -9,7 +9,6 @@ export namespace commands {
 	    costPrice: number;
 	    stock: number;
 	    minStock: number;
-	    organizationId: string;
 	    categoryId?: string;
 	    supplierId?: string;
 	
@@ -27,7 +26,6 @@ export namespace commands {
 	        this.costPrice = source["costPrice"];
 	        this.stock = source["stock"];
 	        this.minStock = source["minStock"];
-	        this.organizationId = source["organizationId"];
 	        this.categoryId = source["categoryId"];
 	        this.supplierId = source["supplierId"];
 	    }

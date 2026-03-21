@@ -4,3 +4,5 @@ import {commands} from '../models';
 import {responses} from '../models';
 
 export function CreateProduct(arg1:commands.CreateProductCommand):Promise<responses.ProductResponse>;
+
+export function FindAllProducts():Promise<Array<responses.ProductResponse>>;

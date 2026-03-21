@@ -9,7 +9,6 @@ import (
 	"desktop/internal/iam/domain/ports"
 	"desktop/internal/iam/infrastructure/repositories"
 	"desktop/internal/shared/db"
-	"log"
 )
 
 type OnStateChangeType string
@@ -83,20 +82,16 @@ func (h *IamHandler) SignUp(signUpDtp *commands.SignUpCommand) (*responses.Respo
 }
 
 func (h *IamHandler) SignIn(signInDto *commands.SignInCommand) (*responses.ResponseAppState, error) {
-	log.Println("✓ SignIn 1")
 	signInUseCase := usecases.NewSignInUseCase(h.operatorRepository, h.appStateRepository)
 
-	log.Println("✓ SignIn 2")
 	newAppState, err := signInUseCase.Execute(h.ctx, signInDto)
 
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("✓ SignIn 3")
 	h.onStateChange(newAppState)
 
-	log.Println("✓ SignIn 4")
 	return responses.ResponseAppStateFromDomain(newAppState), nil
 }
 

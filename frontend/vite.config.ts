@@ -26,7 +26,7 @@ export default defineConfig({
       "@employees": path.resolve(__dirname, "./src/modules/employees"),
       "@teams": path.resolve(__dirname, "./src/modules/teams"),
       "@iam": path.resolve(__dirname, "./src/modules/iam"),
-      "@inventory": path.resolve(__dirname, "./src/modules/inventory"),
+      "@catalog": path.resolve(__dirname, "./src/modules/catalog"),
       "@shared": path.resolve(__dirname, "./src/modules/shared"),
       "@organizations": path.resolve(__dirname, "./src/modules/organizations"),
     },

@@ -9,7 +9,6 @@ type CreateProductCommand struct {
 	CostPrice      int64   `json:"costPrice"`
 	Stock          int64   `json:"stock"`
 	MinStock       int64   `json:"minStock"`
-	OrganizationID string  `json:"organizationId"`
 	CategoryID     *string `json:"categoryId"`
 	SupplierID     *string `json:"supplierId"`
 }

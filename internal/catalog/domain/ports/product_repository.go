@@ -12,4 +12,5 @@ type ProductRepository interface {
 
 	FindOneBySku(ctx context.Context, sku string) (*aggregates.Product, error)
 	FindOneByName(ctx context.Context, name string) (*aggregates.Product, error)
+	FindAllProducts(ctx context.Context, organizationId string) ([]*aggregates.Product, error)
 }

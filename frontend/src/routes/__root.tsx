@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Toaster } from "@shared/components/ui/sonner";
 
 import { TooltipProvider } from "@shared/components/ui/tooltip";
 
@@ -40,6 +41,7 @@ function RootLayout() {
     <>
       <TooltipProvider>
         <Outlet />
+        <Toaster />
       </TooltipProvider>
       <TanStackRouterDevtools />
     </>

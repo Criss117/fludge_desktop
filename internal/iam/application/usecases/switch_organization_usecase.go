@@ -6,7 +6,6 @@ import (
 	"desktop/internal/iam/domain/aggregates"
 	"desktop/internal/iam/domain/derrors"
 	"desktop/internal/iam/domain/ports"
-	"log"
 )
 
 type SwitchOrganizationUseCase struct {
@@ -45,8 +44,6 @@ func (uc *SwitchOrganizationUseCase) Execute(
 	}
 
 	currentAppState.SwitchOrganization(organization)
-
-	log.Println("✓ SwitchOrganizationUseCase: organization switched", currentAppState)
 
 	errUpdateAppState := uc.appStateRepo.Update(ctx, currentAppState)
 

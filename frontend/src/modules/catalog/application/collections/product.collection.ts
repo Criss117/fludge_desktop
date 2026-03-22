@@ -55,6 +55,7 @@ export function productCollectionBuilder(orgId: string) {
             sku: values.sku,
             stock: values.stock,
             wholesalePrice: values.wholesalePrice,
+            categoryId: values.categoryId,
           });
 
           collection.utils.writeInsert(cretedProduct);

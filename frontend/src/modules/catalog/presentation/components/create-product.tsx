@@ -16,10 +16,14 @@ import { Button } from "@shared/components/ui/button";
 import { FieldGroup, FieldLegend, FieldSet } from "@shared/components/ui/field";
 
 import { useProductForm } from "@catalog/presentation/components/product-form";
-import { createProductSchema } from "@catalog/application/validators/product.validators";
+import {
+  createProductSchema,
+  type CreateProductSchema,
+} from "@catalog/application/validators/product.validators";
 import { useMutateProducts } from "@catalog/application/hooks/use-mutate-products";
+import { useFindManyCategories } from "@catalog/application/hooks/use-category.queries";
 
-const defaultValues = {
+const defaultValues: CreateProductSchema = {
   name: "",
   sku: "",
   description: "",
@@ -28,12 +32,14 @@ const defaultValues = {
   costPrice: 0,
   wholesalePrice: 0,
   salePrice: 0,
+  categoryId: undefined,
 };
 
 export function CreateProduct() {
   const [open, setOpen] = useState(false);
   const { create } = useMutateProducts();
   const formId = `create-product-form-${useId()}`;
+  const categories = useFindManyCategories();
 
   const form = useProductForm({
     defaultValues,
@@ -122,6 +128,12 @@ export function CreateProduct() {
                 <form.AppField
                   name="description"
                   children={(field) => <field.DescriptionField />}
+                />
+                <form.AppField
+                  name="categoryId"
+                  children={(field) => (
+                    <field.CategoryField categories={categories} />
+                  )}
                 />
               </FieldGroup>
             </FieldSet>

@@ -34,6 +34,8 @@ const productsBaseSchema = z.object({
   minStock: z.coerce
     .number<number>("El nivel de reorden del producto es requerido")
     .min(0, "El nivel de reorden del producto debe ser mayor o igual a 0"),
+
+  categoryId: z.uuid().optional(),
 });
 
 export const createProductSchema = productsBaseSchema

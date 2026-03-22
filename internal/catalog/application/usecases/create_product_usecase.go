@@ -10,11 +10,13 @@ import (
 
 type CreateProductUseCase struct {
 	productRepository ports.ProductRepository
+	categoryChecker   ports.CategoryChecker
 }
 
-func NewCreateProductUseCase(productRepository ports.ProductRepository) *CreateProductUseCase {
+func NewCreateProductUseCase(productRepository ports.ProductRepository, categoryChecker ports.CategoryChecker) *CreateProductUseCase {
 	return &CreateProductUseCase{
 		productRepository: productRepository,
+		categoryChecker:   categoryChecker,
 	}
 }
 
@@ -59,6 +61,18 @@ func (u *CreateProductUseCase) Execute(
 
 	if existisByName != nil {
 		return nil, derrors.ErrProductNameAlreadyExists
+	}
+
+	if newProduct.CategoryID != nil {
+		categoryExists, errCategoryExists := u.categoryChecker.Exists(ctx, organizationId, *newProduct.CategoryID)
+
+		if errCategoryExists != nil {
+			return nil, errCategoryExists
+		}
+
+		if !categoryExists {
+			return nil, derrors.ErrCategoryNotFound
+		}
 	}
 
 	if err := u.productRepository.Create(ctx, organizationId, newProduct); err != nil {

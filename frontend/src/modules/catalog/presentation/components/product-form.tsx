@@ -1,14 +1,31 @@
+import { useMemo } from "react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
 } from "@shared/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@shared/components/ui/select";
 import { Input } from "@shared/components/ui/input";
 import { Textarea } from "@shared/components/ui/textarea";
 import { inputNumberHelper } from "@shared/lib/utils";
+
+import type { Category } from "@catalog/application/collections/category.collection";
+
+interface CategoryFieldProps {
+  categories: Category[];
+}
 
 export const { fieldContext, formContext, useFieldContext } =
   createFormHookContexts();
@@ -23,6 +40,7 @@ const { useAppForm } = createFormHook({
     SalePriceField,
     MinStockField,
     StockField,
+    CategoryField,
   },
   formComponents: {},
   fieldContext,
@@ -243,7 +261,7 @@ function StockField() {
 
 function MinStockField() {
   const field = useFieldContext<string>();
-  const id = field.name + "-product-reorder-level";
+  const id = field.name + "-product-minstock-level";
 
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
@@ -271,6 +289,53 @@ function MinStockField() {
         negativo
       </FieldDescription>
       {isInvalid && <FieldError errors={field.state.meta.errors} />}
+    </Field>
+  );
+}
+
+function CategoryField({ categories }: CategoryFieldProps) {
+  const field = useFieldContext<string>();
+  const id = field.name + "-product-category";
+
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  const categoryItems = useMemo(
+    () =>
+      categories.map((category) => ({
+        value: category.id,
+        label: category.name,
+      })),
+    [categories],
+  );
+
+  return (
+    <Field data-invalid={isInvalid}>
+      <FieldContent>
+        <FieldLabel htmlFor={id}>Categoría</FieldLabel>
+      </FieldContent>
+      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+      <Select
+        items={categoryItems}
+        name={field.name}
+        value={field.state.value}
+        onValueChange={(v) => {
+          if (v) field.handleChange(v);
+        }}
+      >
+        <SelectTrigger id={id} aria-invalid={isInvalid}>
+          <SelectValue placeholder="Selecciona una categoría" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Categorias</SelectLabel>
+            {categoryItems.map((category) => (
+              <SelectItem value={category.value} key={category.value}>
+                {category.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </Field>
   );
 }

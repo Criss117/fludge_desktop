@@ -1,6 +1,6 @@
 "use no memo";
 
-import { createContext, use, useId, useState } from "react";
+import { createContext, use, useId, useMemo, useState } from "react";
 import { BadgeCheck, Banknote, ClipboardCheck } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,8 +18,12 @@ import { FieldGroup, FieldLegend, FieldSet } from "@shared/components/ui/field";
 
 import { useProductForm } from "@catalog/presentation/components/product-form";
 import { useMutateProducts } from "@catalog/application/hooks/use-mutate-products";
+import {
+  createProductSchema,
+  type CreateProductSchema,
+} from "@catalog/application/validators/product.validators";
 import type { Product } from "@catalog/application/collections/product.collection";
-import { createProductSchema } from "@catalog/application/validators/product.validators";
+import { useFindManyCategories } from "@catalog/application/hooks/use-category.queries";
 
 interface RootProps {
   children: React.ReactNode;
@@ -59,22 +63,30 @@ export function UpdateProductRoot({ children }: RootProps) {
   );
 }
 
+function getDefaultValues(product: Product | null): CreateProductSchema {
+  return {
+    name: product?.name ?? "",
+    sku: product?.sku ?? "",
+    description: product?.description ?? "",
+    minStock: product?.minStock ?? 0,
+    stock: product?.stock ?? 0,
+    costPrice: product?.costPrice ?? 0,
+    wholesalePrice: product?.wholesalePrice ?? 0,
+    salePrice: product?.salePrice ?? 0,
+    categoryId: product?.categoryId,
+  };
+}
+
 export function UpdateProductForm() {
   const { product, clearState } = useUpdateProduct();
   const { update } = useMutateProducts();
   const formId = `register-product-form-${useId()}`;
+  const categories = useFindManyCategories();
+
+  const defaultValues = useMemo(() => getDefaultValues(product), [product]);
 
   const form = useProductForm({
-    defaultValues: {
-      name: product?.name ?? "",
-      sku: product?.sku ?? "",
-      description: product?.description ?? "",
-      minStock: product?.minStock ?? 0,
-      stock: product?.stock ?? 0,
-      costPrice: product?.costPrice ?? 0,
-      wholesalePrice: product?.wholesalePrice ?? 0,
-      salePrice: product?.salePrice ?? 0,
-    },
+    defaultValues,
     validators: {
       onChange: createProductSchema,
     },
@@ -166,6 +178,12 @@ export function UpdateProductForm() {
                 <form.AppField
                   name="description"
                   children={(field) => <field.DescriptionField />}
+                />
+                <form.AppField
+                  name="categoryId"
+                  children={(field) => (
+                    <field.CategoryField categories={categories} />
+                  )}
                 />
               </FieldGroup>
             </FieldSet>

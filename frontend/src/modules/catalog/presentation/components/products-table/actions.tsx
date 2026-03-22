@@ -36,7 +36,7 @@ export function ProductsTableActions({ product }: Props) {
             onClick={() => selectProduct(product)}
           >
             <PencilIcon className="h-4 w-4" />
-            Editar equipo
+            Editar Producto
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -47,7 +47,7 @@ export function ProductsTableActions({ product }: Props) {
             // onClick={() => remove.mutate([product.id])}
           >
             <TrashIcon className="h-4 w-4" />
-            Eliminar equipo
+            Eliminar Producto
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

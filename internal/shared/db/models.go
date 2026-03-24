@@ -27,15 +27,11 @@ type Category struct {
 }
 
 type CreditPayment struct {
-	ID             string         `json:"id"`
-	CustomerID     string         `json:"customer_id"`
-	Amount         int64          `json:"amount"`
-	PaymentMethod  sql.NullString `json:"payment_method"`
-	OrganizationID string         `json:"organization_id"`
-	Metadata       sql.NullString `json:"metadata"`
-	CreatedAt      int64          `json:"created_at"`
-	UpdatedAt      int64          `json:"updated_at"`
-	DeletedAt      sql.NullInt64  `json:"deleted_at"`
+	ID             string `json:"id"`
+	CustomerID     string `json:"customer_id"`
+	Amount         int64  `json:"amount"`
+	OrganizationID string `json:"organization_id"`
+	CreatedAt      int64  `json:"created_at"`
 }
 
 type Customer struct {
@@ -48,8 +44,15 @@ type Customer struct {
 	CurrentBalance int64          `json:"current_balance"`
 	OrganizationID string         `json:"organization_id"`
 	CreatedAt      int64          `json:"created_at"`
-	UpdatedAt      int64          `json:"updated_at"`
-	DeletedAt      sql.NullInt64  `json:"deleted_at"`
+}
+
+type InventoryItem struct {
+	ProductID      string `json:"product_id"`
+	OrganizationID string `json:"organization_id"`
+	Quantity       int64  `json:"quantity"`
+	MinStock       int64  `json:"min_stock"`
+	CreatedAt      int64  `json:"created_at"`
+	UpdatedAt      int64  `json:"updated_at"`
 }
 
 type Member struct {
@@ -63,15 +66,15 @@ type Member struct {
 }
 
 type Operator struct {
-	ID        string        `json:"id"`
-	Name      string        `json:"name"`
-	Email     string        `json:"email"`
-	Username  string        `json:"username"`
-	Pin       string        `json:"pin"`
-	IsRoot    int64         `json:"is_root"`
-	CreatedAt int64         `json:"created_at"`
-	UpdatedAt int64         `json:"updated_at"`
-	DeletedAt sql.NullInt64 `json:"deleted_at"`
+	ID           string        `json:"id"`
+	Name         string        `json:"name"`
+	Email        string        `json:"email"`
+	Username     string        `json:"username"`
+	Pin          string        `json:"pin"`
+	OperatorType string        `json:"operator_type"`
+	CreatedAt    int64         `json:"created_at"`
+	UpdatedAt    int64         `json:"updated_at"`
+	DeletedAt    sql.NullInt64 `json:"deleted_at"`
 }
 
 type Organization struct {
@@ -97,11 +100,9 @@ type Product struct {
 	WholesalePrice int64          `json:"wholesale_price"`
 	SalePrice      int64          `json:"sale_price"`
 	CostPrice      int64          `json:"cost_price"`
-	Stock          int64          `json:"stock"`
-	MinStock       int64          `json:"min_stock"`
 	CategoryID     sql.NullString `json:"category_id"`
-	OrganizationID string         `json:"organization_id"`
 	SupplierID     sql.NullString `json:"supplier_id"`
+	OrganizationID string         `json:"organization_id"`
 	CreatedAt      int64          `json:"created_at"`
 	UpdatedAt      int64          `json:"updated_at"`
 	DeletedAt      sql.NullInt64  `json:"deleted_at"`
@@ -116,8 +117,6 @@ type StockMovement struct {
 	OrganizationID string         `json:"organization_id"`
 	Metadata       sql.NullString `json:"metadata"`
 	CreatedAt      int64          `json:"created_at"`
-	UpdatedAt      int64          `json:"updated_at"`
-	DeletedAt      sql.NullInt64  `json:"deleted_at"`
 }
 
 type Supplier struct {
@@ -163,22 +162,15 @@ type Ticket struct {
 	OrganizationID string         `json:"organization_id"`
 	OperatorID     string         `json:"operator_id"`
 	CreatedAt      int64          `json:"created_at"`
-	UpdatedAt      int64          `json:"updated_at"`
-	DeletedAt      sql.NullInt64  `json:"deleted_at"`
 }
 
 type TicketDetail struct {
 	ID             string         `json:"id"`
 	TicketID       string         `json:"ticket_id"`
+	ProductID      sql.NullString `json:"product_id"`
 	Sku            string         `json:"sku"`
 	Name           string         `json:"name"`
-	Description    sql.NullString `json:"description"`
 	SalePrice      int64          `json:"sale_price"`
 	Quantity       int64          `json:"quantity"`
-	SubTotal       int64          `json:"sub_total"`
-	ProductID      sql.NullString `json:"product_id"`
 	OrganizationID string         `json:"organization_id"`
-	CreatedAt      int64          `json:"created_at"`
-	UpdatedAt      int64          `json:"updated_at"`
-	DeletedAt      sql.NullInt64  `json:"deleted_at"`
 }

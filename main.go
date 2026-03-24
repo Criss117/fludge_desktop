@@ -29,7 +29,6 @@ func main() {
 		},
 		Bind: []interface{}{
 			&app.IamHandler,
-			&app.CatalogHandler,
 			app,
 		},
 		Linux: &linux.Options{

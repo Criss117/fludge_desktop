@@ -1,105 +1,112 @@
-export namespace commands {
+export namespace appstate {
 	
-	export class CreateCategory {
+	export class ActiveOperatorResponse {
+	    id: string;
 	    name: string;
-	    description?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new CreateCategory(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.description = source["description"];
-	    }
-	}
-	export class CreateProduct {
-	    name: string;
-	    sku: string;
-	    description?: string;
-	    wholesalePrice: number;
-	    salePrice: number;
-	    costPrice: number;
-	    stock: number;
-	    minStock: number;
-	    categoryId?: string;
-	    supplierId?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new CreateProduct(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.sku = source["sku"];
-	        this.description = source["description"];
-	        this.wholesalePrice = source["wholesalePrice"];
-	        this.salePrice = source["salePrice"];
-	        this.costPrice = source["costPrice"];
-	        this.stock = source["stock"];
-	        this.minStock = source["minStock"];
-	        this.categoryId = source["categoryId"];
-	        this.supplierId = source["supplierId"];
-	    }
-	}
-	export class DeleteManyCategories {
-	    ids: string[];
-	
-	    static createFrom(source: any = {}) {
-	        return new DeleteManyCategories(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.ids = source["ids"];
-	    }
-	}
-	export class RegisterOrganization {
-	    name: string;
-	    legalName: string;
-	    address: string;
-	    logo?: string;
-	    contactPhone?: string;
-	    contactEmail?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new RegisterOrganization(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.legalName = source["legalName"];
-	        this.address = source["address"];
-	        this.logo = source["logo"];
-	        this.contactPhone = source["contactPhone"];
-	        this.contactEmail = source["contactEmail"];
-	    }
-	}
-	export class SignIn {
+	    email: string;
 	    username: string;
 	    pin: string;
+	    operatorType: string;
+	    createdAt: number;
+	    updatedAt: number;
+	    deletedAt?: number;
+	    id: string;
+	    organizationId: string;
+	    operatorId: string;
+	    role: string;
+	    createdAt: number;
+	    updatedAt: number;
+	    deletedAt?: number;
+	    teams: responses.TeamResponse[];
 	
 	    static createFrom(source: any = {}) {
-	        return new SignIn(source);
+	        return new ActiveOperatorResponse(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.email = source["email"];
 	        this.username = source["username"];
 	        this.pin = source["pin"];
+	        this.operatorType = source["operatorType"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.deletedAt = source["deletedAt"];
+	        this.id = source["id"];
+	        this.organizationId = source["organizationId"];
+	        this.operatorId = source["operatorId"];
+	        this.role = source["role"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.deletedAt = source["deletedAt"];
+	        this.teams = this.convertValues(source["teams"], responses.TeamResponse);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
-	export class SignUp {
+	export class SessionStateResponse {
+	    activeOrganization?: responses.OrganizationResponse;
+	    activeOperator?: ActiveOperatorResponse;
+	
+	    static createFrom(source: any = {}) {
+	        return new SessionStateResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.activeOrganization = this.convertValues(source["activeOrganization"], responses.OrganizationResponse);
+	        this.activeOperator = this.convertValues(source["activeOperator"], ActiveOperatorResponse);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace commands {
+	
+	export class RegisterRootOperator {
 	    name: string;
 	    email: string;
 	    username: string;
 	    pin: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new SignUp(source);
+	        return new RegisterRootOperator(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -110,95 +117,11 @@ export namespace commands {
 	        this.pin = source["pin"];
 	    }
 	}
-	export class SwitchOrganization {
-	    organizationId: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new SwitchOrganization(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.organizationId = source["organizationId"];
-	    }
-	}
-	export class UpdateCategory {
-	    id: string;
-	    name: string;
-	    description?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UpdateCategory(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	        this.description = source["description"];
-	    }
-	}
-	export class UpdateProduct {
-	    id: string;
-	    name: string;
-	    sku: string;
-	    description?: string;
-	    wholesalePrice: number;
-	    salePrice: number;
-	    costPrice: number;
-	    stock: number;
-	    minStock: number;
-	    categoryId?: string;
-	    supplierId?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new UpdateProduct(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	        this.sku = source["sku"];
-	        this.description = source["description"];
-	        this.wholesalePrice = source["wholesalePrice"];
-	        this.salePrice = source["salePrice"];
-	        this.costPrice = source["costPrice"];
-	        this.stock = source["stock"];
-	        this.minStock = source["minStock"];
-	        this.categoryId = source["categoryId"];
-	        this.supplierId = source["supplierId"];
-	    }
-	}
 
 }
 
 export namespace responses {
 	
-	export class CategoryResponse {
-	    id: string;
-	    name: string;
-	    description?: string;
-	    organizationId: string;
-	    createdAt: number;
-	    updatedAt: number;
-	    deletedAt?: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new CategoryResponse(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	        this.description = source["description"];
-	        this.organizationId = source["organizationId"];
-	        this.createdAt = source["createdAt"];
-	        this.updatedAt = source["updatedAt"];
-	        this.deletedAt = source["deletedAt"];
-	    }
-	}
 	export class MemberResponse {
 	    id: string;
 	    organizationId: string;
@@ -223,33 +146,16 @@ export namespace responses {
 	        this.deletedAt = source["deletedAt"];
 	    }
 	}
-	export class OperatorOrganizationResponse {
-	    id: string;
-	    slug: string;
-	    name: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new OperatorOrganizationResponse(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.slug = source["slug"];
-	        this.name = source["name"];
-	    }
-	}
 	export class OperatorResponse {
 	    id: string;
 	    name: string;
 	    email: string;
 	    username: string;
 	    pin: string;
-	    isRoot: boolean;
+	    operatorType: string;
 	    createdAt: number;
 	    updatedAt: number;
 	    deletedAt?: number;
-	    isMemberIn: OperatorOrganizationResponse[];
 	
 	    static createFrom(source: any = {}) {
 	        return new OperatorResponse(source);
@@ -262,30 +168,11 @@ export namespace responses {
 	        this.email = source["email"];
 	        this.username = source["username"];
 	        this.pin = source["pin"];
-	        this.isRoot = source["isRoot"];
+	        this.operatorType = source["operatorType"];
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	        this.deletedAt = source["deletedAt"];
-	        this.isMemberIn = this.convertValues(source["isMemberIn"], OperatorOrganizationResponse);
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 	export class TeamMemberResponse {
 	    id: string;
@@ -393,78 +280,6 @@ export namespace responses {
 	        this.deletedAt = source["deletedAt"];
 	        this.Members = this.convertValues(source["Members"], MemberResponse);
 	        this.Teams = this.convertValues(source["Teams"], TeamResponse);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class ProductResponse {
-	    id: string;
-	    sku: string;
-	    name: string;
-	    description?: string;
-	    wholesalePrice: number;
-	    salePrice: number;
-	    costPrice: number;
-	    stock: number;
-	    minStock: number;
-	    organizationId: string;
-	    categoryId?: string;
-	    supplierId?: string;
-	    createdAt: number;
-	    updatedAt: number;
-	    deletedAt?: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new ProductResponse(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.sku = source["sku"];
-	        this.name = source["name"];
-	        this.description = source["description"];
-	        this.wholesalePrice = source["wholesalePrice"];
-	        this.salePrice = source["salePrice"];
-	        this.costPrice = source["costPrice"];
-	        this.stock = source["stock"];
-	        this.minStock = source["minStock"];
-	        this.organizationId = source["organizationId"];
-	        this.categoryId = source["categoryId"];
-	        this.supplierId = source["supplierId"];
-	        this.createdAt = source["createdAt"];
-	        this.updatedAt = source["updatedAt"];
-	        this.deletedAt = source["deletedAt"];
-	    }
-	}
-	export class ResponseAppState {
-	    activeOrganization?: OrganizationResponse;
-	    activeOperator?: OperatorResponse;
-	
-	    static createFrom(source: any = {}) {
-	        return new ResponseAppState(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.activeOrganization = this.convertValues(source["activeOrganization"], OrganizationResponse);
-	        this.activeOperator = this.convertValues(source["activeOperator"], OperatorResponse);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

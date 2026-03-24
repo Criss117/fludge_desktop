@@ -1,26 +1,29 @@
-# 🧠 POS Desktop App — Contexto Completo del Proyecto (DDD + Go + Wails)
+# 🧠 POS Desktop App — Contexto Completo (DDD + Go + Wails + sqlc)
 
 ## 📌 Concepto General
 
-Esta aplicación es un **POS (Point of Sale) desktop**, diseñada para operar **offline-first**, con soporte **multitenant** mediante `organization_id` en todos los agregados.
+Aplicación **POS (Point of Sale) desktop**, diseñada para operar **offline-first**, con soporte **multitenant** mediante `organization_id` en todos los agregados.
 
-Stack tecnológico:
+### Stack
 
-- **Wails v2** (desktop app)
-- **Go** (backend con DDD + Clean Architecture)
-- **React + TypeScript** (frontend)
-- **SQLite + sqlc** (persistencia con queries tipadas)
-
-La arquitectura sigue:
-
-- **DDD (Domain Driven Design)**
-- **CQRS ligero**
-- **Separación por Bounded Contexts**
-- **Arquitectura por capas (Domain / Application / Infrastructure / Interfaces)**
+- **Wails v2** → aplicación desktop
+- **Go** → backend (DDD + Clean Architecture)
+- **React + TypeScript** → frontend
+- **SQLite + sqlc** → persistencia (queries tipadas, sin ORM)
 
 ---
 
-## 🧠 Modelo Mental del Sistema
+## 🧠 Principios Arquitectónicos
+
+- **DDD real (no superficial)**
+- **CQRS ligero**
+- **Bounded Contexts bien definidos**
+- **Separación estricta de capas**
+- **Sin acoplamiento entre dominios**
+
+---
+
+## 🧩 Modelo Mental del Sistema
 
 ```
 IAM        → quién eres
@@ -32,118 +35,105 @@ Credit     → quién debe
 
 ---
 
-## 🧩 Bounded Contexts
+# 🧩 BOUNDED CONTEXTS
 
 ---
 
-### 🔐 IAM (Identity & Access)
+## 🔐 IAM (Identity & Access)
 
-Responsable de identidad, permisos y sesión activa.
-
-#### Aggregate Roots:
+### Aggregate Roots:
 
 - `Operator`
 - `Organization`
 - `AppState`
 
-#### Entidades hijas:
+### Entidades hijas:
 
 - `Member`
 - `Team`
 - `TeamMember`
 
-#### Responsabilidades:
+### Responsabilidades:
 
 - Autenticación (PIN)
 - Gestión de organizaciones
-- Gestión de miembros y equipos
 - Permisos
-- Estado activo de la app
+- Estado activo (session)
 
 ---
 
-### 📦 Catalog
+## 📦 Catalog
 
-Define los productos. **NO maneja estado dinámico**.
-
-#### Aggregate Roots:
+### Aggregate Roots:
 
 - `Product`
 - `Category`
 - `Supplier`
 
-#### Reglas:
+### Reglas:
 
-- `Product` NO contiene stock
-- Referencias por ID (no agregados embebidos)
-- Precios validados por invariantes
+- ❗ `Product` **NO tiene stock**
+- Solo define datos estáticos
+- Referencias por ID
 
 ---
 
-### 📦 Inventory
+## 📦 Inventory
 
-Gestiona el stock real de productos.
-
-#### Aggregate Roots:
+### Aggregate Roots:
 
 - `InventoryItem`
 
-#### Entidades hijas:
+### Entidades hijas:
 
 - `StockMovement`
 
-#### Responsabilidades:
+### Responsabilidades:
 
-- Cantidad actual (`InventoryItem`)
-- Historial (`StockMovement`)
+- Estado actual (`quantity`, `min_stock`)
+- Historial de movimientos
 - Ajustes de stock
-- Reorden (min_stock)
 
 ---
 
-### 🛒 Sales (POS)
+## 🛒 Sales (POS)
 
-Core del sistema.
-
-#### Aggregate Roots:
+### Aggregate Roots:
 
 - `Sale` (persistido como `ticket`)
 
-#### Entidades hijas:
+### Entidades hijas:
 
 - `SaleItem` (persistido como `ticket_detail`)
 
-#### Responsabilidades:
+### Responsabilidades:
 
 - Crear ventas
 - Calcular totales
 - Manejar pagos
-- Emitir eventos de negocio
+- Emitir eventos
 
 ---
 
-### 💳 Credit
+## 💳 Credit
 
-Gestión de crédito y cobranza.
-
-#### Aggregate Roots:
+### Aggregate Roots:
 
 - `Customer`
-- `CreditAccount` (implícito en `Customer`)
 
-#### Entidades hijas:
+### Entidades hijas:
 
 - `CreditPayment`
 
-#### Responsabilidades:
+### Responsabilidades:
 
-- Límites de crédito
-- Balance actual (cacheado)
+- Límite de crédito
+- Balance actual (**cacheado**)
 - Registro de pagos
 
 ---
 
-## 🔗 Relación entre Contextos
+# 🔗 RELACIÓN ENTRE CONTEXTOS
 
 ```
 IAM → todos
@@ -153,274 +143,259 @@ Catalog → Inventory, Sales
 Sales → Inventory (evento)
 Sales → Credit (evento)
 
-Inventory → independiente (reacciona a eventos)
+Inventory → reacciona a eventos
 
 Credit → depende de Sales
 ```
 
 ---
 
-## 📁 Estructura de Carpetas
+# 🧱 CAPAS DE ARQUITECTURA
+
+---
+
+## Domain
+
+- Lógica de negocio pura
+- Sin dependencias externas
+
+Contiene:
+
+```
+aggregates/
+valueobjects/
+ports/
+services/
+```
+
+---
+
+## Application
+
+- Orquesta casos de uso
+
+Contiene:
+
+```
+usecases/
+commands/
+responses/
+queries/ (interfaces, no sqlc)
+```
+
+---
+
+## Infrastructure
+
+- Implementaciones técnicas
+
+Contiene:
+
+```
+repositories/
+mappers/
+sqlc (desde shared)
+```
+
+---
+
+## Interfaces
+
+- Adaptadores (Wails)
+
+Contiene:
+
+```
+handlers/
+session access
+DTO mapping
+```
+
+---
+
+# 📁 ESTRUCTURA DEL PROYECTO
 
 ```
 internal/
   shared/
     db/
+      schema/
+        001_iam.sql
+        002_catalog.sql
+        003_inventory.sql
+        004_sales.sql
+        005_credit.sql
+
       iam_sqlc/
       catalog_sqlc/
       inventory_sqlc/
       sales_sqlc/
+      credit_sqlc/
+
+      db.go
+
     derrors/
     valueobjects/
     events/
+    types/
+    lib/
 
   appstate/
 
   platform/
     iam/
-      domain/
-        aggregates/
-        valueobjects/
-        ports/
-        services/
-      application/
-        usecases/
-        commands/
-        responses/
-        queries/
-      infrastructure/
-        persistence/
-          repositories/
-          mappers/
-        services/
-      interfaces/
-
     catalog/
-      domain/
-        aggregates/
-        valueobjects/
-        ports/
-      application/
-        usecases/
-        commands/
-        responses/
-        queries/
-      infrastructure/
-        persistence/
-          repositories/
-          mappers/
-      interfaces/
-
     inventory/
-      domain/
-        aggregates/
-        valueobjects/
-        ports/
-      application/
-        usecases/
-        commands/
-        responses/
-        queries/
-      infrastructure/
-        persistence/
-          repositories/
-          mappers/
-      interfaces/
-
     sales/
-      domain/
-        aggregates/
-        valueobjects/
-        ports/
-      application/
-        usecases/
-        commands/
-        responses/
-        queries/
-      infrastructure/
-        persistence/
-          repositories/
-          mappers/
-      interfaces/
-
     credit/
-      domain/
-        aggregates/
-        valueobjects/
-        ports/
-      application/
-        usecases/
-        commands/
-        responses/
-        queries/
-      infrastructure/
-        persistence/
-          repositories/
-          mappers/
-      interfaces/
 ```
 
 ---
 
-## 🧱 Capas de la Arquitectura
+# 🗄️ BASE DE DATOS
 
-### Domain
+## Principios
 
-- Contiene lógica de negocio pura
-- Sin dependencias externas
-
-Incluye:
-
-- `aggregates/`
-- `valueobjects/`
-- `ports/` (interfaces)
-- `services/` (lógica compleja sin DB)
-
----
-
-### Application
-
-- Orquesta casos de uso
-
-Incluye:
-
-- `usecases/`
-- `commands/`
-- `responses/`
-- `queries/` (interfaces, no sqlc)
-
----
-
-### Infrastructure
-
-- Implementaciones técnicas
-
-Incluye:
-
-- `sqlc` (en shared)
-- `repositories/`
-- `mappers/`
-- `services/`
-
----
-
-### Interfaces
-
-- Adaptadores (Wails)
-
-Incluye:
-
-- handlers
-- transformación DTO ↔ commands
-- acceso a SessionState
-
----
-
-## 🗄️ Base de Datos (SQLite)
-
-### Principios clave
-
-- Multitenant (`organization_id` en todo)
+- Multitenant (`organization_id`)
 - Soft delete (`deleted_at`)
-- Constraints fuertes (integridad)
-- Índices para performance
-- DB garantiza unicidad (no el use case)
+- Constraints fuertes
+- Índices optimizados
+- DB garantiza unicidad
 
 ---
 
-### Separación por Contexto
+## Separación por Contexto
 
-#### IAM
+### IAM
 
-- operator
-- organization
-- app_state
-- member
-- team
-- team_member
+```
+operator
+organization
+app_state
+member
+team
+team_member
+```
 
-#### Catalog
+### Catalog
 
-- product (SIN stock)
-- category
-- supplier
+```
+product (SIN stock)
+category
+supplier
+```
 
-#### Inventory
+### Inventory
 
-- inventory_item (estado actual)
-- stock_movement (historial)
+```
+inventory_item  ← estado actual
+stock_movement  ← historial
+```
 
-#### Sales
+### Sales
 
-- ticket (sale)
-- ticket_detail (sale_item)
+```
+ticket
+ticket_detail
+```
 
-#### Credit
+### Credit
 
-- customer
-- credit_payment
+```
+customer
+credit_payment
+```
 
 ---
 
-## ⚠️ Reglas Arquitectónicas Críticas
+# ⚠️ REGLAS CRÍTICAS
 
 1. **Product NO tiene stock**
 2. **Inventory maneja TODO el stock**
-3. **Contextos no comparten agregados**
-4. **Comunicación entre contextos solo vía:**
+3. **Contextos NO comparten agregados**
+4. Comunicación solo vía:
    - IDs
    - eventos
 
 5. **sqlc solo se usa en infrastructure**
-6. **Use cases no instancian dependencias**
-7. **Handlers no contienen lógica de negocio**
-8. **Unicidad se maneja en DB (constraints)**
+6. **1 bounded context = 1 paquete sqlc**
+7. **Use cases no instancian dependencias**
+8. **Handlers no contienen lógica de negocio**
+9. **Shared NO contiene lógica de dominio**
 
 ---
 
-## 📡 Eventos de Dominio
+# 🧠 SHARED KERNEL
+
+## Contiene únicamente:
+
+```
+db/           → sqlc + conexión
+derrors/      → errores genéricos
+valueobjects/ → Email, Phone
+events/       → interfaces de eventos
+types/        → pagination, filters
+lib/          → uuid, time
+```
+
+## NO contiene:
+
+- lógica de negocio
+- agregados
+- repositorios
+- DTOs
+- services de dominio
+
+---
+
+# ⚙️ SQLC CONFIG
+
+- 1 config por bounded context (en el mismo yaml)
+- 1 `queries.sql` por contexto
+- 1 package generado por contexto
+
+Ejemplo:
+
+```
+catalog_sqlc/
+inventory_sqlc/
+sales_sqlc/
+```
+
+---
+
+# 📡 EVENTOS DE DOMINIO
 
 Ejemplo:
 
 ```
 SaleCompleted
   → Inventory descuenta stock
-  → Credit registra deuda
+  → Credit genera deuda
 ```
 
 ---
 
-## 🔒 Session & App State
+# 🔒 SESSION
 
-- `AppState` (dominio): IDs activos
-- `SessionState` (app layer): agregados cargados
+- `AppState` → IDs activos (dominio)
+- `SessionState` → agregados cargados (app layer)
 
-Uso:
-
-- handlers acceden a `SessionState`
-- no se consulta DB para permisos
+Handlers usan `SessionState`, no DB directa
 
 ---
 
-## 🎯 Objetivo del Sistema
+# 🚀 OBJETIVO DEL SISTEMA
 
 - Offline-first
 - Alta coherencia de dominio
-- Escalable a múltiples módulos
-- Preparado para concurrencia local (POS)
+- POS rápido y consistente
+- Escalable por módulos
 - Mantenible a largo plazo
 
 ---
 
-## 🚀 Contexto para la IA
-
-Este proyecto:
-
-- Usa DDD real (no superficial)
-- Tiene separación estricta por bounded contexts
-- Usa sqlc (no ORM)
-- Prioriza invariantes de dominio
-- Está optimizado para POS real (ventas rápidas, consistencia)
+# 🧠 INSTRUCCIONES PARA LA IA
 
 Cualquier cambio debe:
 
@@ -428,4 +403,9 @@ Cualquier cambio debe:
 - no acoplar dominios
 - mantener separación de capas
 - evitar lógica en handlers
-- evitar acceso directo a DB fuera de infrastructure
+- evitar uso de sqlc fuera de infrastructure
+- mantener invariantes en domain
+- tratar DB como detalle de infraestructura
+
+Este es un sistema diseñado con DDD real y arquitectura limpia.  
+Las decisiones deben priorizar consistencia del dominio sobre conveniencia técnica.

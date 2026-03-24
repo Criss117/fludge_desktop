@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
-	"desktop/internal/catalog"
-	"desktop/internal/iam"
-	iamAggregates "desktop/internal/iam/domain/aggregates"
+	"database/sql"
+	"desktop/internal/appstate"
+	"desktop/internal/platform/iam"
+	iamApp "desktop/internal/platform/iam/application"
+	iamPorts "desktop/internal/platform/iam/domain/ports"
+	iamRepos "desktop/internal/platform/iam/infrastructure/repositories"
+
 	"desktop/internal/shared/db"
-	"desktop/internal/shared/db/platform"
+	"desktop/internal/shared/db/dbutils"
 	_ "embed"
-	"log"
 	"sync"
 
 	_ "modernc.org/sqlite"
@@ -19,11 +22,13 @@ var ddl string
 
 // App struct
 type App struct {
-	ctx            context.Context
-	IamHandler     iam.IamHandler
-	CatalogHandler catalog.CatalogHandler
-	SessionState   *iamAggregates.AppState
-	mu             sync.RWMutex
+	ctx          context.Context
+	db           *sql.DB
+	queries      *db.Queries
+	SessionState *appstate.SessionState
+	IamHandler   iam.IamHandler
+	AppStateRepo iamPorts.AppStateRepository
+	mu           sync.RWMutex
 }
 
 // NewApp creates a new App application struct
@@ -35,50 +40,66 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	log.Println("▶ abriendo DB...")
 
-	conn, err := platform.NewDatabase("pos.db", ddl, &ctx)
+	conn, err := dbutils.NewDatabase("pos.db", ddl, &ctx)
 	if err != nil {
-		log.Println("✗ error DB:", err)
-		return
-	}
-	log.Println("✓ DB abierta")
-
-	queries := db.New(conn)
-
-	a.IamHandler = *iam.NewIamHandler(ctx, queries, func(appState *iamAggregates.AppState) {
-		a.mu.Lock()
-		defer a.mu.Unlock()
-
-		if appState == nil {
-			log.Println("✗ error getting app state")
-			return
-		}
-
-		a.SessionState = appState
-	})
-
-	log.Println("✓ IamHandler creado")
-
-	_, errAppState := a.IamHandler.GetAppState()
-
-	if errAppState != nil {
-		log.Println("✗ error getting app state:", err)
-		return
+		panic(err)
 	}
 
-	a.CatalogHandler = *catalog.NewCatalogHandler(ctx, queries, func() *iamAggregates.AppState {
-		a.mu.RLock()
-		defer a.mu.RUnlock()
+	a.db = conn
+	a.queries = db.New(conn)
 
-		return a.SessionState
-	})
+	// TxManager
+	txManager := dbutils.NewSqliteTxManager(conn, a.queries)
 
-	log.Println("✓ CatalogHandler creado")
+	// IAM - Repositories
+	operatorRepo := iamRepos.NewSqliteOperatorRepository(a.queries)
+	appStateRepo := iamRepos.NewSqliteAppRepository(a.queries)
+	organizationRepo := iamRepos.NewSqliteOrganizationRepository(a.queries)
+	memberRepo := iamRepos.NewSqliteOrganizationMemberRepository(a.queries)
+	teamRepo := iamRepos.NewSqliteOrganizationTeamRepository(a.queries)
 
-	// if err != nil {
-	// 	log.Println("✗ error appState:", err)
-	// 	return
-	// }
+	iamContainer := iamApp.NewContainer(
+		txManager,
+		operatorRepo,
+		organizationRepo,
+		memberRepo,
+		teamRepo,
+	)
 
+	a.AppStateRepo = appStateRepo
+
+	// IAM - Handler
+	a.IamHandler = *iam.NewIamHandler(
+		func() context.Context { return a.ctx },
+		a.onStateChange,
+		iamContainer,
+	)
+}
+
+func (a *App) GetAppSession() *appstate.SessionStateResponse {
+	return appstate.SessionStateResponseFromDomain(a.SessionState)
+}
+
+func (a *App) onStateChange(e appstate.StateChangeEvent) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	switch e.Type {
+	case appstate.SignUp:
+		a.SessionState.SetActiveOperator(e.Operator)
+		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
+
+	case appstate.SignIn:
+		a.SessionState.SetActiveOperator(e.Operator)
+		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
+
+	case appstate.SignOut:
+		a.SessionState.Clear()
+		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
+
+	case appstate.SwitchOrganization:
+		a.SessionState.SetActiveOrganization(e.Organization)
+		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
+	}
 }

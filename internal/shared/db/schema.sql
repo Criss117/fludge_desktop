@@ -12,13 +12,14 @@ CREATE TABLE IF NOT EXISTS "operator" (
     "email"         text    NOT NULL,
     "username"      text    NOT NULL,
     "pin"           text    NOT NULL,
-    "is_root"       integer NOT NULL DEFAULT false,
+    "operator_type" text    NOT NULL,
     "created_at"    integer NOT NULL,
     "updated_at"    integer NOT NULL,
-    "deleted_at"    integer
-);
+    "deleted_at"    integer,
 
-CREATE UNIQUE INDEX IF NOT EXISTS "operator_email_unique" ON "operator" ("email");
+    CONSTRAINT "operator_type_valid" CHECK("operator_type" IN ('ROOT', 'EMPLOYEE'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "operator_email_unique" ON "operator" ("email") WHERE "deleted_at" IS NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS "operator_username_unique" ON "operator" ("username");
 
 
@@ -62,7 +63,7 @@ CREATE TABLE IF NOT EXISTS "member" (
     "deleted_at"      integer,
     FOREIGN KEY ("organization_id") REFERENCES "organization"("id") ON DELETE CASCADE,
     FOREIGN KEY ("operator_id")     REFERENCES "operator"("id")     ON DELETE CASCADE,
-    CONSTRAINT "member_role_valid" CHECK("role" IN ('ROOT', 'MEMBER'))
+    CONSTRAINT "member_role_valid" CHECK("role" IN ('ROOT', 'EMPLOYEE'))
 );
 
 

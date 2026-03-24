@@ -1,8 +1,9 @@
 version: "2"
+
 sql:
   - engine: "sqlite"
-    queries: "internal/shared/db/queries.sql"
     schema: "internal/shared/db/schema.sql"
+    queries: "internal/shared/db/queries"
     gen:
       go:
         package: "db"

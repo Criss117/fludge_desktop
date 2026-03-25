@@ -4,10 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"desktop/internal/appstate"
+	"desktop/internal/platform/catalog"
+	catalogApp "desktop/internal/platform/catalog/application"
+	catalogInfra "desktop/internal/platform/catalog/infrastructure"
 	"desktop/internal/platform/iam"
 	iamApp "desktop/internal/platform/iam/application"
+	iamInfra "desktop/internal/platform/iam/infrastructure"
+
 	iamPorts "desktop/internal/platform/iam/domain/ports"
-	iamRepos "desktop/internal/platform/iam/infrastructure/repositories"
 
 	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
@@ -22,13 +26,14 @@ var ddl string
 
 // App struct
 type App struct {
-	ctx          context.Context
-	db           *sql.DB
-	queries      *db.Queries
-	SessionState *appstate.SessionState
-	IamHandler   iam.IamHandler
-	AppStateRepo iamPorts.AppStateRepository
-	mu           sync.RWMutex
+	ctx            context.Context
+	db             *sql.DB
+	queries        *db.Queries
+	SessionState   *appstate.SessionState
+	IamHandler     iam.IamHandler
+	CatalogHandler catalog.CatalogHandler
+	AppStateRepo   iamPorts.AppStateRepository
+	mu             sync.RWMutex
 }
 
 // NewApp creates a new App application struct
@@ -52,28 +57,39 @@ func (a *App) startup(ctx context.Context) {
 	// TxManager
 	txManager := dbutils.NewSqliteTxManager(conn, a.queries)
 
-	// IAM - Repositories
-	operatorRepo := iamRepos.NewSqliteOperatorRepository(a.queries)
-	appStateRepo := iamRepos.NewSqliteAppRepository(a.queries)
-	organizationRepo := iamRepos.NewSqliteOrganizationRepository(a.queries)
-	memberRepo := iamRepos.NewSqliteOrganizationMemberRepository(a.queries)
-	teamRepo := iamRepos.NewSqliteOrganizationTeamRepository(a.queries)
+	// IAM - Repositories & Container
+	aimRepositories := iamInfra.NewContainer(a.queries)
 
-	iamContainer := iamApp.NewContainer(
+	iamAppContainer := iamApp.NewContainer(
 		txManager,
-		operatorRepo,
-		organizationRepo,
-		memberRepo,
-		teamRepo,
+		aimRepositories.OperatorRepository,
+		aimRepositories.OrganizationRepository,
+		aimRepositories.OrganizationMemberRepository,
+		aimRepositories.OrganizationTeamRepository,
 	)
 
-	a.AppStateRepo = appStateRepo
+	a.AppStateRepo = aimRepositories.AppStateRepository
 
-	// IAM - Handler
 	a.IamHandler = *iam.NewIamHandler(
-		func() context.Context { return a.ctx },
+		iamAppContainer,
 		a.onStateChange,
-		iamContainer,
+		func() context.Context { return a.ctx },
+		func() *appstate.SessionState { return a.SessionState },
+	)
+
+	// Catlog - Repositories
+	catalogRepositories := catalogInfra.NewContainer(a.queries)
+
+	catalogAppContainer := catalogApp.NewContainer(
+		txManager,
+		catalogRepositories.CategoryRepository,
+		catalogRepositories.ProductRepository,
+	)
+
+	a.CatalogHandler = *catalog.NewCatalogHandler(
+		catalogAppContainer,
+		func() context.Context { return a.ctx },
+		func() *appstate.SessionState { return a.SessionState },
 	)
 }
 

@@ -5,13 +5,13 @@ import (
 	"desktop/internal/shared/db/dbutils"
 )
 
-type OperatorOrganizationResponse struct {
+type OperatorOrganization struct {
 	ID   string `json:"id"`
 	Slug string `json:"slug"`
 	Name string `json:"name"`
 }
 
-type OperatorResponse struct {
+type Operator struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`
 	Email        string `json:"email"`
@@ -23,8 +23,8 @@ type OperatorResponse struct {
 	DeletedAt    *int64 `json:"deletedAt"`
 }
 
-func OperatorResponseFromDomain(operator *aggregates.Operator) *OperatorResponse {
-	return &OperatorResponse{
+func OperatorResponseFromDomain(operator *aggregates.Operator) *Operator {
+	return &Operator{
 		ID:           operator.ID,
 		Name:         operator.Name,
 		Email:        operator.Email.Value(),

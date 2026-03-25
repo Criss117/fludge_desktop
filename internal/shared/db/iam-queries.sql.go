@@ -8,7 +8,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 )
 
 const createMember = `-- name: CreateMember :exec
@@ -109,13 +108,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateTeamParams struct {
-	ID             string          `json:"id"`
-	Name           string          `json:"name"`
-	OrganizationID string          `json:"organization_id"`
-	Permissions    json.RawMessage `json:"permissions"`
-	Description    sql.NullString  `json:"description"`
-	CreatedAt      int64           `json:"created_at"`
-	UpdatedAt      int64           `json:"updated_at"`
+	ID             string         `json:"id"`
+	Name           string         `json:"name"`
+	OrganizationID string         `json:"organization_id"`
+	Permissions    []byte         `json:"permissions"`
+	Description    sql.NullString `json:"description"`
+	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
 }
 
 func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) error {

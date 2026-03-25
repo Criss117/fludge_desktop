@@ -6,7 +6,6 @@ package db
 
 import (
 	"database/sql"
-	"encoding/json"
 )
 
 type AppState struct {
@@ -27,11 +26,13 @@ type Category struct {
 }
 
 type CreditPayment struct {
-	ID             string `json:"id"`
-	CustomerID     string `json:"customer_id"`
-	Amount         int64  `json:"amount"`
-	OrganizationID string `json:"organization_id"`
-	CreatedAt      int64  `json:"created_at"`
+	ID             string         `json:"id"`
+	CustomerID     string         `json:"customer_id"`
+	Amount         int64          `json:"amount"`
+	Notes          sql.NullString `json:"notes"`
+	OrganizationID string         `json:"organization_id"`
+	OperatorID     string         `json:"operator_id"`
+	CreatedAt      int64          `json:"created_at"`
 }
 
 type Customer struct {
@@ -44,12 +45,13 @@ type Customer struct {
 	CurrentBalance int64          `json:"current_balance"`
 	OrganizationID string         `json:"organization_id"`
 	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
 }
 
 type InventoryItem struct {
 	ProductID      string `json:"product_id"`
 	OrganizationID string `json:"organization_id"`
-	Quantity       int64  `json:"quantity"`
+	Stock          int64  `json:"stock"`
 	MinStock       int64  `json:"min_stock"`
 	CreatedAt      int64  `json:"created_at"`
 	UpdatedAt      int64  `json:"updated_at"`
@@ -110,11 +112,12 @@ type Product struct {
 
 type StockMovement struct {
 	ID             string         `json:"id"`
-	ProductID      string         `json:"product_id"`
 	Type           string         `json:"type"`
 	Quantity       int64          `json:"quantity"`
 	Reason         sql.NullString `json:"reason"`
+	ProductID      string         `json:"product_id"`
 	OrganizationID string         `json:"organization_id"`
+	TicketDetailID sql.NullString `json:"ticket_detail_id"`
 	Metadata       sql.NullString `json:"metadata"`
 	CreatedAt      int64          `json:"created_at"`
 }
@@ -132,14 +135,14 @@ type Supplier struct {
 }
 
 type Team struct {
-	ID             string          `json:"id"`
-	Name           string          `json:"name"`
-	OrganizationID string          `json:"organization_id"`
-	Permissions    json.RawMessage `json:"permissions"`
-	Description    sql.NullString  `json:"description"`
-	CreatedAt      int64           `json:"created_at"`
-	UpdatedAt      int64           `json:"updated_at"`
-	DeletedAt      sql.NullInt64   `json:"deleted_at"`
+	ID             string         `json:"id"`
+	Name           string         `json:"name"`
+	OrganizationID string         `json:"organization_id"`
+	Permissions    []byte         `json:"permissions"`
+	Description    sql.NullString `json:"description"`
+	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
+	DeletedAt      sql.NullInt64  `json:"deleted_at"`
 }
 
 type TeamMember struct {
@@ -162,6 +165,7 @@ type Ticket struct {
 	OrganizationID string         `json:"organization_id"`
 	OperatorID     string         `json:"operator_id"`
 	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
 }
 
 type TicketDetail struct {
@@ -173,4 +177,6 @@ type TicketDetail struct {
 	SalePrice      int64          `json:"sale_price"`
 	Quantity       int64          `json:"quantity"`
 	OrganizationID string         `json:"organization_id"`
+	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
 }

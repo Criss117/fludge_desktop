@@ -5,7 +5,7 @@ import (
 	"desktop/internal/shared/db/dbutils"
 )
 
-type TeamMemberResponse struct {
+type TeamMember struct {
 	ID             string `json:"id"`
 	TeamID         string `json:"teamId"`
 	OperatorID     string `json:"operatorId"`
@@ -15,7 +15,7 @@ type TeamMemberResponse struct {
 	DeletedAt      *int64 `json:"deletedAt"`
 }
 
-type TeamResponse struct {
+type Team struct {
 	ID             string   `json:"id"`
 	Name           string   `json:"name"`
 	OrganizationId string   `json:"organizationId"`
@@ -24,11 +24,11 @@ type TeamResponse struct {
 	CreatedAt      int64    `json:"createdAt"`
 	UpdatedAt      int64    `json:"updatedAt"`
 	DeletedAt      *int64   `json:"deletedAt"`
-	Members        []TeamMemberResponse
+	Members        []TeamMember
 }
 
-func TeamMemberResponseFromDomain(teamMember *aggregates.TeamMember) *TeamMemberResponse {
-	return &TeamMemberResponse{
+func TeamMemberResponseFromDomain(teamMember *aggregates.TeamMember) *TeamMember {
+	return &TeamMember{
 		ID:             teamMember.ID,
 		TeamID:         teamMember.TeamID,
 		OperatorID:     teamMember.OperatorID,
@@ -39,9 +39,9 @@ func TeamMemberResponseFromDomain(teamMember *aggregates.TeamMember) *TeamMember
 	}
 }
 
-func TeamResponseFromDomain(team *aggregates.Team) *TeamResponse {
+func TeamResponseFromDomain(team *aggregates.Team) *Team {
 
-	teamsMembers := make([]TeamMemberResponse, len(team.Members))
+	teamsMembers := make([]TeamMember, len(team.Members))
 
 	for i, member := range team.Members {
 		tm := TeamMemberResponseFromDomain(member)
@@ -55,7 +55,7 @@ func TeamResponseFromDomain(team *aggregates.Team) *TeamResponse {
 		permissions[i] = p.Value()
 	}
 
-	return &TeamResponse{
+	return &Team{
 		ID:             team.ID,
 		Name:           team.Name,
 		OrganizationId: team.OrganizationID,

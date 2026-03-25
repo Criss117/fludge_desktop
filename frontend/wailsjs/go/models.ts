@@ -17,7 +17,7 @@ export namespace appstate {
 	    createdAt: number;
 	    updatedAt: number;
 	    deletedAt?: number;
-	    teams: responses.TeamResponse[];
+	    teams: responses.Team[];
 	
 	    static createFrom(source: any = {}) {
 	        return new ActiveOperatorResponse(source);
@@ -41,7 +41,7 @@ export namespace appstate {
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	        this.deletedAt = source["deletedAt"];
-	        this.teams = this.convertValues(source["teams"], responses.TeamResponse);
+	        this.teams = this.convertValues(source["teams"], responses.Team);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -63,7 +63,7 @@ export namespace appstate {
 		}
 	}
 	export class SessionStateResponse {
-	    activeOrganization?: responses.OrganizationResponse;
+	    activeOrganization?: responses.Organization;
 	    activeOperator?: ActiveOperatorResponse;
 	
 	    static createFrom(source: any = {}) {
@@ -72,7 +72,7 @@ export namespace appstate {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.activeOrganization = this.convertValues(source["activeOrganization"], responses.OrganizationResponse);
+	        this.activeOrganization = this.convertValues(source["activeOrganization"], responses.Organization);
 	        this.activeOperator = this.convertValues(source["activeOperator"], ActiveOperatorResponse);
 	    }
 	
@@ -99,6 +99,66 @@ export namespace appstate {
 
 export namespace commands {
 	
+	export class CreateCategory {
+	    name: string;
+	    description?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CreateCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.description = source["description"];
+	    }
+	}
+	export class DeleteManyCategories {
+	    ids: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteManyCategories(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ids = source["ids"];
+	    }
+	}
+	export class FindOneOrganization {
+	    organizationId: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FindOneOrganization(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.organizationId = source["organizationId"];
+	    }
+	}
+	export class RegisterOrganization {
+	    name: string;
+	    legalName: string;
+	    address: string;
+	    logo?: string;
+	    contactPhone?: string;
+	    contactEmail?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RegisterOrganization(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.legalName = source["legalName"];
+	        this.address = source["address"];
+	        this.logo = source["logo"];
+	        this.contactPhone = source["contactPhone"];
+	        this.contactEmail = source["contactEmail"];
+	    }
+	}
 	export class RegisterRootOperator {
 	    name: string;
 	    email: string;
@@ -117,12 +177,96 @@ export namespace commands {
 	        this.pin = source["pin"];
 	    }
 	}
+	export class SignIn {
+	    username: string;
+	    pin: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SignIn(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.username = source["username"];
+	        this.pin = source["pin"];
+	    }
+	}
+	export class SwitchOrganization {
+	    organizationId: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SwitchOrganization(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.organizationId = source["organizationId"];
+	    }
+	}
+	export class UpdateCategory {
+	    id: string;
+	    name: string;
+	    description?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	    }
+	}
+	export class UpdateOrganization {
+	    id: string;
+	    name: string;
+	    legalName: string;
+	    address: string;
+	    logo?: string;
+	    contactPhone?: string;
+	    contactEmail?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateOrganization(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.legalName = source["legalName"];
+	        this.address = source["address"];
+	        this.logo = source["logo"];
+	        this.contactPhone = source["contactPhone"];
+	        this.contactEmail = source["contactEmail"];
+	    }
+	}
 
 }
 
 export namespace responses {
 	
-	export class MemberResponse {
+	export class Category {
+	    id: string;
+	    name: string;
+	    description?: string;
+	    organization_id: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Category(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.organization_id = source["organization_id"];
+	    }
+	}
+	export class Member {
 	    id: string;
 	    organizationId: string;
 	    operatorId: string;
@@ -132,7 +276,7 @@ export namespace responses {
 	    deletedAt?: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new MemberResponse(source);
+	        return new Member(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -146,7 +290,7 @@ export namespace responses {
 	        this.deletedAt = source["deletedAt"];
 	    }
 	}
-	export class OperatorResponse {
+	export class Operator {
 	    id: string;
 	    name: string;
 	    email: string;
@@ -158,7 +302,7 @@ export namespace responses {
 	    deletedAt?: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new OperatorResponse(source);
+	        return new Operator(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -174,7 +318,7 @@ export namespace responses {
 	        this.deletedAt = source["deletedAt"];
 	    }
 	}
-	export class TeamMemberResponse {
+	export class TeamMember {
 	    id: string;
 	    teamId: string;
 	    operatorId: string;
@@ -184,7 +328,7 @@ export namespace responses {
 	    deletedAt?: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new TeamMemberResponse(source);
+	        return new TeamMember(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -198,7 +342,7 @@ export namespace responses {
 	        this.deletedAt = source["deletedAt"];
 	    }
 	}
-	export class TeamResponse {
+	export class Team {
 	    id: string;
 	    name: string;
 	    organizationId: string;
@@ -207,10 +351,10 @@ export namespace responses {
 	    createdAt: number;
 	    updatedAt: number;
 	    deletedAt?: number;
-	    Members: TeamMemberResponse[];
+	    Members: TeamMember[];
 	
 	    static createFrom(source: any = {}) {
-	        return new TeamResponse(source);
+	        return new Team(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -223,7 +367,7 @@ export namespace responses {
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	        this.deletedAt = source["deletedAt"];
-	        this.Members = this.convertValues(source["Members"], TeamMemberResponse);
+	        this.Members = this.convertValues(source["Members"], TeamMember);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -244,7 +388,7 @@ export namespace responses {
 		    return a;
 		}
 	}
-	export class OrganizationResponse {
+	export class Organization {
 	    id: string;
 	    name: string;
 	    slug: string;
@@ -257,11 +401,11 @@ export namespace responses {
 	    createdAt: number;
 	    updatedAt: number;
 	    deletedAt?: number;
-	    Members: MemberResponse[];
-	    Teams: TeamResponse[];
+	    Members: Member[];
+	    Teams: Team[];
 	
 	    static createFrom(source: any = {}) {
-	        return new OrganizationResponse(source);
+	        return new Organization(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -278,8 +422,8 @@ export namespace responses {
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	        this.deletedAt = source["deletedAt"];
-	        this.Members = this.convertValues(source["Members"], MemberResponse);
-	        this.Teams = this.convertValues(source["Teams"], TeamResponse);
+	        this.Members = this.convertValues(source["Members"], Member);
+	        this.Teams = this.convertValues(source["Teams"], Team);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

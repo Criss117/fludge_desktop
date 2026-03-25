@@ -5,14 +5,14 @@ import (
 )
 
 type ActiveOperatorResponse struct {
-	*responses.OperatorResponse `json:"operator"`
-	*responses.MemberResponse   `json:"member"`
-	Teams                       []*responses.TeamResponse `json:"teams"`
+	*responses.Operator `json:"operator"`
+	*responses.Member   `json:"member"`
+	Teams               []*responses.Team `json:"teams"`
 }
 
 type SessionStateResponse struct {
-	ActiveOrganization *responses.OrganizationResponse `json:"activeOrganization"`
-	ActiveOperator     *ActiveOperatorResponse         `json:"activeOperator"`
+	ActiveOrganization *responses.Organization `json:"activeOrganization"`
+	ActiveOperator     *ActiveOperatorResponse `json:"activeOperator"`
 }
 
 func SessionStateResponseFromDomain(sessionState *SessionState) *SessionStateResponse {
@@ -20,7 +20,7 @@ func SessionStateResponseFromDomain(sessionState *SessionState) *SessionStateRes
 		return nil
 	}
 
-	var activeOrganization *responses.OrganizationResponse = nil
+	var activeOrganization *responses.Organization = nil
 	var activeOperator *ActiveOperatorResponse = nil
 
 	if sessionState.ActiveOrganization != nil {
@@ -29,9 +29,9 @@ func SessionStateResponseFromDomain(sessionState *SessionState) *SessionStateRes
 
 	if sessionState.ActiveOperator != nil {
 		activeOperator = &ActiveOperatorResponse{
-			OperatorResponse: responses.OperatorResponseFromDomain(sessionState.ActiveOperator.Operator),
-			MemberResponse:   responses.MemberResponseFromDomain(sessionState.ActiveOperator.Member),
-			Teams:            make([]*responses.TeamResponse, len(sessionState.ActiveOperator.Teams)),
+			Operator: responses.OperatorResponseFromDomain(sessionState.ActiveOperator.Operator),
+			Member:   responses.MemberResponseFromDomain(sessionState.ActiveOperator.Member),
+			Teams:    make([]*responses.Team, len(sessionState.ActiveOperator.Teams)),
 		}
 
 		for i, team := range sessionState.ActiveOperator.Teams {

@@ -1,411 +1,476 @@
-# 🧠 POS Desktop App — Contexto Completo (DDD + Go + Wails + sqlc)
+# 🧠 CONTEXTO COMPLETO DEL PROYECTO — POS DESKTOP (WAILS + GO + REACT)
 
-## 📌 Concepto General
-
-Aplicación **POS (Point of Sale) desktop**, diseñada para operar **offline-first**, con soporte **multitenant** mediante `organization_id` en todos los agregados.
-
-### Stack
-
-- **Wails v2** → aplicación desktop
-- **Go** → backend (DDD + Clean Architecture)
-- **React + TypeScript** → frontend
-- **SQLite + sqlc** → persistencia (queries tipadas, sin ORM)
+Este documento define la arquitectura, decisiones técnicas y organización del proyecto para que una IA pueda continuar el desarrollo de forma consistente.
 
 ---
 
-## 🧠 Principios Arquitectónicos
+# 🧩 VISIÓN GENERAL
 
-- **DDD real (no superficial)**
-- **CQRS ligero**
-- **Bounded Contexts bien definidos**
-- **Separación estricta de capas**
-- **Sin acoplamiento entre dominios**
+Aplicación POS (Point of Sale) desktop con:
+
+- Funcionamiento 100% local/offline
+- Arquitectura modular basada en DDD
+- Soporte multitenant (multi-organización)
+- UI en React, backend en Go
+- Comunicación directa vía bindings de Wails
 
 ---
 
-## 🧩 Modelo Mental del Sistema
+# 🧱 STACK TECNOLÓGICO
 
-```
-IAM        → quién eres
-Catalog    → qué vendes
-Inventory  → cuánto tienes
-Sales      → qué vendiste
-Credit     → quién debe
-```
+- Wails v2 (desktop app)
+- Go (backend, arquitectura DDD)
+- React + TypeScript (frontend)
+- SQLite (base de datos local)
+- sqlc (queries tipadas)
+- Zod (validaciones frontend)
+
+---
+
+# 🧠 PRINCIPIOS ARQUITECTÓNICOS
+
+## 1. DDD
+
+- Separación por Bounded Contexts
+- Agregados como núcleo del dominio
+- Value Objects para invariantes
+- Use Cases para escritura
+- Queries directas para lectura
+
+---
+
+## 2. CQRS (ligero)
+
+Escritura → Use Cases + Aggregates  
+Lectura → sqlc directo → responses
+
+---
+
+## 3. Clean Architecture
+
+Handler → UseCase → Domain → Repository → DB
+
+---
+
+## 4. Multitenancy
+
+organization_id en TODAS las entidades
+
+---
+
+## 5. Offline-first
+
+Sin APIs externas  
+Sin auth server  
+Todo local
 
 ---
 
 # 🧩 BOUNDED CONTEXTS
 
----
-
 ## 🔐 IAM (Identity & Access)
 
-### Aggregate Roots:
+Responsable de:
 
-- `Operator`
-- `Organization`
-- `AppState`
-
-### Entidades hijas:
-
-- `Member`
-- `Team`
-- `TeamMember`
-
-### Responsabilidades:
-
-- Autenticación (PIN)
-- Gestión de organizaciones
-- Permisos
-- Estado activo (session)
+- Operadores
+- Organizaciones
+- Membresías
+- Equipos y permisos
+- Sesión
 
 ---
 
-## 📦 Catalog
+### Aggregate Roots
 
-### Aggregate Roots:
+#### Operator
 
-- `Product`
-- `Category`
-- `Supplier`
+Tipos:
 
-### Reglas:
+- ROOT → puede crear organizaciones
+- EMPLOYEE → pertenece a una sola organización
 
-- ❗ `Product` **NO tiene stock**
-- Solo define datos estáticos
-- Referencias por ID
+Campos:
 
----
-
-## 📦 Inventory
-
-### Aggregate Roots:
-
-- `InventoryItem`
-
-### Entidades hijas:
-
-- `StockMovement`
-
-### Responsabilidades:
-
-- Estado actual (`quantity`, `min_stock`)
-- Historial de movimientos
-- Ajustes de stock
+- id
+- name
+- username
+- email (VO)
+- pin (VO)
+- operator_type
+- timestamps
 
 ---
 
-## 🛒 Sales (POS)
+#### Organization
 
-### Aggregate Roots:
-
-- `Sale` (persistido como `ticket`)
-
-### Entidades hijas:
-
-- `SaleItem` (persistido como `ticket_detail`)
-
-### Responsabilidades:
-
-- Crear ventas
-- Calcular totales
-- Manejar pagos
-- Emitir eventos
+- id
+- name
+- slug (VO)
+- legal_name
+- address
+- Members[]
+- Teams[]
 
 ---
 
-## 💳 Credit
+#### AppState (persistido)
 
-### Aggregate Roots:
-
-- `Customer`
-
-### Entidades hijas:
-
-- `CreditPayment`
-
-### Responsabilidades:
-
-- Límite de crédito
-- Balance actual (**cacheado**)
-- Registro de pagos
+- active_operator_id
+- active_organization_id
 
 ---
 
-# 🔗 RELACIÓN ENTRE CONTEXTOS
+### Entidades hijas
 
-```
-IAM → todos
+#### Member
 
-Catalog → Inventory, Sales
-
-Sales → Inventory (evento)
-Sales → Credit (evento)
-
-Inventory → reacciona a eventos
-
-Credit → depende de Sales
-```
+- operator_id
+- organization_id
+- role (ROOT | MEMBER)
 
 ---
 
-# 🧱 CAPAS DE ARQUITECTURA
+#### Team
+
+- name
+- permissions
+- members[]
 
 ---
 
-## Domain
+#### TeamMember
 
-- Lógica de negocio pura
-- Sin dependencias externas
-
-Contiene:
-
-```
-aggregates/
-valueobjects/
-ports/
-services/
-```
+- operator_id
+- team_id
 
 ---
 
-## Application
+## 📦 Catálogo
 
-- Orquesta casos de uso
+Aggregate roots independientes:
 
-Contiene:
+- Product
+- Category
+- Supplier
 
-```
-usecases/
-commands/
-responses/
-queries/ (interfaces, no sqlc)
-```
+Relaciones por ID (no agregados anidados)
 
 ---
 
-## Infrastructure
+## 📦 Inventario (pendiente)
 
-- Implementaciones técnicas
+- StockMovement
 
-Contiene:
+---
 
-```
-repositories/
-mappers/
-sqlc (desde shared)
+## 💳 POS (pendiente)
+
+- Ticket
+- TicketDetail
+
+---
+
+## 💰 Crédito (pendiente)
+
+- Customer
+- CreditPayment
+
+---
+
+# 🧠 MODELADO CLAVE
+
+## OperatorType vs MemberRole
+
+OperatorType → nivel GLOBAL  
+MemberRole → nivel ORGANIZACIÓN
+
+---
+
+### OperatorType
+
+- ROOT
+- EMPLOYEE
+
+---
+
+### MemberRole
+
+- ROOT
+- MEMBER
+
+---
+
+Regla importante:
+
+ROOT operator NO necesita pertenecer a teams
+
+---
+
+# 🧠 SESIÓN
+
+## AppState (persistido)
+
+```go
+type AppState struct {
+	ActiveOrganizationID *string
+	ActiveOperatorID     *string
+}
 ```
 
 ---
 
-## Interfaces
+## SessionState (en memoria)
 
-- Adaptadores (Wails)
+```go
+type SessionState struct {
+	ActiveOrganization *Organization
+	ActiveOperator     *ActiveOperator
+}
 
-Contiene:
-
-```
-handlers/
-session access
-DTO mapping
-```
-
----
-
-# 📁 ESTRUCTURA DEL PROYECTO
-
-```
-internal/
-  shared/
-    db/
-      schema/
-        001_iam.sql
-        002_catalog.sql
-        003_inventory.sql
-        004_sales.sql
-        005_credit.sql
-
-      iam_sqlc/
-      catalog_sqlc/
-      inventory_sqlc/
-      sales_sqlc/
-      credit_sqlc/
-
-      db.go
-
-    derrors/
-    valueobjects/
-    events/
-    types/
-    lib/
-
-  appstate/
-
-  platform/
-    iam/
-    catalog/
-    inventory/
-    sales/
-    credit/
+type ActiveOperator struct {
+	Operator *Operator
+	Member   *Member
+	Teams    []*Team
+}
 ```
 
 ---
 
-# 🗄️ BASE DE DATOS
+## Construcción
 
-## Principios
-
-- Multitenant (`organization_id`)
-- Soft delete (`deleted_at`)
-- Constraints fuertes
-- Índices optimizados
-- DB garantiza unicidad
-
----
-
-## Separación por Contexto
-
-### IAM
-
-```
-operator
-organization
-app_state
-member
-team
-team_member
-```
-
-### Catalog
-
-```
-product (SIN stock)
-category
-supplier
-```
-
-### Inventory
-
-```
-inventory_item  ← estado actual
-stock_movement  ← historial
-```
-
-### Sales
-
-```
-ticket
-ticket_detail
-```
-
-### Credit
-
-```
-customer
-credit_payment
+```go
+BuildSessionState(operator, org, member, teams)
 ```
 
 ---
 
-# ⚠️ REGLAS CRÍTICAS
+## Actualización
 
-1. **Product NO tiene stock**
-2. **Inventory maneja TODO el stock**
-3. **Contextos NO comparten agregados**
-4. Comunicación solo vía:
-   - IDs
-   - eventos
-
-5. **sqlc solo se usa en infrastructure**
-6. **1 bounded context = 1 paquete sqlc**
-7. **Use cases no instancian dependencias**
-8. **Handlers no contienen lógica de negocio**
-9. **Shared NO contiene lógica de dominio**
+UseCase → Handler → StateChangeEvent → App → SessionState + AppState
 
 ---
 
-# 🧠 SHARED KERNEL
+Regla clave:
 
-## Contiene únicamente:
-
-```
-db/           → sqlc + conexión
-derrors/      → errores genéricos
-valueobjects/ → Email, Phone
-events/       → interfaces de eventos
-types/        → pagination, filters
-lib/          → uuid, time
-```
-
-## NO contiene:
-
-- lógica de negocio
-- agregados
-- repositorios
-- DTOs
-- services de dominio
+El dominio NO conoce la sesión
 
 ---
 
-# ⚙️ SQLC CONFIG
+# 🔄 EVENTOS DE ESTADO
 
-- 1 config por bounded context (en el mismo yaml)
-- 1 `queries.sql` por contexto
-- 1 package generado por contexto
-
-Ejemplo:
-
+```go
+type StateChangeEvent struct {
+	Type         OnStateChangeType
+	Operator     *Operator
+	Organization *Organization
+	Member       *Member
+	Teams        []*Team
+}
 ```
-catalog_sqlc/
-inventory_sqlc/
-sales_sqlc/
+
+Tipos:
+
+- SignUp
+- SignIn
+- SignOut
+- SwitchOrganization
+
+---
+
+# 🧠 USE CASES IMPORTANTES
+
+## Auth Flow
+
+Register → SignIn → acceso
+
+---
+
+## RegisterRootOperator
+
+- crea operator ROOT
+- no maneja sesión
+- handler emite evento
+
+---
+
+## SignIn
+
+- valida credenciales
+- retorna operator
+
+---
+
+## SwitchOrganization
+
+Use case obligatorio (no query)
+
+Valida:
+
+- operador activo
+- pertenencia
+
+Retorna:
+
+- Operator
+- Organization
+- Member
+- Teams
+
+---
+
+# 🔥 TRANSACCIONES
+
+Responsabilidad:
+
+UseCase controla la transacción
+
+---
+
+## TransactionManager
+
+```go
+type TxManager interface {
+	WithTx(ctx context.Context, fn func(q *db.Queries) error) error
+}
 ```
 
 ---
 
-# 📡 EVENTOS DE DOMINIO
+## Uso
 
-Ejemplo:
-
-```
-SaleCompleted
-  → Inventory descuenta stock
-  → Credit genera deuda
+```go
+txManager.WithTx(ctx, func(q *db.Queries) error {
+	// operaciones
+})
 ```
 
 ---
 
-# 🔒 SESSION
+# 🧠 SQLC
 
-- `AppState` → IDs activos (dominio)
-- `SessionState` → agregados cargados (app layer)
+## Config
 
-Handlers usan `SessionState`, no DB directa
+```yaml
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "internal/shared/db/queries.sql"
+    schema: "internal/shared/db/schema.sql"
+    gen:
+      go:
+        package: "db"
+        out: "internal/shared/db"
+        emit_json_tags: true
+        overrides:
+          - db_type: "blob"
+            go_type: "encoding/json.RawMessage"
+```
 
 ---
 
-# 🚀 OBJETIVO DEL SISTEMA
+## Ubicación
 
-- Offline-first
-- Alta coherencia de dominio
-- POS rápido y consistente
-- Escalable por módulos
-- Mantenible a largo plazo
+internal/shared/db/
+
+- schema.sql
+- queries.sql
+- código generado
 
 ---
 
-# 🧠 INSTRUCCIONES PARA LA IA
+# 🧠 HANDLERS
 
-Cualquier cambio debe:
+```go
+type IamHandler struct {
+	app           *application.Container
+	getCtx        func() context.Context
+	onStateChange func(StateChangeEvent)
+}
+```
 
-- respetar bounded contexts
-- no acoplar dominios
-- mantener separación de capas
-- evitar lógica en handlers
-- evitar uso de sqlc fuera de infrastructure
-- mantener invariantes en domain
-- tratar DB como detalle de infraestructura
+---
 
-Este es un sistema diseñado con DDD real y arquitectura limpia.  
-Las decisiones deben priorizar consistencia del dominio sobre conveniencia técnica.
+Flujo:
+
+React → Handler → UseCase → Event → App
+
+---
+
+Regla:
+
+NO guardar ctx en struct
+
+---
+
+# 🧠 APP (COMPOSITION ROOT)
+
+Responsable de:
+
+- inicializar DB
+- crear repositorios
+- crear containers
+- inyectar handlers
+- manejar SessionState
+
+---
+
+## StateChange handling
+
+```go
+func (a *App) handleStateChange(e StateChangeEvent)
+```
+
+Actualiza:
+
+- SessionState (memoria)
+- AppState (DB)
+
+---
+
+# 🧠 SHARED
+
+Ubicación:
+
+internal/shared/
+
+---
+
+## Contenido
+
+- db/ → sqlc + schema + queries
+- dbutils/ → helpers time/null
+- derrors/ → errores compartidos
+- lib/ → uuid, helpers
+- valueobjects/ → Email
+
+---
+
+Regla:
+
+Shared NO contiene lógica de dominio
+
+---
+
+# 🧠 REGLAS IMPORTANTES
+
+- Aggregates con campos públicos
+- NewX valida, ReconstituteX no valida
+- UseCases solo para escritura
+- Queries no usan aggregates
+- Repos no contienen lógica de negocio
+- SessionState fuera del dominio
+- organization_id obligatorio en todo
+- Eventos para sincronizar estado
+
+---
+
+# 🎯 OBJETIVO
+
+Mantener una arquitectura:
+
+- consistente
+- predecible
+- extensible
+- fácil de razonar
+
+para soportar crecimiento del POS sin romper el dominio.

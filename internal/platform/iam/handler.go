@@ -22,14 +22,16 @@ type IamHandler struct {
 }
 
 func NewIamHandler(
-	getCtx GetCtxFunc,
-	onStateChange OnStateChange,
 	app *application.Container,
+	onStateChange OnStateChange,
+	getCtx GetCtxFunc,
+	getSession GetSessionFunc,
 ) *IamHandler {
 	return &IamHandler{
 		getCtx:        getCtx,
 		app:           app,
 		onStateChange: onStateChange,
+		getSession:    getSession,
 	}
 }
 
@@ -40,6 +42,8 @@ func (h *IamHandler) getCurrentContext() context.Context {
 	}
 	return ctx
 }
+
+// Operator
 
 func (h *IamHandler) currentOperator() (*aggregates.Operator, error) {
 	sessionState := h.getSession()
@@ -55,7 +59,7 @@ func (h *IamHandler) currentOperator() (*aggregates.Operator, error) {
 	return sessionState.ActiveOperator.Operator, nil
 }
 
-func (h *IamHandler) RegisterRootOperator(cmd *commands.RegisterRootOperator) (*responses.OperatorResponse, error) {
+func (h *IamHandler) RegisterRootOperator(cmd *commands.RegisterRootOperator) (*responses.Operator, error) {
 	ctx := h.getCurrentContext()
 
 	newOperator, err := h.app.RegisterRootOperator.Execute(ctx, cmd)
@@ -72,7 +76,7 @@ func (h *IamHandler) RegisterRootOperator(cmd *commands.RegisterRootOperator) (*
 	return responses.OperatorResponseFromDomain(newOperator), nil
 }
 
-func (h *IamHandler) SignIn(cmd *commands.SignIn) (*responses.OperatorResponse, error) {
+func (h *IamHandler) SignIn(cmd *commands.SignIn) (*responses.Operator, error) {
 	ctx := h.getCurrentContext()
 
 	newOperator, err := h.app.SignIn.Execute(ctx, cmd)
@@ -95,7 +99,9 @@ func (h *IamHandler) SignOut() {
 	})
 }
 
-func (h *IamHandler) SwitchOrganization(cmd *commands.SwitchOrganization) (*responses.OrganizationResponse, error) {
+// Organization
+
+func (h *IamHandler) SwitchOrganization(cmd *commands.SwitchOrganization) (*responses.Organization, error) {
 	ctx := h.getCurrentContext()
 	currentOperator, err := h.currentOperator()
 
@@ -121,7 +127,7 @@ func (h *IamHandler) SwitchOrganization(cmd *commands.SwitchOrganization) (*resp
 	return responses.OrganizationResponseFromDomain(organization), nil
 }
 
-func (h *IamHandler) FindOneOrganization(cmd *commands.FindOneOrganization) (*responses.OrganizationResponse, error) {
+func (h *IamHandler) FindOneOrganization(cmd *commands.FindOneOrganization) (*responses.Organization, error) {
 	ctx := h.getCurrentContext()
 	currentOperator, err := h.currentOperator()
 
@@ -147,7 +153,7 @@ func (h *IamHandler) FindOneOrganization(cmd *commands.FindOneOrganization) (*re
 	return responses.OrganizationResponseFromDomain(organization), nil
 }
 
-func (h *IamHandler) CreateOrganization(cmd *commands.RegisterOrganization) (*responses.OrganizationResponse, error) {
+func (h *IamHandler) CreateOrganization(cmd *commands.RegisterOrganization) (*responses.Organization, error) {
 	ctx := h.getCurrentContext()
 	currentOperator, err := h.currentOperator()
 
@@ -158,4 +164,53 @@ func (h *IamHandler) CreateOrganization(cmd *commands.RegisterOrganization) (*re
 	h.app.RegisterOrganization.Execute(ctx, currentOperator.ID, cmd)
 
 	return nil, nil
+}
+
+func (h *IamHandler) UpdateOrganization(cmd *commands.UpdateOrganization) (*responses.Organization, error) {
+	ctx := h.getCurrentContext()
+	currentOperator, err := h.currentOperator()
+
+	if err != nil {
+		return nil, err
+	}
+
+	updatedOrg, errUpdated := h.app.UpdateOrganization.Execute(ctx, currentOperator.ID, cmd)
+
+	if errUpdated != nil {
+		return nil, errUpdated
+	}
+
+	h.onStateChange(appstate.StateChangeEvent{
+		Type:         appstate.SwitchOrganization,
+		Organization: updatedOrg,
+	})
+
+	return responses.OrganizationResponseFromDomain(updatedOrg), nil
+}
+
+func (h *IamHandler) FindManyOrganizationsByRootOperator() ([]*responses.Organization, error) {
+	ctx := h.getCurrentContext()
+	currentOperator, err := h.currentOperator()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !currentOperator.IsRoot() {
+		return nil, derrors.ErrOperatorMustBeRoot
+	}
+
+	organizations, err := h.app.FindManyOrganizationsByRootOperator.Execute(ctx, currentOperator.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	orgRes := make([]*responses.Organization, len(organizations))
+
+	for i, org := range organizations {
+		orgRes[i] = responses.OrganizationResponseFromDomain(org)
+	}
+
+	return orgRes, nil
 }

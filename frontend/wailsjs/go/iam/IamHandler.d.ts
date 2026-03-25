@@ -3,4 +3,18 @@
 import {commands} from '../models';
 import {responses} from '../models';
 
-export function RegisterRootOperator(arg1:commands.RegisterRootOperator):Promise<responses.OperatorResponse>;
+export function CreateOrganization(arg1:commands.RegisterOrganization):Promise<responses.Organization>;
+
+export function FindManyOrganizationsByRootOperator():Promise<Array<responses.Organization>>;
+
+export function FindOneOrganization(arg1:commands.FindOneOrganization):Promise<responses.Organization>;
+
+export function RegisterRootOperator(arg1:commands.RegisterRootOperator):Promise<responses.Operator>;
+
+export function SignIn(arg1:commands.SignIn):Promise<responses.Operator>;
+
+export function SignOut():Promise<void>;
+
+export function SwitchOrganization(arg1:commands.SwitchOrganization):Promise<responses.Organization>;
+
+export function UpdateOrganization(arg1:commands.UpdateOrganization):Promise<responses.Organization>;

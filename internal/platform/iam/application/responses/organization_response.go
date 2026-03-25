@@ -5,7 +5,7 @@ import (
 	"desktop/internal/shared/db/dbutils"
 )
 
-type OrganizationResponse struct {
+type Organization struct {
 	ID           string  `json:"id"`
 	Name         string  `json:"name"`
 	Slug         string  `json:"slug"`
@@ -18,15 +18,15 @@ type OrganizationResponse struct {
 	CreatedAt    int64   `json:"createdAt"`
 	UpdatedAt    int64   `json:"updatedAt"`
 	DeletedAt    *int64  `json:"deletedAt"`
-	Members      []*MemberResponse
-	Teams        []*TeamResponse
+	Members      []*Member
+	Teams        []*Team
 }
 
-func OrganizationResponseFromDomain(organization *aggregates.Organization) *OrganizationResponse {
+func OrganizationResponseFromDomain(organization *aggregates.Organization) *Organization {
 
 	contactEmail := organization.ContactEmail.Value()
 
-	return &OrganizationResponse{
+	return &Organization{
 		ID:           organization.ID,
 		Name:         organization.Name,
 		Slug:         organization.Slug.Value(),

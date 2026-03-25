@@ -5,7 +5,7 @@ import (
 	"desktop/internal/shared/db/dbutils"
 )
 
-type MemberResponse struct {
+type Member struct {
 	ID             string `json:"id"`
 	OrganizationID string `json:"organizationId"`
 	OperatorID     string `json:"operatorId"`
@@ -15,9 +15,9 @@ type MemberResponse struct {
 	DeletedAt      *int64 `json:"deletedAt"`
 }
 
-func MemberResponseFromDomain(member *aggregates.Member) *MemberResponse {
+func MemberResponseFromDomain(member *aggregates.Member) *Member {
 
-	return &MemberResponse{
+	return &Member{
 		ID:             member.ID,
 		OrganizationID: member.OrganizationID,
 		OperatorID:     member.OperatorID,

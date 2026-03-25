@@ -70,7 +70,7 @@ type CreateInventoryItemParams struct {
 }
 
 // ------------------------------------------------------------------------------
-// Inventory Queries
+// Inventory Items Queries
 // ------------------------------------------------------------------------------
 func (q *Queries) CreateInventoryItem(ctx context.Context, arg CreateInventoryItemParams) error {
 	_, err := q.db.ExecContext(ctx, createInventoryItem,
@@ -197,6 +197,47 @@ func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) er
 	return err
 }
 
+const existsProductByNameOrSku = `-- name: ExistsProductByNameOrSku :many
+SELECT name, sku FROM product
+WHERE (lowwer(name) = lower(?1) OR sku = ?2)
+AND organization_id = ?3 
+AND deleted_at IS NULL
+`
+
+type ExistsProductByNameOrSkuParams struct {
+	Name           string `json:"name"`
+	Sku            string `json:"sku"`
+	OrganizationID string `json:"organization_id"`
+}
+
+type ExistsProductByNameOrSkuRow struct {
+	Name string `json:"name"`
+	Sku  string `json:"sku"`
+}
+
+func (q *Queries) ExistsProductByNameOrSku(ctx context.Context, arg ExistsProductByNameOrSkuParams) ([]ExistsProductByNameOrSkuRow, error) {
+	rows, err := q.db.QueryContext(ctx, existsProductByNameOrSku, arg.Name, arg.Sku, arg.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ExistsProductByNameOrSkuRow
+	for rows.Next() {
+		var i ExistsProductByNameOrSkuRow
+		if err := rows.Scan(&i.Name, &i.Sku); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const findAllCategories = `-- name: FindAllCategories :many
 SELECT id, name, description, organization_id, created_at, updated_at, deleted_at FROM category
 WHERE organization_id = ? AND deleted_at IS NULL
@@ -234,19 +275,39 @@ func (q *Queries) FindAllCategories(ctx context.Context, organizationID string) 
 }
 
 const findAllProducts = `-- name: FindAllProducts :many
-SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, category_id, supplier_id, organization_id, created_at, updated_at, deleted_at FROM product
+SELECT product.id, product.sku, product.name, product.description, product.wholesale_price, product.sale_price, product.cost_price, product.category_id, product.supplier_id, product.organization_id, product.created_at, product.updated_at, product.deleted_at, inventory_item.stock, inventory_item.min_stock
+FROM product
+INNER JOIN inventory_item ON inventory_item.product_id = product.id
 WHERE product.organization_id = ? AND deleted_at IS NULL
 `
 
-func (q *Queries) FindAllProducts(ctx context.Context, organizationID string) ([]Product, error) {
+type FindAllProductsRow struct {
+	ID             string         `json:"id"`
+	Sku            string         `json:"sku"`
+	Name           string         `json:"name"`
+	Description    sql.NullString `json:"description"`
+	WholesalePrice int64          `json:"wholesale_price"`
+	SalePrice      int64          `json:"sale_price"`
+	CostPrice      int64          `json:"cost_price"`
+	CategoryID     sql.NullString `json:"category_id"`
+	SupplierID     sql.NullString `json:"supplier_id"`
+	OrganizationID string         `json:"organization_id"`
+	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
+	DeletedAt      sql.NullInt64  `json:"deleted_at"`
+	Stock          int64          `json:"stock"`
+	MinStock       int64          `json:"min_stock"`
+}
+
+func (q *Queries) FindAllProducts(ctx context.Context, organizationID string) ([]FindAllProductsRow, error) {
 	rows, err := q.db.QueryContext(ctx, findAllProducts, organizationID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Product
+	var items []FindAllProductsRow
 	for rows.Next() {
-		var i Product
+		var i FindAllProductsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Sku,
@@ -261,6 +322,8 @@ func (q *Queries) FindAllProducts(ctx context.Context, organizationID string) ([
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
+			&i.Stock,
+			&i.MinStock,
 		); err != nil {
 			return nil, err
 		}
@@ -325,6 +388,32 @@ func (q *Queries) FindOneCategoryByName(ctx context.Context, arg FindOneCategory
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const findOneInventoryItem = `-- name: FindOneInventoryItem :one
+SELECT product_id, organization_id, stock, min_stock, created_at, updated_at FROM inventory_item
+WHERE product_id = ?1 
+AND organization_id = ?2 
+AND deleted_at IS NULL
+`
+
+type FindOneInventoryItemParams struct {
+	ProductID      string `json:"product_id"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) FindOneInventoryItem(ctx context.Context, arg FindOneInventoryItemParams) (InventoryItem, error) {
+	row := q.db.QueryRowContext(ctx, findOneInventoryItem, arg.ProductID, arg.OrganizationID)
+	var i InventoryItem
+	err := row.Scan(
+		&i.ProductID,
+		&i.OrganizationID,
+		&i.Stock,
+		&i.MinStock,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

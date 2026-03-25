@@ -2,12 +2,10 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"desktop/internal/platform/catalog/domain/aggregates"
-	"desktop/internal/platform/catalog/infrastructure/mappers"
+	"desktop/internal/platform/catalog/domain/ports"
 	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
-	"errors"
 )
 
 type SqliteProductRepository struct {
@@ -71,39 +69,39 @@ func (r *SqliteProductRepository) Delete(ctx context.Context, product *aggregate
 	return nil
 }
 
-func (r *SqliteProductRepository) FindOneById(ctx context.Context, organizationId, productId string) (*aggregates.Product, error) {
-	dbProduct, err := r.queries.FindOneProduct(ctx, db.FindOneProductParams{
-		ProductID:      productId,
+func (r *SqliteProductRepository) ExistsBy(ctx context.Context, organizationId string, params ports.ExistsByParams) (ports.ExistsByReturn, error) {
+	products, err := r.queries.ExistsProductByNameOrSku(ctx, db.ExistsProductByNameOrSkuParams{
+		Name:           params.Name,
+		Sku:            params.Sku,
 		OrganizationID: organizationId,
 	})
 
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+		return ports.ExistsByReturn{}, err
+	}
+
+	if len(products) == 0 {
+		return ports.ExistsByReturn{
+			Name: false,
+			Sku:  false,
+		}, nil
+	}
+
+	var existsByName bool = false
+	var existsBySku bool = false
+
+	for _, product := range products {
+		if product.Name == params.Name {
+			existsByName = true
 		}
 
-		return nil, err
+		if product.Sku == params.Sku {
+			existsBySku = true
+		}
 	}
 
-	return mappers.MapProductToDomain(dbProduct), nil
-}
-
-func (r *SqliteProductRepository) FindAll(ctx context.Context, organizationId string) ([]*aggregates.Product, error) {
-	dbProducts, err := r.queries.FindAllProducts(ctx, organizationId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if len(dbProducts) == 0 {
-		return nil, nil
-	}
-
-	products := make([]*aggregates.Product, len(dbProducts))
-
-	for i, dbProduct := range dbProducts {
-		products[i] = mappers.MapProductToDomain(dbProduct)
-	}
-
-	return products, nil
+	return ports.ExistsByReturn{
+		Name: existsByName,
+		Sku:  existsBySku,
+	}, nil
 }

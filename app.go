@@ -9,10 +9,10 @@ import (
 	catalogInfra "desktop/internal/platform/catalog/infrastructure"
 	"desktop/internal/platform/iam"
 	iamApp "desktop/internal/platform/iam/application"
-	iamInfra "desktop/internal/platform/iam/infrastructure"
-
 	iamPorts "desktop/internal/platform/iam/domain/ports"
-
+	iamInfra "desktop/internal/platform/iam/infrastructure"
+	inventoryApp "desktop/internal/platform/inventory/application"
+	inventoryInfra "desktop/internal/platform/inventory/infrastructure"
 	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
 	_ "embed"
@@ -77,17 +77,28 @@ func (a *App) startup(ctx context.Context) {
 		func() *appstate.SessionState { return a.SessionState },
 	)
 
-	// Catlog - Repositories
+	// Inventory - Repositories & Container
+	inventoryRepositories := inventoryInfra.NewRepositoriesContainer(a.queries)
+
+	inventoryUseCasesContainer := inventoryApp.NewUseCasesContainer(
+		inventoryRepositories.InventoryItemRepository,
+	)
+
+	// Catalog - Repositories & Container
 	catalogRepositories := catalogInfra.NewContainer(a.queries)
 
-	catalogAppContainer := catalogApp.NewContainer(
+	catalogUseCasesContainer := catalogApp.NewUseCasesContainer(
 		txManager,
 		catalogRepositories.CategoryRepository,
 		catalogRepositories.ProductRepository,
+		*inventoryUseCasesContainer.CreateInventoryItem,
 	)
 
+	catalogQueriesContainer := catalogApp.NewQueriesContainer(a.queries)
+
 	a.CatalogHandler = *catalog.NewCatalogHandler(
-		catalogAppContainer,
+		catalogUseCasesContainer,
+		catalogQueriesContainer,
 		func() context.Context { return a.ctx },
 		func() *appstate.SessionState { return a.SessionState },
 	)

@@ -95,11 +95,19 @@ AND product.organization_id = sqlc.arg(organization_id)
 AND product.deleted_at IS NULL;
 
 -- name: FindAllProducts :many
-SELECT * FROM product
+SELECT product.*, inventory_item.stock, inventory_item.min_stock
+FROM product
+INNER JOIN inventory_item ON inventory_item.product_id = product.id
 WHERE product.organization_id = ? AND deleted_at IS NULL;
 
+-- name: ExistsProductByNameOrSku :many
+SELECT name, sku FROM product
+WHERE (lowwer(name) = lower(sqlc.arg(name)) OR sku = sqlc.arg(sku))
+AND organization_id = sqlc.arg(organization_id) 
+AND deleted_at IS NULL;
+
 --------------------------------------------------------------------------------
--- Inventory Queries
+-- Inventory Items Queries
 --------------------------------------------------------------------------------
 
 -- name: CreateInventoryItem :exec
@@ -116,3 +124,9 @@ INSERT INTO inventory_item (
 UPDATE inventory_item 
 SET stock = ?, min_stock = ?, updated_at = ?
 WHERE product_id = ? AND organization_id = ? AND deleted_at IS NULL;
+
+-- name: FindOneInventoryItem :one
+SELECT * FROM inventory_item
+WHERE product_id = sqlc.arg(product_id) 
+AND organization_id = sqlc.arg(organization_id) 
+AND deleted_at IS NULL;

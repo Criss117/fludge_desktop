@@ -12,20 +12,23 @@ type GetCtxFunc func() context.Context
 type GetSessionFunc func() *appstate.SessionState
 
 type CatalogHandler struct {
-	app        *application.Container
+	usecases   *application.UseCasesContainer
+	queries    *application.QueriesContainer
 	getCtx     GetCtxFunc
 	getSession GetSessionFunc
 }
 
 func NewCatalogHandler(
-	app *application.Container,
+	usecases *application.UseCasesContainer,
+	queries *application.QueriesContainer,
 	getCtx GetCtxFunc,
 	getSession GetSessionFunc,
 ) *CatalogHandler {
 	return &CatalogHandler{
 		getCtx:     getCtx,
-		app:        app,
 		getSession: getSession,
+		usecases:   usecases,
+		queries:    queries,
 	}
 }
 
@@ -59,19 +62,13 @@ func (h *CatalogHandler) FindAllCategories() ([]*responses.Category, error) {
 		return nil, err
 	}
 
-	categories, err := h.app.FindAllCategories.Execute(ctx, activeOrganizationId)
+	categories, err := h.queries.FindAllCategories.Execute(ctx, activeOrganizationId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	categoryRes := make([]*responses.Category, len(categories))
-
-	for i, category := range categories {
-		categoryRes[i] = responses.CategoryResponseFromDomain(category)
-	}
-
-	return categoryRes, nil
+	return categories, nil
 }
 
 func (h *CatalogHandler) DeleteCategory(cmd *commands.DeleteManyCategories) error {
@@ -82,7 +79,7 @@ func (h *CatalogHandler) DeleteCategory(cmd *commands.DeleteManyCategories) erro
 		return err
 	}
 
-	if err := h.app.DeleteCategory.Execute(ctx, activeOrganizationId, cmd); err != nil {
+	if err := h.usecases.DeleteCategory.Execute(ctx, activeOrganizationId, cmd); err != nil {
 		return err
 	}
 
@@ -97,7 +94,7 @@ func (h *CatalogHandler) UpdateCategory(cmd *commands.UpdateCategory) (*response
 		return nil, err
 	}
 
-	updatedCategory, err := h.app.UpdateCategory.Execute(ctx, activeOrganizationId, cmd)
+	updatedCategory, err := h.usecases.UpdateCategory.Execute(ctx, activeOrganizationId, cmd)
 
 	if err != nil {
 		return nil, err
@@ -114,11 +111,30 @@ func (h *CatalogHandler) CreateCategory(cmd *commands.CreateCategory) (*response
 		return nil, err
 	}
 
-	createdCategory, err := h.app.CreateCategory.Execute(ctx, activeOrganizationId, cmd)
+	createdCategory, err := h.usecases.CreateCategory.Execute(ctx, activeOrganizationId, cmd)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return responses.CategoryResponseFromDomain(createdCategory), nil
+}
+
+// Product -------------------------------------------------------------------------------------
+
+func (h *CatalogHandler) CreateProduct(cmd *commands.CreateProduct) (*responses.Product, error) {
+	ctx := h.getCurrentContext()
+	activeOrganizationId, err := h.getCurrentOrganizationId()
+
+	if err != nil {
+		return nil, err
+	}
+
+	createdProduct, err := h.usecases.CreateProduct.Execute(ctx, activeOrganizationId, cmd)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return responses.ProductFromDomain(createdProduct.Product, createdProduct.Stock, createdProduct.MinStock), nil
 }

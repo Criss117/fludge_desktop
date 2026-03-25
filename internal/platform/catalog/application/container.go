@@ -1,33 +1,53 @@
 package application
 
 import (
+	"desktop/internal/platform/catalog/application/queries"
 	"desktop/internal/platform/catalog/application/usecases"
+	inventoryUsecases "desktop/internal/platform/inventory/application/usecases"
+
 	"desktop/internal/platform/catalog/domain/ports"
+	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
 )
 
-type Container struct {
-	FindAllCategories *usecases.FindAllCategories
-	CreateCategory    *usecases.CreateCategory
-	UpdateCategory    *usecases.UpdateCategory
-	DeleteCategory    *usecases.DeleteCategory
+type UseCasesContainer struct {
+	CreateCategory *usecases.CreateCategory
+	UpdateCategory *usecases.UpdateCategory
+	DeleteCategory *usecases.DeleteCategory
+	CreateProduct  *usecases.CreateProduct
 }
 
-func NewContainer(
+type QueriesContainer struct {
+	FindAllCategories *queries.FindAllCategories
+}
+
+func NewUseCasesContainer(
 	txManager dbutils.TxManager,
 	categoryRepository ports.CategoryRepository,
 	productRepository ports.ProductRepository,
-) *Container {
+	createInventoryItem inventoryUsecases.CreateInventoryItem,
+) *UseCasesContainer {
 	// Category - UseCases
-	findAllCategories := usecases.NewFindAllCategories(categoryRepository)
 	createCategory := usecases.NewCreateCategory(categoryRepository)
 	updateCategory := usecases.NewUpdateCategory(categoryRepository)
 	deleteCategory := usecases.NewDeleteCategory(categoryRepository)
 
-	return &Container{
+	// Product - UseCases
+	createProduct := usecases.NewCreateProduct(productRepository, createInventoryItem)
+
+	return &UseCasesContainer{
+		CreateCategory: createCategory,
+		UpdateCategory: updateCategory,
+		DeleteCategory: deleteCategory,
+		CreateProduct:  createProduct,
+	}
+}
+
+func NewQueriesContainer(dbQueries *db.Queries) *QueriesContainer {
+	// Category - Queries
+	findAllCategories := queries.NewFindAllCategories(dbQueries)
+
+	return &QueriesContainer{
 		FindAllCategories: findAllCategories,
-		CreateCategory:    createCategory,
-		UpdateCategory:    updateCategory,
-		DeleteCategory:    deleteCategory,
 	}
 }

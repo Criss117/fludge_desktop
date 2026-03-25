@@ -113,6 +113,36 @@ export namespace commands {
 	        this.description = source["description"];
 	    }
 	}
+	export class CreateProduct {
+	    name: string;
+	    sku: string;
+	    description?: string;
+	    wholesalePrice: number;
+	    salePrice: number;
+	    costPrice: number;
+	    stock: number;
+	    minStock: number;
+	    categoryId?: string;
+	    supplierId?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CreateProduct(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.sku = source["sku"];
+	        this.description = source["description"];
+	        this.wholesalePrice = source["wholesalePrice"];
+	        this.salePrice = source["salePrice"];
+	        this.costPrice = source["costPrice"];
+	        this.stock = source["stock"];
+	        this.minStock = source["minStock"];
+	        this.categoryId = source["categoryId"];
+	        this.supplierId = source["supplierId"];
+	    }
+	}
 	export class DeleteManyCategories {
 	    ids: string[];
 	
@@ -243,6 +273,38 @@ export namespace commands {
 	        this.contactEmail = source["contactEmail"];
 	    }
 	}
+	export class UpdateProduct {
+	    id: string;
+	    name: string;
+	    sku: string;
+	    description?: string;
+	    wholesalePrice: number;
+	    salePrice: number;
+	    costPrice: number;
+	    stock: number;
+	    minStock: number;
+	    categoryId?: string;
+	    supplierId?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateProduct(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.sku = source["sku"];
+	        this.description = source["description"];
+	        this.wholesalePrice = source["wholesalePrice"];
+	        this.salePrice = source["salePrice"];
+	        this.costPrice = source["costPrice"];
+	        this.stock = source["stock"];
+	        this.minStock = source["minStock"];
+	        this.categoryId = source["categoryId"];
+	        this.supplierId = source["supplierId"];
+	    }
+	}
 
 }
 
@@ -253,6 +315,9 @@ export namespace responses {
 	    name: string;
 	    description?: string;
 	    organization_id: string;
+	    created_at: number;
+	    updated_at: number;
+	    deleted_at?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Category(source);
@@ -264,6 +329,9 @@ export namespace responses {
 	        this.name = source["name"];
 	        this.description = source["description"];
 	        this.organization_id = source["organization_id"];
+	        this.created_at = source["created_at"];
+	        this.updated_at = source["updated_at"];
+	        this.deleted_at = source["deleted_at"];
 	    }
 	}
 	export class Member {
@@ -443,6 +511,46 @@ export namespace responses {
 		    }
 		    return a;
 		}
+	}
+	export class Product {
+	    id: string;
+	    sku: string;
+	    name: string;
+	    description?: string;
+	    wholesalePrice: number;
+	    salePrice: number;
+	    costPrice: number;
+	    categoryId?: string;
+	    organizationId: string;
+	    supplierId?: string;
+	    createdAt: number;
+	    updatedAt: number;
+	    deletedAt?: number;
+	    stock: number;
+	    minStock: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Product(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.sku = source["sku"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.wholesalePrice = source["wholesalePrice"];
+	        this.salePrice = source["salePrice"];
+	        this.costPrice = source["costPrice"];
+	        this.categoryId = source["categoryId"];
+	        this.organizationId = source["organizationId"];
+	        this.supplierId = source["supplierId"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.deletedAt = source["deletedAt"];
+	        this.stock = source["stock"];
+	        this.minStock = source["minStock"];
+	    }
 	}
 	
 

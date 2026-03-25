@@ -5,8 +5,14 @@ import {responses} from '../models';
 
 export function CreateCategory(arg1:commands.CreateCategory):Promise<responses.Category>;
 
+export function CreateProduct(arg1:commands.CreateProduct):Promise<responses.Product>;
+
 export function DeleteCategory(arg1:commands.DeleteManyCategories):Promise<void>;
 
 export function FindAllCategories():Promise<Array<responses.Category>>;
 
+export function FindAllProducts():Promise<Array<responses.Product>>;
+
 export function UpdateCategory(arg1:commands.UpdateCategory):Promise<responses.Category>;
+
+export function UpdateProduct(arg1:commands.UpdateProduct):Promise<responses.Product>;

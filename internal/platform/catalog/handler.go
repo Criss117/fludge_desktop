@@ -122,6 +122,23 @@ func (h *CatalogHandler) CreateCategory(cmd *commands.CreateCategory) (*response
 
 // Product -------------------------------------------------------------------------------------
 
+func (h *CatalogHandler) FindAllProducts() ([]*responses.Product, error) {
+	ctx := h.getCurrentContext()
+	activeOrganizationId, err := h.getCurrentOrganizationId()
+
+	if err != nil {
+		return nil, err
+	}
+
+	products, err := h.queries.FindAllProducts.Execute(ctx, activeOrganizationId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
 func (h *CatalogHandler) CreateProduct(cmd *commands.CreateProduct) (*responses.Product, error) {
 	ctx := h.getCurrentContext()
 	activeOrganizationId, err := h.getCurrentOrganizationId()
@@ -137,4 +154,21 @@ func (h *CatalogHandler) CreateProduct(cmd *commands.CreateProduct) (*responses.
 	}
 
 	return responses.ProductFromDomain(createdProduct.Product, createdProduct.Stock, createdProduct.MinStock), nil
+}
+
+func (h *CatalogHandler) UpdateProduct(cmd *commands.UpdateProduct) (*responses.Product, error) {
+	ctx := h.getCurrentContext()
+	activeOrganizationId, err := h.getCurrentOrganizationId()
+
+	if err != nil {
+		return nil, err
+	}
+
+	product, err := h.usecases.UpdateProduct.Execute(ctx, activeOrganizationId, cmd)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return responses.ProductFromDomain(product.Product, product.Stock, product.MinStock), nil
 }

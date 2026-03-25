@@ -17,7 +17,7 @@ type CreateProduct struct {
 	createInventoryItem inventoryUsecases.CreateInventoryItem
 }
 
-type Response struct {
+type CreateResponse struct {
 	Product  *aggregates.Product
 	Stock    int64
 	MinStock int64
@@ -37,7 +37,7 @@ func (u *CreateProduct) Execute(
 	ctx context.Context,
 	organizationId string,
 	cmd *commands.CreateProduct,
-) (*Response, error) {
+) (*CreateResponse, error) {
 	exists, err := u.productRepository.ExistsBy(ctx, organizationId, ports.ExistsByParams{
 		Name: cmd.Name,
 		Sku:  cmd.Sku,
@@ -76,7 +76,7 @@ func (u *CreateProduct) Execute(
 			return errDb
 		}
 
-		if errDb := u.createInventoryItem.Execute(ctx, newProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
+		if _, errDb := u.createInventoryItem.Execute(ctx, newProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
 			return errDb
 		}
 
@@ -87,7 +87,7 @@ func (u *CreateProduct) Execute(
 		return nil, errTx
 	}
 
-	return &Response{
+	return &CreateResponse{
 		Product:  newProduct,
 		Stock:    cmd.Stock,
 		MinStock: cmd.MinStock,

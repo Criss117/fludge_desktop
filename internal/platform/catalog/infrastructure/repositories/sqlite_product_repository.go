@@ -2,10 +2,13 @@ package repositories
 
 import (
 	"context"
+	"database/sql"
 	"desktop/internal/platform/catalog/domain/aggregates"
 	"desktop/internal/platform/catalog/domain/ports"
+	"desktop/internal/platform/catalog/infrastructure/mappers"
 	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
+	"errors"
 )
 
 type SqliteProductRepository struct {
@@ -70,17 +73,18 @@ func (r *SqliteProductRepository) Delete(ctx context.Context, product *aggregate
 }
 
 func (r *SqliteProductRepository) ExistsBy(ctx context.Context, organizationId string, params ports.ExistsByParams) (ports.ExistsByReturn, error) {
-	products, err := r.queries.ExistsProductByNameOrSku(ctx, db.ExistsProductByNameOrSkuParams{
+	dbProducts, err := r.queries.ExistsProductByNameOrSku(ctx, db.ExistsProductByNameOrSkuParams{
 		Name:           params.Name,
 		Sku:            params.Sku,
 		OrganizationID: organizationId,
+		ProductID:      params.ProductID,
 	})
 
 	if err != nil {
 		return ports.ExistsByReturn{}, err
 	}
 
-	if len(products) == 0 {
+	if len(dbProducts) == 0 {
 		return ports.ExistsByReturn{
 			Name: false,
 			Sku:  false,
@@ -90,7 +94,7 @@ func (r *SqliteProductRepository) ExistsBy(ctx context.Context, organizationId s
 	var existsByName bool = false
 	var existsBySku bool = false
 
-	for _, product := range products {
+	for _, product := range dbProducts {
 		if product.Name == params.Name {
 			existsByName = true
 		}
@@ -104,4 +108,21 @@ func (r *SqliteProductRepository) ExistsBy(ctx context.Context, organizationId s
 		Name: existsByName,
 		Sku:  existsBySku,
 	}, nil
+}
+
+func (r *SqliteProductRepository) FindOneById(ctx context.Context, organizationId, productId string) (*aggregates.Product, error) {
+	product, err := r.queries.FindOneProduct(ctx, db.FindOneProductParams{
+		ProductID:      productId,
+		OrganizationID: organizationId,
+	})
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return mappers.MapProductToDomain(product), nil
 }

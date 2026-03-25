@@ -92,6 +92,7 @@ func (a *App) startup(ctx context.Context) {
 		catalogRepositories.CategoryRepository,
 		catalogRepositories.ProductRepository,
 		*inventoryUseCasesContainer.CreateInventoryItem,
+		*inventoryUseCasesContainer.UpdateInventoryItem,
 	)
 
 	catalogQueriesContainer := catalogApp.NewQueriesContainer(a.queries)

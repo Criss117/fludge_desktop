@@ -199,15 +199,23 @@ func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) er
 
 const existsProductByNameOrSku = `-- name: ExistsProductByNameOrSku :many
 SELECT name, sku FROM product
-WHERE (lowwer(name) = lower(?1) OR sku = ?2)
-AND organization_id = ?3 
+WHERE (
+  lower(name) = lower(?1)
+  OR sku = ?2
+)
+AND organization_id = ?3
+AND (
+  ?4 IS NULL
+  OR id != ?4
+)
 AND deleted_at IS NULL
 `
 
 type ExistsProductByNameOrSkuParams struct {
-	Name           string `json:"name"`
-	Sku            string `json:"sku"`
-	OrganizationID string `json:"organization_id"`
+	Name           string      `json:"name"`
+	Sku            string      `json:"sku"`
+	OrganizationID string      `json:"organization_id"`
+	ProductID      interface{} `json:"product_id"`
 }
 
 type ExistsProductByNameOrSkuRow struct {
@@ -216,7 +224,12 @@ type ExistsProductByNameOrSkuRow struct {
 }
 
 func (q *Queries) ExistsProductByNameOrSku(ctx context.Context, arg ExistsProductByNameOrSkuParams) ([]ExistsProductByNameOrSkuRow, error) {
-	rows, err := q.db.QueryContext(ctx, existsProductByNameOrSku, arg.Name, arg.Sku, arg.OrganizationID)
+	rows, err := q.db.QueryContext(ctx, existsProductByNameOrSku,
+		arg.Name,
+		arg.Sku,
+		arg.OrganizationID,
+		arg.ProductID,
+	)
 	if err != nil {
 		return nil, err
 	}

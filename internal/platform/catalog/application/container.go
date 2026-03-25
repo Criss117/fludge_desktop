@@ -15,10 +15,12 @@ type UseCasesContainer struct {
 	UpdateCategory *usecases.UpdateCategory
 	DeleteCategory *usecases.DeleteCategory
 	CreateProduct  *usecases.CreateProduct
+	UpdateProduct  *usecases.UpdateProduct
 }
 
 type QueriesContainer struct {
 	FindAllCategories *queries.FindAllCategories
+	FindAllProducts   *queries.FindAllProducts
 }
 
 func NewUseCasesContainer(
@@ -26,6 +28,7 @@ func NewUseCasesContainer(
 	categoryRepository ports.CategoryRepository,
 	productRepository ports.ProductRepository,
 	createInventoryItem inventoryUsecases.CreateInventoryItem,
+	updateInventoryItem inventoryUsecases.UpdateInventoryItem,
 ) *UseCasesContainer {
 	// Category - UseCases
 	createCategory := usecases.NewCreateCategory(categoryRepository)
@@ -34,12 +37,14 @@ func NewUseCasesContainer(
 
 	// Product - UseCases
 	createProduct := usecases.NewCreateProduct(productRepository, createInventoryItem)
+	updateProduct := usecases.NewUpdateProduct(productRepository, updateInventoryItem)
 
 	return &UseCasesContainer{
 		CreateCategory: createCategory,
 		UpdateCategory: updateCategory,
 		DeleteCategory: deleteCategory,
 		CreateProduct:  createProduct,
+		UpdateProduct:  updateProduct,
 	}
 }
 
@@ -47,7 +52,11 @@ func NewQueriesContainer(dbQueries *db.Queries) *QueriesContainer {
 	// Category - Queries
 	findAllCategories := queries.NewFindAllCategories(dbQueries)
 
+	// Product - Queries
+	findAllProducts := queries.NewFindAllProducts(dbQueries)
+
 	return &QueriesContainer{
 		FindAllCategories: findAllCategories,
+		FindAllProducts:   findAllProducts,
 	}
 }

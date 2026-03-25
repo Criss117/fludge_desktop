@@ -6,6 +6,10 @@ export function CreateCategory(arg1) {
   return window['go']['catalog']['CatalogHandler']['CreateCategory'](arg1);
 }
 
+export function CreateProduct(arg1) {
+  return window['go']['catalog']['CatalogHandler']['CreateProduct'](arg1);
+}
+
 export function DeleteCategory(arg1) {
   return window['go']['catalog']['CatalogHandler']['DeleteCategory'](arg1);
 }
@@ -14,6 +18,14 @@ export function FindAllCategories() {
   return window['go']['catalog']['CatalogHandler']['FindAllCategories']();
 }
 
+export function FindAllProducts() {
+  return window['go']['catalog']['CatalogHandler']['FindAllProducts']();
+}
+
 export function UpdateCategory(arg1) {
   return window['go']['catalog']['CatalogHandler']['UpdateCategory'](arg1);
+}
+
+export function UpdateProduct(arg1) {
+  return window['go']['catalog']['CatalogHandler']['UpdateProduct'](arg1);
 }

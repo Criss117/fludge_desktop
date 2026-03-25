@@ -6,8 +6,9 @@ import (
 )
 
 type ExistsByParams struct {
-	Name string
-	Sku  string
+	Name      string
+	Sku       string
+	ProductID *string
 }
 
 type ExistsByReturn struct {
@@ -21,4 +22,5 @@ type ProductRepository interface {
 	Delete(ctx context.Context, product *aggregates.Product) error
 
 	ExistsBy(ctx context.Context, organizationId string, params ExistsByParams) (ExistsByReturn, error)
+	FindOneById(ctx context.Context, organizationId, productId string) (*aggregates.Product, error)
 }

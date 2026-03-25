@@ -102,8 +102,15 @@ WHERE product.organization_id = ? AND deleted_at IS NULL;
 
 -- name: ExistsProductByNameOrSku :many
 SELECT name, sku FROM product
-WHERE (lowwer(name) = lower(sqlc.arg(name)) OR sku = sqlc.arg(sku))
-AND organization_id = sqlc.arg(organization_id) 
+WHERE (
+  lower(name) = lower(sqlc.arg(name))
+  OR sku = sqlc.arg(sku)
+)
+AND organization_id = sqlc.arg(organization_id)
+AND (
+  sqlc.narg(product_id) IS NULL
+  OR id != sqlc.narg(product_id)
+)
 AND deleted_at IS NULL;
 
 --------------------------------------------------------------------------------

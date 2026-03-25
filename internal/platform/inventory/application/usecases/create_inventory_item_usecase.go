@@ -20,7 +20,7 @@ func (u *CreateInventoryItem) Execute(
 	ctx context.Context,
 	productID, organizationID string,
 	stock, minStock int64,
-) error {
+) (*aggregates.InventoryItem, error) {
 	newInvItem, err := aggregates.NewInventoryItem(
 		productID,
 		organizationID,
@@ -29,8 +29,12 @@ func (u *CreateInventoryItem) Execute(
 	)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return u.inventoryItemRepository.Create(ctx, newInvItem)
+	if err := u.inventoryItemRepository.Create(ctx, newInvItem); err != nil {
+		return nil, err
+	}
+
+	return newInvItem, nil
 }

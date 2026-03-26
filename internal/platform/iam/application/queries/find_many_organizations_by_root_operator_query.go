@@ -1,8 +1,8 @@
-package usecases
+package queries
 
 import (
 	"context"
-	"desktop/internal/platform/iam/domain/aggregates"
+	"desktop/internal/platform/iam/application/responses"
 	"desktop/internal/platform/iam/domain/ports"
 )
 
@@ -21,6 +21,24 @@ func NewFindManyOrganizationsByRootOperator(
 func (u *FindManyOrganizationsByRootOperator) Execute(
 	ctx context.Context,
 	loggedOperatorId string,
-) ([]*aggregates.Organization, error) {
-	return u.organizationRepository.FindManyByRootOperator(ctx, loggedOperatorId)
+) ([]responses.Organization, error) {
+	organizations, err := u.organizationRepository.FindManyByRootOperator(ctx, loggedOperatorId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(organizations) == 0 {
+		return make([]responses.Organization, 0), nil
+	}
+
+	orgs := make([]responses.Organization, len(organizations))
+
+	for i, org := range organizations {
+		o := responses.OrganizationFromDomain(org)
+
+		orgs[i] = o
+	}
+
+	return orgs, nil
 }

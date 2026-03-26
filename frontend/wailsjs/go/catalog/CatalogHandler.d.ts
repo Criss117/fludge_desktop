@@ -7,7 +7,7 @@ export function CreateCategory(arg1:commands.CreateCategory):Promise<responses.C
 
 export function CreateProduct(arg1:commands.CreateProduct):Promise<responses.Product>;
 
-export function DeleteCategory(arg1:commands.DeleteManyCategories):Promise<void>;
+export function DeleteManyCategories(arg1:commands.DeleteManyCategories):Promise<void>;
 
 export function FindAllCategories():Promise<Array<responses.Category>>;
 

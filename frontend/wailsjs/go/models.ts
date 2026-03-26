@@ -314,10 +314,10 @@ export namespace responses {
 	    id: string;
 	    name: string;
 	    description?: string;
-	    organization_id: string;
-	    created_at: number;
-	    updated_at: number;
-	    deleted_at?: number;
+	    organizationId: string;
+	    createdAt: number;
+	    updatedAt: number;
+	    deletedAt?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Category(source);
@@ -328,10 +328,10 @@ export namespace responses {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.description = source["description"];
-	        this.organization_id = source["organization_id"];
-	        this.created_at = source["created_at"];
-	        this.updated_at = source["updated_at"];
-	        this.deleted_at = source["deleted_at"];
+	        this.organizationId = source["organizationId"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.deletedAt = source["deletedAt"];
 	    }
 	}
 	export class Member {

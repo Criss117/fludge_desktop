@@ -10,8 +10,8 @@ export function CreateProduct(arg1) {
   return window['go']['catalog']['CatalogHandler']['CreateProduct'](arg1);
 }
 
-export function DeleteCategory(arg1) {
-  return window['go']['catalog']['CatalogHandler']['DeleteCategory'](arg1);
+export function DeleteManyCategories(arg1) {
+  return window['go']['catalog']['CatalogHandler']['DeleteManyCategories'](arg1);
 }
 
 export function FindAllCategories() {

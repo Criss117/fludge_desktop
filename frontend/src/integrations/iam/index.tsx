@@ -1,11 +1,11 @@
 import { createContext, use } from "react";
 import {
   SignIn,
-  GetAppState,
-  SignUp,
+  RegisterRootOperator,
   SignOut,
   SwitchOrganization,
 } from "@wails/go/iam/IamHandler";
+import { GetAppSession } from "@wails/go/main/App";
 import {
   queryOptions,
   useMutation,
@@ -13,26 +13,26 @@ import {
   useSuspenseQuery,
   type UseMutationResult,
 } from "@tanstack/react-query";
-import type { responses } from "@wails/go/models";
+import type { commands, responses } from "@wails/go/models";
 import type {
   SignInSchema,
   SignUpSchema,
 } from "@iam/application/validators/operator-form.validators";
 
-type AppState = Awaited<ReturnType<typeof GetAppState>>;
+type AppState = Awaited<ReturnType<typeof GetAppSession>>;
 
 interface Context {
   appState: AppState;
   signIn: UseMutationResult<
-    responses.ResponseAppState,
+    responses.Operator,
     Error,
-    SignInSchema,
+    commands.SignIn,
     unknown
   >;
   signUp: UseMutationResult<
-    responses.ResponseAppState,
+    responses.Operator,
     Error,
-    SignUpSchema,
+    commands.RegisterRootOperator,
     unknown
   >;
   signOut: UseMutationResult<void, Error, void, unknown>;
@@ -41,7 +41,7 @@ interface Context {
 
 export const appStateQueryOptions = queryOptions({
   queryKey: ["auth", "app-state"],
-  queryFn: GetAppState,
+  queryFn: GetAppSession,
   refetchOnWindowFocus: true,
 });
 
@@ -79,7 +79,7 @@ export function IamProvider({ children }: { children: React.ReactNode }) {
     mutationFn: async (data: SignInSchema) => {
       const appState = await SignIn(data);
 
-      queryClient.setQueryData(appStateQueryOptions.queryKey, appState);
+      authQuery.refetch();
 
       return appState;
     },
@@ -88,9 +88,9 @@ export function IamProvider({ children }: { children: React.ReactNode }) {
   const signUp = useMutation({
     mutationKey: ["auth", "signup"],
     mutationFn: async (data: SignUpSchema) => {
-      const appState = await SignUp(data);
+      const appState = await RegisterRootOperator(data);
 
-      queryClient.setQueryData(appStateQueryOptions.queryKey, appState);
+      authQuery.refetch();
 
       return appState;
     },

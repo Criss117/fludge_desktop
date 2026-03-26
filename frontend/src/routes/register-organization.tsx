@@ -3,6 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { appStateQueryOptions } from "@/integrations/iam";
 
 import { RegisterOrganizationScreen } from "@organizations/presentation/screens/register-organization.screen";
+import { FindManyOrganizationsByRootOperator } from "@wails/go/iam/IamHandler";
 
 export const Route = createFileRoute("/register-organization")({
   component: RouteComponent,
@@ -17,19 +18,19 @@ export const Route = createFileRoute("/register-organization")({
         to: "/",
       });
 
+    const organizations = await FindManyOrganizationsByRootOperator();
+
     return {
-      activeOperator,
+      organizations,
     };
   },
   loader: async ({ context }) => {
-    return context.activeOperator;
+    return context.organizations;
   },
 });
 
 function RouteComponent() {
-  const activeOperator = Route.useLoaderData();
+  const organizations = Route.useLoaderData();
 
-  return (
-    <RegisterOrganizationScreen organizations={activeOperator.isMemberIn} />
-  );
+  return <RegisterOrganizationScreen organizations={organizations} />;
 }

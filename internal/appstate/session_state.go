@@ -37,18 +37,26 @@ func BuildSessionState(
 	org *iamAggregates.Organization,
 ) *SessionState {
 	if operator == nil {
-		return nil
+		return &SessionState{
+			ActiveOrganization: nil,
+			ActiveOperator:     nil,
+			UpdatedAt:          time.Now(),
+		}
 	}
 
-	var member *iamAggregates.Member = nil
-	var teams []*iamAggregates.Team = nil
+	var member *iamAggregates.Member
+	var teams []*iamAggregates.Team
 
 	if org != nil {
 		member = org.FindMemberByOperatorId(operator.ID)
 		teams = org.FindTeamsByOperatorId(operator.ID)
 
 		if member == nil {
-			return nil
+			return &SessionState{
+				ActiveOrganization: nil,
+				ActiveOperator:     nil,
+				UpdatedAt:          time.Now(),
+			}
 		}
 
 		if operator.IsRoot() {
@@ -63,6 +71,7 @@ func BuildSessionState(
 			Member:   member,
 			Teams:    teams,
 		},
+		UpdatedAt: time.Now(),
 	}
 }
 

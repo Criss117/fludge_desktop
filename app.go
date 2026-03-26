@@ -45,8 +45,9 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	// a.SessionState = appstate.BuildSessionState(nil, nil)
 
-	conn, err := dbutils.NewDatabase("pos.db", ddl, &ctx)
+	conn, err := dbutils.NewDatabase("db/pos.db", ddl, &ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -60,7 +61,7 @@ func (a *App) startup(ctx context.Context) {
 	// IAM - Repositories & Container
 	aimRepositories := iamInfra.NewContainer(a.queries)
 
-	iamAppContainer := iamApp.NewContainer(
+	iamAppContainer := iamApp.NewUseCasesContainer(
 		txManager,
 		aimRepositories.OperatorRepository,
 		aimRepositories.OrganizationRepository,
@@ -68,10 +69,13 @@ func (a *App) startup(ctx context.Context) {
 		aimRepositories.OrganizationTeamRepository,
 	)
 
+	iamQueriesContainer := iamApp.NewQueriesContainer(aimRepositories.OrganizationRepository)
+
 	a.AppStateRepo = aimRepositories.AppStateRepository
 
 	a.IamHandler = *iam.NewIamHandler(
 		iamAppContainer,
+		iamQueriesContainer,
 		a.onStateChange,
 		func() context.Context { return a.ctx },
 		func() *appstate.SessionState { return a.SessionState },
@@ -103,10 +107,26 @@ func (a *App) startup(ctx context.Context) {
 		func() context.Context { return a.ctx },
 		func() *appstate.SessionState { return a.SessionState },
 	)
+
+	a.initAppSession()
 }
 
-func (a *App) GetAppSession() *appstate.SessionStateResponse {
-	return appstate.SessionStateResponseFromDomain(a.SessionState)
+func (a *App) initAppSession() {
+	appState, err := a.AppStateRepo.GetWithAggregates(a.ctx)
+
+	if err != nil {
+		panic(err)
+	}
+
+	sessionState := appstate.BuildSessionState(appState.Operator, appState.Organization)
+
+	a.SessionState = sessionState
+}
+
+func (a *App) GetAppSession() appstate.SessionStateResponse {
+	app := appstate.SessionStateResponseFromDomain(a.SessionState)
+
+	return app
 }
 
 func (a *App) onStateChange(e appstate.StateChangeEvent) {
@@ -130,4 +150,5 @@ func (a *App) onStateChange(e appstate.StateChangeEvent) {
 		a.SessionState.SetActiveOrganization(e.Organization)
 		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
 	}
+
 }

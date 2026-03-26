@@ -67,6 +67,9 @@ CREATE TABLE IF NOT EXISTS "app_state" (
     CONSTRAINT  "app_state_singleton"      CHECK("id" = 'local')
 );
 
+INSERT INTO "app_state" ("id", "active_organization_id", "active_operator_id", "updated_at") 
+VALUES ('local', NULL, NULL, 0) ON CONFLICT DO NOTHING;
+
 ---
 
 CREATE TABLE IF NOT EXISTS "member" (

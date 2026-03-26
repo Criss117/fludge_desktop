@@ -20,16 +20,16 @@ export const Route = createFileRoute("/")({
         params: { orgid: activeOrganization.id },
       });
 
-    if (activeOperator.isRoot) {
-      if (activeOperator.isMemberIn.length === 0)
-        throw redirect({
-          to: "/register-organization",
-        });
+    // if (activeOperator.operatorType === "ROOT") {
+    //   if (activeOperator.isMemberIn.length === 0)
+    //     throw redirect({
+    //       to: "/register-organization",
+    //     });
 
-      throw redirect({
-        to: "/select-organization",
-      });
-    }
+    //   throw redirect({
+    //     to: "/select-organization",
+    //   });
+    // }
 
     // TODO: Here the operator is not root, redirect to unique organization in isMemberIn
     throw redirect({

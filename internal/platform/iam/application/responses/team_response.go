@@ -27,7 +27,7 @@ type Team struct {
 	Members        []TeamMember
 }
 
-func TeamMemberResponseFromDomain(teamMember *aggregates.TeamMember) *TeamMember {
+func TeamMemberFromDomain(teamMember *aggregates.TeamMember) *TeamMember {
 	return &TeamMember{
 		ID:             teamMember.ID,
 		TeamID:         teamMember.TeamID,
@@ -39,12 +39,12 @@ func TeamMemberResponseFromDomain(teamMember *aggregates.TeamMember) *TeamMember
 	}
 }
 
-func TeamResponseFromDomain(team *aggregates.Team) *Team {
+func TeamFromDomain(team *aggregates.Team) *Team {
 
 	teamsMembers := make([]TeamMember, len(team.Members))
 
 	for i, member := range team.Members {
-		tm := TeamMemberResponseFromDomain(member)
+		tm := TeamMemberFromDomain(member)
 
 		teamsMembers[i] = *tm
 	}

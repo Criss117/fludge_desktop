@@ -7,7 +7,7 @@ import { LinkButton } from "@shared/components/link-button";
 import { Avatar, AvatarFallback } from "@shared/components/ui/avatar";
 
 interface Props {
-  organizations: responses.OperatorOrganizationResponse[];
+  organizations: responses.Organization[];
 }
 
 export function SelectOrganizationScreen({ organizations }: Props) {

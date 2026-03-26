@@ -22,11 +22,26 @@ type Organization struct {
 	Teams        []*Team
 }
 
-func OrganizationResponseFromDomain(organization *aggregates.Organization) *Organization {
+func OrganizationFromDomain(organization *aggregates.Organization) Organization {
+	var cemail *string = nil
 
-	contactEmail := organization.ContactEmail.Value()
+	if organization.ContactEmail != nil {
+		email := organization.ContactEmail.Value()
+		cemail = &email
+	}
 
-	return &Organization{
+	members := make([]*Member, len(organization.Members))
+	teams := make([]*Team, len(organization.Teams))
+
+	for i, member := range organization.Members {
+		members[i] = MemberFromDomain(member)
+	}
+
+	for i, team := range organization.Teams {
+		teams[i] = TeamFromDomain(team)
+	}
+
+	return Organization{
 		ID:           organization.ID,
 		Name:         organization.Name,
 		Slug:         organization.Slug.Value(),
@@ -34,7 +49,7 @@ func OrganizationResponseFromDomain(organization *aggregates.Organization) *Orga
 		LegalName:    organization.LegalName,
 		Address:      organization.Address,
 		ContactPhone: organization.ContactPhone,
-		ContactEmail: &contactEmail,
+		ContactEmail: cemail,
 		CreatedAt:    dbutils.TimeToInt64(organization.CreatedAt),
 		UpdatedAt:    dbutils.TimeToInt64(organization.UpdatedAt),
 		DeletedAt:    dbutils.TimeToInt64Nullable(organization.DeletedAt),

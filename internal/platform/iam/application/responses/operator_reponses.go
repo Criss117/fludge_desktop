@@ -23,8 +23,12 @@ type Operator struct {
 	DeletedAt    *int64 `json:"deletedAt"`
 }
 
-func OperatorResponseFromDomain(operator *aggregates.Operator) *Operator {
-	return &Operator{
+func OperatorFromDomain(operator *aggregates.Operator) Operator {
+	if operator == nil {
+		return Operator{}
+	}
+
+	return Operator{
 		ID:           operator.ID,
 		Name:         operator.Name,
 		Email:        operator.Email.Value(),

@@ -9,10 +9,10 @@ type Category struct {
 	ID             string  `json:"id"`
 	Name           string  `json:"name"`
 	Description    *string `json:"description"`
-	OrganizationID string  `json:"organization_id"`
-	CreatedAt      int64   `json:"created_at"`
-	UpdatedAt      int64   `json:"updated_at"`
-	DeletedAt      *int64  `json:"deleted_at"`
+	OrganizationID string  `json:"organizationId"`
+	CreatedAt      int64   `json:"createdAt"`
+	UpdatedAt      int64   `json:"updatedAt"`
+	DeletedAt      *int64  `json:"deletedAt"`
 }
 
 func CategoryResponseFromDomain(category *aggregates.Category) *Category {

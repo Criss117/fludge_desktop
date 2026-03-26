@@ -15,11 +15,15 @@ type Container struct {
 }
 
 func NewContainer(querires *db.Queries) *Container {
-	appStateRepository := repositories.NewSqliteAppRepository(querires)
 	operatorRepository := repositories.NewSqliteOperatorRepository(querires)
 	organizationRepository := repositories.NewSqliteOrganizationRepository(querires)
 	memberRepository := repositories.NewSqliteOrganizationMemberRepository(querires)
 	teamRepository := repositories.NewSqliteOrganizationTeamRepository(querires)
+	appStateRepository := repositories.NewSqliteAppRepository(
+		querires,
+		organizationRepository,
+		operatorRepository,
+	)
 
 	return &Container{
 		AppStateRepository:           appStateRepository,

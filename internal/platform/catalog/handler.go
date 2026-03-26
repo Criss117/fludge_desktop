@@ -71,7 +71,7 @@ func (h *CatalogHandler) FindAllCategories() ([]*responses.Category, error) {
 	return categories, nil
 }
 
-func (h *CatalogHandler) DeleteCategory(cmd *commands.DeleteManyCategories) error {
+func (h *CatalogHandler) DeleteManyCategories(cmd *commands.DeleteManyCategories) error {
 	ctx := h.getCurrentContext()
 	activeOrganizationId, err := h.getCurrentOrganizationId()
 

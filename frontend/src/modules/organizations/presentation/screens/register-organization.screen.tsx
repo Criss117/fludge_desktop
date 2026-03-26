@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { AlertCircleIcon, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import type { responses } from "@wails/go/models";
 
@@ -16,11 +16,6 @@ import { Logo } from "@shared/components/logo";
 import { FieldError, FieldGroup } from "@shared/components/ui/field";
 import { Button } from "@shared/components/ui/button";
 import { LinkButton } from "@shared/components/link-button";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@shared/components/ui/alert";
 
 import {
   createOrganizationSchema,
@@ -30,7 +25,7 @@ import { useRegisterOrganizationForm } from "@organizations/presentation/compone
 import { useMutateOrganizations } from "@organizations/application/hooks/use-mutate-organizations";
 
 interface Props {
-  organizations: responses.OperatorOrganizationResponse[];
+  organizations: responses.Organization[];
 }
 
 const defaultValues: CreateOrganizationSchema = {
@@ -66,12 +61,10 @@ export function RegisterOrganizationScreen({ organizations }: Props) {
             message: "Error al crear la cuenta",
           });
         },
-        onSuccess: ({ activeOrganization }) => {
-          if (!activeOrganization) return;
-
+        onSuccess: (activeOrganization) => {
           router.navigate({
-            to: "/dashboard/$orgslug",
-            params: { orgslug: activeOrganization?.slug },
+            to: "/dashboard/$orgid",
+            params: { orgid: activeOrganization?.slug },
           });
         },
       });

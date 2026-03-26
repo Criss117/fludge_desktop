@@ -4,4 +4,7 @@ frontend/dist
 
 .agents
 
+db/
 *.db
+*.db-shm
+*.db-wal

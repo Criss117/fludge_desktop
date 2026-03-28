@@ -8,7 +8,6 @@ import (
 	"desktop/internal/platform/catalog/domain/ports"
 	inventoryUsecases "desktop/internal/platform/inventory/application/usecases"
 	"desktop/internal/shared/db/dbutils"
-	"log"
 )
 
 type UpdateProduct struct {
@@ -80,13 +79,10 @@ func (u *UpdateProduct) Execute(
 		return nil, errDb
 	}
 
-	log.Println("Despues de actualizar product")
-
 	if _, errDb := u.updateInventoryItem.Execute(ctx, existingProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
 		return nil, errDb
 	}
 
-	log.Println("Despues de actualizar item")
 	// errTx := u.txManager.WithTx(ctx, func(q *db.Queries) error {
 
 	// 	return nil

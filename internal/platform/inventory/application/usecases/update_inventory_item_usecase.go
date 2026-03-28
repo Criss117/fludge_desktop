@@ -4,7 +4,6 @@ import (
 	"context"
 	"desktop/internal/platform/inventory/domain/aggregates"
 	"desktop/internal/platform/inventory/domain/ports"
-	"log"
 )
 
 type UpdateInventoryItem struct {
@@ -35,25 +34,16 @@ func (u *UpdateInventoryItem) Execute(
 		return nil, err
 	}
 
-	log.Println("Execute 1")
-
 	if inventoryItem == nil {
-		log.Println("Execute 1-1")
 
 		newItem, err := u.createInventoryItem.Execute(ctx, productId, organizationId, stock, minStock)
-
-		log.Println("Execute 1-2")
 
 		if err != nil {
 			return nil, err
 		}
 
-		log.Println("Execute 1-3")
-
 		return newItem, nil
 	}
-
-	log.Println("Execute 2")
 
 	errUpdating := inventoryItem.Update(stock, minStock)
 

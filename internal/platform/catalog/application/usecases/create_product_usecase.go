@@ -7,7 +7,6 @@ import (
 	"desktop/internal/platform/catalog/domain/derrors"
 	"desktop/internal/platform/catalog/domain/ports"
 	inventoryUsecases "desktop/internal/platform/inventory/application/usecases"
-	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
 )
 
@@ -71,20 +70,27 @@ func (u *CreateProduct) Execute(
 		return nil, err
 	}
 
-	errTx := u.txManager.WithTx(ctx, func(q *db.Queries) error {
-		if errDb := u.productRepository.Create(ctx, newProduct); errDb != nil {
-			return errDb
-		}
+	// errTx := u.txManager.WithTx(ctx, func(q *db.Queries) error {
+	// 	if errDb := u.productRepository.Create(ctx, newProduct); errDb != nil {
+	// 		return errDb
+	// 	}
 
-		if _, errDb := u.createInventoryItem.Execute(ctx, newProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
-			return errDb
-		}
+	// 	if _, errDb := u.createInventoryItem.Execute(ctx, newProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
+	// 		return errDb
+	// 	}
 
-		return nil
-	})
+	// 	return nil
+	// })
+	// if errTx != nil {
+	// 	return nil, errTx
+	// }
 
-	if errTx != nil {
-		return nil, errTx
+	if errDb := u.productRepository.Create(ctx, newProduct); errDb != nil {
+		return nil, errDb
+	}
+
+	if _, errDb := u.createInventoryItem.Execute(ctx, newProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
+		return nil, errDb
 	}
 
 	return &CreateResponse{

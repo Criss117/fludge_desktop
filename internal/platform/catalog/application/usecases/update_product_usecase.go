@@ -7,8 +7,8 @@ import (
 	"desktop/internal/platform/catalog/domain/derrors"
 	"desktop/internal/platform/catalog/domain/ports"
 	inventoryUsecases "desktop/internal/platform/inventory/application/usecases"
-	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
+	"log"
 )
 
 type UpdateProduct struct {
@@ -76,21 +76,25 @@ func (u *UpdateProduct) Execute(
 		cmd.WholesalePrice,
 	)
 
-	errTx := u.txManager.WithTx(ctx, func(q *db.Queries) error {
-		if errDb := u.productRepository.Update(ctx, existingProduct); errDb != nil {
-			return errDb
-		}
-
-		if _, errDb := u.updateInventoryItem.Execute(ctx, existingProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
-			return errDb
-		}
-
-		return nil
-	})
-
-	if errTx != nil {
-		return nil, errTx
+	if errDb := u.productRepository.Update(ctx, existingProduct); errDb != nil {
+		return nil, errDb
 	}
+
+	log.Println("Despues de actualizar product")
+
+	if _, errDb := u.updateInventoryItem.Execute(ctx, existingProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
+		return nil, errDb
+	}
+
+	log.Println("Despues de actualizar item")
+	// errTx := u.txManager.WithTx(ctx, func(q *db.Queries) error {
+
+	// 	return nil
+	// })
+
+	// if errTx != nil {
+	// 	return nil, errTx
+	// }
 
 	return &UpdateResponse{
 		Product:  existingProduct,

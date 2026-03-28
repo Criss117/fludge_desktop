@@ -130,10 +130,9 @@ INSERT INTO inventory_item (
 -- name: UpdateInventoryItem :exec
 UPDATE inventory_item 
 SET stock = ?, min_stock = ?, updated_at = ?
-WHERE product_id = ? AND organization_id = ? AND deleted_at IS NULL;
+WHERE product_id = ? AND organization_id = ?;
 
 -- name: FindOneInventoryItem :one
 SELECT * FROM inventory_item
-WHERE product_id = sqlc.arg(product_id) 
-AND organization_id = sqlc.arg(organization_id) 
-AND deleted_at IS NULL;
+WHERE inventory_item.product_id = sqlc.arg(product_id) 
+AND inventory_item.organization_id = sqlc.arg(organization_id);

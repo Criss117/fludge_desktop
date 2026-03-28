@@ -42,5 +42,7 @@ func ProductFromDomain(product *aggregates.Product, stock int64, minStock int64)
 		CreatedAt:      dbutils.TimeToInt64(product.CreatedAt),
 		UpdatedAt:      dbutils.TimeToInt64(product.UpdatedAt),
 		DeletedAt:      dbutils.TimeToInt64Nullable(product.DeletedAt),
+		Stock:          stock,
+		MinStock:       minStock,
 	}
 }

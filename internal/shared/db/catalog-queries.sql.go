@@ -407,9 +407,8 @@ func (q *Queries) FindOneCategoryByName(ctx context.Context, arg FindOneCategory
 
 const findOneInventoryItem = `-- name: FindOneInventoryItem :one
 SELECT product_id, organization_id, stock, min_stock, created_at, updated_at FROM inventory_item
-WHERE product_id = ?1 
-AND organization_id = ?2 
-AND deleted_at IS NULL
+WHERE inventory_item.product_id = ?1 
+AND inventory_item.organization_id = ?2
 `
 
 type FindOneInventoryItemParams struct {
@@ -497,7 +496,7 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) 
 const updateInventoryItem = `-- name: UpdateInventoryItem :exec
 UPDATE inventory_item 
 SET stock = ?, min_stock = ?, updated_at = ?
-WHERE product_id = ? AND organization_id = ? AND deleted_at IS NULL
+WHERE product_id = ? AND organization_id = ?
 `
 
 type UpdateInventoryItemParams struct {

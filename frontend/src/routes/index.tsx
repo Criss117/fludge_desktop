@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { SignInScreen } from "@iam/presentation/screen/signin.screen";
+import { SignInScreen } from "@iam/presentation/screens/signin.screen";
 import { appStateQueryOptions } from "@/integrations/iam";
 
 export const Route = createFileRoute("/")({

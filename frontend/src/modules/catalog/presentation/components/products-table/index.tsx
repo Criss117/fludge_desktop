@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-table";
 
 import { productsTableColumns } from "./columns";
-import type { Product } from "@catalog/application/collections/product.collection";
 
 import {
   Table,
@@ -17,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@shared/components/ui/table";
+import type { Product } from "@catalog/domain/entities/product.entity";
 
 interface Context {
   table: TSTable<Product>;

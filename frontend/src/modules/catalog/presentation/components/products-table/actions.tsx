@@ -11,7 +11,7 @@ import {
 import { Button } from "@shared/components/ui/button";
 
 import { useUpdateProduct } from "@catalog/presentation/components/update-product";
-import type { Product } from "@catalog/application/collections/product.collection";
+import type { Product } from "@catalog/domain/entities/product.entity";
 
 interface Props {
   product: Product;

@@ -20,8 +20,8 @@ import {
   createProductSchema,
   type CreateProductSchema,
 } from "@catalog/application/validators/product.validators";
-import type { Product } from "@catalog/application/collections/product.collection";
 import { useFindManyCategories } from "@catalog/application/hooks/use-category.queries";
+import type { Product } from "@catalog/domain/entities/product.entity";
 
 interface RootProps {
   children: React.ReactNode;

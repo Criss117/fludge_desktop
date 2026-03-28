@@ -16,7 +16,7 @@ import {
   UpdateProductRoot,
 } from "@catalog/presentation/components/update-product";
 import { useCountProductsQuery } from "@catalog/application/hooks/use-products-queries";
-import { ProductsTableSkeleton } from "../components/products-table/skeleton";
+import { ProductsTableSkeleton } from "@catalog/presentation/components/products-table/skeleton";
 
 export function ProductsScreen() {
   const totalProducts = useCountProductsQuery();

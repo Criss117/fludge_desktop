@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { CreateOrganizationSchema } from "@organizations/application/validators/organizations.validators";
+import type { CreateOrganizationSchema } from "@iam/application/validators/organizations.validators";
 import { appStateQueryOptions } from "@/integrations/iam";
 import { organizationService } from "@iam/application/container";
 

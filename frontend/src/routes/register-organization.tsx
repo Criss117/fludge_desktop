@@ -2,8 +2,8 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { appStateQueryOptions } from "@/integrations/iam";
 
-import { RegisterOrganizationScreen } from "@organizations/presentation/screens/register-organization.screen";
-import { FindManyOrganizationsByRootOperator } from "@wails/go/handlers/IamOrganizationHandler";
+import { RegisterOrganizationScreen } from "@iam/presentation/screens/register-organization.screen";
+import { organizationQueryOptions } from "@iam/application/hooks/use-organization-queries";
 
 export const Route = createFileRoute("/register-organization")({
   component: RouteComponent,
@@ -18,7 +18,9 @@ export const Route = createFileRoute("/register-organization")({
         to: "/",
       });
 
-    const organizations = await FindManyOrganizationsByRootOperator();
+    const organizations = await context.queryClient.ensureQueryData(
+      organizationQueryOptions.findManyOrganizationsByRootOperator,
+    );
 
     return {
       organizations,

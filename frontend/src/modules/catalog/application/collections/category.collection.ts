@@ -9,17 +9,9 @@ import {
 } from "@tanstack/query-db-collection";
 
 import { queryClient } from "@/integrations/ts-query";
-import {
-  FindAllCategories,
-  CreateCategory,
-  UpdateCategory,
-} from "@wails/go/handlers/CatalogCategoryHandler";
 
-export type Category = Awaited<ReturnType<typeof FindAllCategories>>[number] & {
-  metadata?: {
-    isPending?: boolean;
-  };
-};
+import type { Category } from "@catalog/domain/entities/category.entity";
+import { categoryService } from "@catalog/application/container";
 
 type CategoryCollection = Collection<
   Category,
@@ -37,14 +29,14 @@ export function categoryCollectionBuilder(orgId: string) {
     const newCategoryCollection = createCollection(
       queryCollectionOptions<Category>({
         queryKey: ["organization", orgId, "categories"],
-        queryFn: () => FindAllCategories(),
+        queryFn: () => categoryService.findAllCategories(),
         getKey: (p) => p.id,
         queryClient,
 
         onInsert: async ({ transaction, collection }) => {
           const values = transaction.mutations[0].modified;
 
-          const cretedCategory = await CreateCategory({
+          const cretedCategory = await categoryService.createCategory({
             name: values.name,
             description: values.description,
           });
@@ -64,7 +56,8 @@ export function categoryCollectionBuilder(orgId: string) {
             description: changes.description ?? original.description,
           };
 
-          const updatedCategory = await UpdateCategory(categoryToUpdate);
+          const updatedCategory =
+            await categoryService.updateCategory(categoryToUpdate);
 
           collection.utils.writeUpdate(updatedCategory);
 

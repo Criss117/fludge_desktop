@@ -7,19 +7,11 @@ import {
   queryCollectionOptions,
   type QueryCollectionUtils,
 } from "@tanstack/query-db-collection";
+
 import { queryClient } from "@/integrations/ts-query";
 
-import {
-  FindAllProducts,
-  CreateProduct,
-  UpdateProduct,
-} from "@wails/go/handlers/CatalogProductHandler";
-
-export type Product = Awaited<ReturnType<typeof FindAllProducts>>[number] & {
-  metadata?: {
-    isPending?: boolean;
-  };
-};
+import { productService } from "@catalog/application/container";
+import type { Product } from "@catalog/domain/entities/product.entity";
 
 type ProductCollection = Collection<
   Product,
@@ -38,7 +30,7 @@ export function productCollectionBuilder(orgId: string) {
       queryCollectionOptions<Product>({
         queryKey: ["organization", orgId, "products"],
         queryFn: () => {
-          return FindAllProducts();
+          return productService.findAllProducts();
         },
         getKey: (p) => p.id,
         queryClient,
@@ -46,7 +38,7 @@ export function productCollectionBuilder(orgId: string) {
         onInsert: async ({ transaction, collection }) => {
           const values = transaction.mutations[0].modified;
 
-          const cretedProduct = await CreateProduct({
+          const cretedProduct = await productService.createProduct({
             costPrice: values.costPrice,
             name: values.name,
             description: values.description,
@@ -76,7 +68,8 @@ export function productCollectionBuilder(orgId: string) {
             minStock: changes.minStock ?? original.minStock,
           };
 
-          const updatedProduct = await UpdateProduct(productToUpdate);
+          const updatedProduct =
+            await productService.updateProduct(productToUpdate);
 
           collection.utils.writeUpdate(updatedProduct);
           return { refetch: false };

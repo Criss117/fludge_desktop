@@ -22,9 +22,9 @@ import {
   AlertDialogTrigger,
 } from "@shared/components/ui/alert-dialog";
 
-import type { Category } from "@catalog/application/collections/category.collection";
 import { useMutateCategories } from "@catalog/application/hooks/use-mutate-categories";
 import { UpdateCategory } from "@catalog/presentation/components/update-category";
+import type { Category } from "@catalog/domain/entities/category.entity";
 
 interface Props {
   category: Category;

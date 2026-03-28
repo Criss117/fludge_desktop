@@ -10,8 +10,8 @@ import {
 
 import { useProductCollection } from "./use-product-collection";
 import { useCategoryCollection } from "./use-category-collection";
-import type { Product } from "../collections/product.collection";
-import type { Category } from "../collections/category.collection";
+import type { Product } from "@catalog/domain/entities/product.entity";
+import type { Category } from "@catalog/domain/entities/category.entity";
 
 interface Filters {
   limit?: number;

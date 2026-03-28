@@ -1,12 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 
 import { useCategoryCollection } from "@catalog/application/hooks/use-category-collection";
+import { categoryService } from "../container";
 import type {
   CreateCategorySchema,
   DeleteCategoriesSchema,
   UpdateCategorySchema,
 } from "@catalog/application/validators/category.validators";
-import { DeleteManyCategories } from "@wails/go/handlers/CatalogCategoryHandler";
 
 export function useMutateCategories() {
   const categoryCollection = useCategoryCollection();
@@ -21,9 +21,6 @@ export function useMutateCategories() {
         description: values.description || undefined,
         createdAt: new Date().getMilliseconds(),
         updatedAt: new Date().getMilliseconds(),
-        metadata: {
-          isPending: true,
-        },
       });
 
       await tx.isPersisted.promise;
@@ -45,7 +42,7 @@ export function useMutateCategories() {
   const remove = useMutation({
     mutationKey: ["categories", "remove"],
     mutationFn: async (values: DeleteCategoriesSchema) => {
-      await DeleteManyCategories(values);
+      await categoryService.deleteManyCategories(values);
 
       categoryCollection.utils.writeDelete(values.ids);
     },

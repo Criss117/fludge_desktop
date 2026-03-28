@@ -20,8 +20,7 @@ import {
 import { Input } from "@shared/components/ui/input";
 import { Textarea } from "@shared/components/ui/textarea";
 import { inputNumberHelper } from "@shared/lib/utils";
-
-import type { Category } from "@catalog/application/collections/category.collection";
+import type { Category } from "@catalog/domain/entities/category.entity";
 
 interface CategoryFieldProps {
   categories: Category[];

@@ -12,3 +12,11 @@ export interface AppSession {
   activeOrganization: Organization | null;
   activeOperator: ActiveOperator | null;
 }
+
+export function activeOperatorIsRoot(session: AppSession) {
+  if (!session.activeOperator) return false;
+
+  if (!session.activeOperator.member) return false;
+
+  return session.activeOperator.member.role === "ROOT";
+}

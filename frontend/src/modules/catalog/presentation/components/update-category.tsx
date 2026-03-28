@@ -18,8 +18,8 @@ import {
 import { Button } from "@shared/components/ui/button";
 
 import { useCategoryForm } from "./category-form";
-import type { Category } from "@catalog/application/collections/category.collection";
 import { useMutateCategories } from "@catalog/application/hooks/use-mutate-categories";
+import type { Category } from "@catalog/domain/entities/category.entity";
 
 interface RootProps {
   children: React.ReactNode;

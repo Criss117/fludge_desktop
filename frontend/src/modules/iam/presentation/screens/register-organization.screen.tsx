@@ -18,9 +18,9 @@ import { LinkButton } from "@shared/components/link-button";
 import {
   createOrganizationSchema,
   type CreateOrganizationSchema,
-} from "@organizations/application/validators/organizations.validators";
-import { useRegisterOrganizationForm } from "@organizations/presentation/components/register-organization-form";
-import { useMutateOrganizations } from "@organizations/application/hooks/use-mutate-organizations";
+} from "@iam/application/validators/organizations.validators";
+import { useRegisterOrganizationForm } from "@iam/presentation/components/register-organization-form";
+import { useMutateOrganizations } from "@iam/application/hooks/use-mutate-organizations";
 import type { Organization } from "@iam/domain/entities/organization.entity";
 
 interface Props {

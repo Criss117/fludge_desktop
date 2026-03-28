@@ -2,8 +2,8 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { appStateQueryOptions } from "@/integrations/iam";
 
-import { SelectOrganizationScreen } from "@organizations/presentation/screens/select-organization.screen";
-import { organizationQueryOptions } from "@organizations/application/hooks/use-organization-queries";
+import { SelectOrganizationScreen } from "@iam/presentation/screens/select-organization.screen";
+import { organizationQueryOptions } from "@iam/application/hooks/use-organization-queries";
 
 export const Route = createFileRoute("/select-organization")({
   component: RouteComponent,

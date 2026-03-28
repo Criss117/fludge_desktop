@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { CreateOrganizationSchema } from "@organizations/application/validators/organizations.validators";
-import { RegisterOrganization } from "@wails/go/iam/IamHandler";
+import { RegisterOrganization } from "@wails/go/handlers/IamOrganizationHandler";
 import { appStateQueryOptions } from "@/integrations/iam";
 
 export function useMutateOrganizations() {

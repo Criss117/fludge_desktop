@@ -18,8 +18,8 @@ type Organization struct {
 	CreatedAt    int64   `json:"createdAt"`
 	UpdatedAt    int64   `json:"updatedAt"`
 	DeletedAt    *int64  `json:"deletedAt"`
-	Members      []*Member
-	Teams        []*Team
+	Members      []Member
+	Teams        []Team
 }
 
 func OrganizationFromDomain(organization *aggregates.Organization) Organization {
@@ -30,8 +30,8 @@ func OrganizationFromDomain(organization *aggregates.Organization) Organization 
 		cemail = &email
 	}
 
-	members := make([]*Member, len(organization.Members))
-	teams := make([]*Team, len(organization.Teams))
+	members := make([]Member, len(organization.Members))
+	teams := make([]Team, len(organization.Teams))
 
 	for i, member := range organization.Members {
 		members[i] = MemberFromDomain(member)
@@ -53,5 +53,7 @@ func OrganizationFromDomain(organization *aggregates.Organization) Organization 
 		CreatedAt:    dbutils.TimeToInt64(organization.CreatedAt),
 		UpdatedAt:    dbutils.TimeToInt64(organization.UpdatedAt),
 		DeletedAt:    dbutils.TimeToInt64Nullable(organization.DeletedAt),
+		Members:      members,
+		Teams:        teams,
 	}
 }

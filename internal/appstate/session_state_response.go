@@ -5,9 +5,9 @@ import (
 )
 
 type ActiveOperatorResponse struct {
-	*responses.Operator `json:"operator"`
-	*responses.Member   `json:"member"`
-	Teams               []*responses.Team `json:"teams"`
+	Operator *responses.Operator `json:"operator"`
+	Member   *responses.Member   `json:"member"`
+	Teams    []*responses.Team   `json:"teams"`
 }
 
 type SessionStateResponse struct {

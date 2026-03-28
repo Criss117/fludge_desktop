@@ -1,47 +1,32 @@
 import { createContext, use } from "react";
 import {
-  SignIn,
-  RegisterRootOperator,
-  SignOut,
-  SwitchOrganization,
-} from "@wails/go/iam/IamHandler";
-import { GetAppSession } from "@wails/go/main/App";
-import {
   queryOptions,
   useMutation,
   useQueryClient,
   useSuspenseQuery,
   type UseMutationResult,
 } from "@tanstack/react-query";
-import type { commands, responses } from "@wails/go/models";
+
+import { sessionService } from "@iam/application/container";
 import type {
   SignInSchema,
   SignUpSchema,
 } from "@iam/application/validators/operator-form.validators";
-
-type AppState = Awaited<ReturnType<typeof GetAppSession>>;
+import type { AppSession } from "@iam/domain/entities/app-session.entity";
+import type { Operator } from "@iam/domain/entities/operator.entity";
+import type { Organization } from "@iam/domain/entities/organization.entity";
 
 interface Context {
-  appState: AppState;
-  signIn: UseMutationResult<
-    responses.Operator,
-    Error,
-    commands.SignIn,
-    unknown
-  >;
-  signUp: UseMutationResult<
-    responses.Operator,
-    Error,
-    commands.RegisterRootOperator,
-    unknown
-  >;
+  appState: AppSession;
+  signIn: UseMutationResult<Operator, Error, SignInSchema, unknown>;
+  signUp: UseMutationResult<Operator, Error, SignUpSchema, unknown>;
   signOut: UseMutationResult<void, Error, void, unknown>;
-  switchOrganization: UseMutationResult<void, Error, string, unknown>;
+  switchOrganization: UseMutationResult<Organization, Error, string, unknown>;
 }
 
 export const appStateQueryOptions = queryOptions({
   queryKey: ["auth", "app-state"],
-  queryFn: GetAppSession,
+  queryFn: () => sessionService.getAppSession(),
   refetchOnWindowFocus: true,
 });
 
@@ -77,29 +62,29 @@ export function IamProvider({ children }: { children: React.ReactNode }) {
   const signIn = useMutation({
     mutationKey: ["auth", "signin"],
     mutationFn: async (data: SignInSchema) => {
-      const appState = await SignIn(data);
+      const res = await sessionService.signIn(data);
 
-      authQuery.refetch();
+      await authQuery.refetch();
 
-      return appState;
+      return res;
     },
   });
 
   const signUp = useMutation({
     mutationKey: ["auth", "signup"],
     mutationFn: async (data: SignUpSchema) => {
-      const appState = await RegisterRootOperator(data);
+      const res = await sessionService.registerRootOperator(data);
 
-      authQuery.refetch();
+      await authQuery.refetch();
 
-      return appState;
+      return res;
     },
   });
 
   const signOut = useMutation({
     mutationKey: ["auth", "signout"],
     mutationFn: async () => {
-      await SignOut();
+      await sessionService.signOut();
 
       queryClient.invalidateQueries(appStateQueryOptions);
     },
@@ -108,11 +93,13 @@ export function IamProvider({ children }: { children: React.ReactNode }) {
   const switchOrganization = useMutation({
     mutationKey: ["auth", "switch-organization"],
     mutationFn: async (organizationId: string) => {
-      const newAppState = await SwitchOrganization({
+      const newAppState = await sessionService.switchOrganization({
         organizationId,
       });
 
-      queryClient.setQueryData(appStateQueryOptions.queryKey, newAppState);
+      await authQuery.refetch();
+
+      return newAppState;
     },
   });
 

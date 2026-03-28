@@ -28,8 +28,10 @@ func main() {
 			app.startup(ctx)
 		},
 		Bind: []interface{}{
-			&app.IamHandler,
-			&app.CatalogHandler,
+			&app.SessionHandler,
+			&app.OrganizationHanlder,
+			&app.ProductHandler,
+			&app.CategoryHandler,
 			app,
 		},
 		Linux: &linux.Options{

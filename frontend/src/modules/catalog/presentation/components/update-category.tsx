@@ -48,8 +48,6 @@ function Root({ children }: RootProps) {
   const [category, setCategory] = useState<Category | null>(null);
 
   const selectCategory = (category: Category) => {
-    console.log(category);
-
     setCategory(category);
   };
 

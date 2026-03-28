@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { appStateQueryOptions } from "@/integrations/iam";
 
 import { RegisterOrganizationScreen } from "@organizations/presentation/screens/register-organization.screen";
-import { FindManyOrganizationsByRootOperator } from "@wails/go/iam/IamHandler";
+import { FindManyOrganizationsByRootOperator } from "@wails/go/handlers/IamOrganizationHandler";
 
 export const Route = createFileRoute("/register-organization")({
   component: RouteComponent,

@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"desktop/internal/appstate"
-	"desktop/internal/platform/catalog"
 	catalogApp "desktop/internal/platform/catalog/application"
 	catalogInfra "desktop/internal/platform/catalog/infrastructure"
-	"desktop/internal/platform/iam"
+	catalogHandlers "desktop/internal/platform/catalog/infrastructure/handlers"
 	iamApp "desktop/internal/platform/iam/application"
 	iamPorts "desktop/internal/platform/iam/domain/ports"
 	iamInfra "desktop/internal/platform/iam/infrastructure"
+	iamHandlers "desktop/internal/platform/iam/infrastructure/handlers"
 	inventoryApp "desktop/internal/platform/inventory/application"
 	inventoryInfra "desktop/internal/platform/inventory/infrastructure"
 	"desktop/internal/shared/db"
@@ -26,14 +26,17 @@ var ddl string
 
 // App struct
 type App struct {
-	ctx            context.Context
-	db             *sql.DB
-	queries        *db.Queries
-	SessionState   *appstate.SessionState
-	IamHandler     iam.IamHandler
-	CatalogHandler catalog.CatalogHandler
-	AppStateRepo   iamPorts.AppStateRepository
-	mu             sync.RWMutex
+	ctx          context.Context
+	db           *sql.DB
+	queries      *db.Queries
+	mu           sync.RWMutex
+	appStateRepo iamPorts.AppStateRepository
+	sessionState appstate.SessionState
+	// Handlers
+	CategoryHandler     catalogHandlers.CatalogCategoryHandler
+	ProductHandler      catalogHandlers.CatalogProductHandler
+	SessionHandler      iamHandlers.IamSessionHandler
+	OrganizationHanlder iamHandlers.IamOrganizationHandler
 }
 
 // NewApp creates a new App application struct
@@ -45,7 +48,6 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	// a.SessionState = appstate.BuildSessionState(nil, nil)
 
 	conn, err := dbutils.NewDatabase("db/pos.db", ddl, &ctx)
 	if err != nil {
@@ -55,31 +57,8 @@ func (a *App) startup(ctx context.Context) {
 	a.db = conn
 	a.queries = db.New(conn)
 
-	// TxManager
-	txManager := dbutils.NewSqliteTxManager(conn, a.queries)
-
 	// IAM - Repositories & Container
-	aimRepositories := iamInfra.NewContainer(a.queries)
-
-	iamAppContainer := iamApp.NewUseCasesContainer(
-		txManager,
-		aimRepositories.OperatorRepository,
-		aimRepositories.OrganizationRepository,
-		aimRepositories.OrganizationMemberRepository,
-		aimRepositories.OrganizationTeamRepository,
-	)
-
-	iamQueriesContainer := iamApp.NewQueriesContainer(aimRepositories.OrganizationRepository)
-
-	a.AppStateRepo = aimRepositories.AppStateRepository
-
-	a.IamHandler = *iam.NewIamHandler(
-		iamAppContainer,
-		iamQueriesContainer,
-		a.onStateChange,
-		func() context.Context { return a.ctx },
-		func() *appstate.SessionState { return a.SessionState },
-	)
+	a.initIamHandlers()
 
 	// Inventory - Repositories & Container
 	inventoryRepositories := inventoryInfra.NewRepositoriesContainer(a.queries)
@@ -89,7 +68,55 @@ func (a *App) startup(ctx context.Context) {
 	)
 
 	// Catalog - Repositories & Container
-	catalogRepositories := catalogInfra.NewContainer(a.queries)
+	a.iniCatalogHandlers(inventoryUseCasesContainer)
+
+	a.initAppSession()
+}
+
+func (a *App) initAppSession() {
+	appState, err := a.appStateRepo.GetWithAggregates(a.ctx)
+
+	if err != nil {
+		panic(err)
+	}
+
+	sessionState := appstate.BuildSessionState(appState.Operator, appState.Organization)
+
+	a.sessionState = sessionState
+}
+
+func (a *App) initIamHandlers() {
+	txManager := dbutils.NewSqliteTxManager(a.db, a.queries)
+
+	iamRepositories := iamInfra.NewRepositoryContainer(a.queries)
+
+	iamAppContainer := iamApp.NewUseCasesContainer(
+		txManager,
+		iamRepositories.OperatorRepository,
+		iamRepositories.OrganizationRepository,
+		iamRepositories.OrganizationMemberRepository,
+		iamRepositories.OrganizationTeamRepository,
+	)
+
+	iamQueriesContainer := iamApp.NewQueriesContainer(iamRepositories.OrganizationRepository)
+
+	iamHandlers := iamInfra.NewHandlerContainer(
+		iamAppContainer,
+		iamQueriesContainer,
+		a.onStateChange,
+		func() context.Context { return a.ctx },
+		func() *appstate.SessionState { return &a.sessionState },
+	)
+
+	a.appStateRepo = iamRepositories.AppStateRepository
+	a.OrganizationHanlder = iamHandlers.OrganizationHandler
+	a.SessionHandler = iamHandlers.SessionHandler
+}
+
+func (a *App) iniCatalogHandlers(inventoryUseCasesContainer *inventoryApp.UseCasesContainer) {
+	txManager := dbutils.NewSqliteTxManager(a.db, a.queries)
+
+	catalogRepositories := catalogInfra.NewRepositoryContainer(a.queries)
 
 	catalogUseCasesContainer := catalogApp.NewUseCasesContainer(
 		txManager,
@@ -101,32 +128,19 @@ func (a *App) startup(ctx context.Context) {
 
 	catalogQueriesContainer := catalogApp.NewQueriesContainer(a.queries)
 
-	a.CatalogHandler = *catalog.NewCatalogHandler(
+	catalogHandlers := catalogInfra.NewHandlerContainer(
 		catalogUseCasesContainer,
 		catalogQueriesContainer,
 		func() context.Context { return a.ctx },
-		func() *appstate.SessionState { return a.SessionState },
+		func() *appstate.SessionState { return &a.sessionState },
 	)
 
-	a.initAppSession()
-}
-
-func (a *App) initAppSession() {
-	appState, err := a.AppStateRepo.GetWithAggregates(a.ctx)
-
-	if err != nil {
-		panic(err)
-	}
-
-	sessionState := appstate.BuildSessionState(appState.Operator, appState.Organization)
-
-	a.SessionState = sessionState
+	a.CategoryHandler = catalogHandlers.CategoryHandler
+	a.ProductHandler = catalogHandlers.ProductHandler
 }
 
 func (a *App) GetAppSession() appstate.SessionStateResponse {
-	app := appstate.SessionStateResponseFromDomain(a.SessionState)
-
-	return app
+	return appstate.SessionStateResponseFromDomain(&a.sessionState)
 }
 
 func (a *App) onStateChange(e appstate.StateChangeEvent) {
@@ -135,20 +149,20 @@ func (a *App) onStateChange(e appstate.StateChangeEvent) {
 
 	switch e.Type {
 	case appstate.SignUp:
-		a.SessionState.SetActiveOperator(e.Operator)
-		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
+		a.sessionState.SetActiveOperator(e.Operator)
+		a.appStateRepo.Update(a.ctx, a.sessionState.ToAppState())
 
 	case appstate.SignIn:
-		a.SessionState.SetActiveOperator(e.Operator)
-		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
+		a.sessionState.SetActiveOperator(e.Operator)
+		a.appStateRepo.Update(a.ctx, a.sessionState.ToAppState())
 
 	case appstate.SignOut:
-		a.SessionState.Clear()
-		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
+		a.sessionState.Clear()
+		a.appStateRepo.Update(a.ctx, a.sessionState.ToAppState())
 
 	case appstate.SwitchOrganization:
-		a.SessionState.SetActiveOrganization(e.Organization)
-		a.AppStateRepo.Update(a.ctx, a.SessionState.ToAppState())
+		a.sessionState.SetActiveOrganization(e.Organization)
+		a.appStateRepo.Update(a.ctx, a.sessionState.ToAppState())
 	}
 
 }

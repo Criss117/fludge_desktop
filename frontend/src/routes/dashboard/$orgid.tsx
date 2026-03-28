@@ -2,9 +2,10 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 import { appStateQueryOptions } from "@/integrations/iam";
 
-import { SwitchOrganization } from "@wails/go/iam/IamHandler";
 import { SidebarInset, SidebarProvider } from "@shared/components/ui/sidebar";
 import { AppSidebar } from "@shared/components/app-sidebar";
+
+import { sessionService } from "@iam/application/container";
 
 export const Route = createFileRoute("/dashboard/$orgid")({
   component: RouteComponent,
@@ -17,22 +18,15 @@ export const Route = createFileRoute("/dashboard/$orgid")({
         to: "/",
       });
 
-    const newAppState = await SwitchOrganization({
+    const activeOrganization = appState.activeOrganization;
+
+    if (activeOrganization?.id === params.orgid) return;
+
+    await sessionService.switchOrganization({
       organizationId: params.orgid,
     });
 
-    context.queryClient.setQueryData(
-      appStateQueryOptions.queryKey,
-      newAppState,
-    );
-
-    return {
-      appState: newAppState,
-    };
-  },
-
-  loader: async ({ context }) => {
-    return context.appState;
+    await context.queryClient.refetchQueries(appStateQueryOptions);
   },
 });
 

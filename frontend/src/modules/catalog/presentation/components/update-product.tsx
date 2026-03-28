@@ -1,5 +1,3 @@
-"use no memo";
-
 import { createContext, use, useId, useMemo, useState } from "react";
 import { BadgeCheck, Banknote, ClipboardCheck } from "lucide-react";
 import { toast } from "sonner";

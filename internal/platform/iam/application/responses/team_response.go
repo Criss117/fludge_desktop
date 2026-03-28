@@ -39,8 +39,7 @@ func TeamMemberFromDomain(teamMember *aggregates.TeamMember) *TeamMember {
 	}
 }
 
-func TeamFromDomain(team *aggregates.Team) *Team {
-
+func TeamFromDomain(team *aggregates.Team) Team {
 	teamsMembers := make([]TeamMember, len(team.Members))
 
 	for i, member := range team.Members {
@@ -55,7 +54,7 @@ func TeamFromDomain(team *aggregates.Team) *Team {
 		permissions[i] = p.Value()
 	}
 
-	return &Team{
+	return Team{
 		ID:             team.ID,
 		Name:           team.Name,
 		OrganizationId: team.OrganizationID,

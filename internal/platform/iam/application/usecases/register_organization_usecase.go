@@ -6,7 +6,7 @@ import (
 	"desktop/internal/platform/iam/domain/aggregates"
 	"desktop/internal/platform/iam/domain/derrors"
 	"desktop/internal/platform/iam/domain/ports"
-	"desktop/internal/shared/db"
+	"desktop/internal/platform/iam/domain/valueobjects"
 	"desktop/internal/shared/db/dbutils"
 )
 
@@ -36,6 +36,7 @@ func (r *RegisterOrganization) Execute(
 	loggedOperatorId string,
 	cmd *commands.RegisterOrganization,
 ) (*aggregates.Organization, error) {
+
 	newOrganizations, errNewOrganizations := aggregates.NewOrganization(
 		cmd.Name,
 		cmd.LegalName,
@@ -63,22 +64,42 @@ func (r *RegisterOrganization) Execute(
 		return nil, derrors.ErrOrganizationAlreadyExists
 	}
 
-	errTx := r.txManager.WithTx(ctx, func(q *db.Queries) error {
-		if errDb := r.organizationRepository.Create(ctx, newOrganizations); errDb != nil {
-			return errDb
-		}
+	// errTx := r.txManager.WithTx(ctx, func(q *db.Queries) error {
+	// 	if errDb := r.organizationRepository.Create(ctx, newOrganizations); errDb != nil {
+	// 		return errDb
+	// 	}
 
-		defaultTeam := aggregates.DefaultTeam(newOrganizations.ID)
+	// 	defaultTeam := aggregates.DefaultTeam(newOrganizations.ID)
 
-		if errDb := r.teamRepository.Create(ctx, defaultTeam); errDb != nil {
-			return errDb
-		}
+	// 	if errDb := r.teamRepository.Create(ctx, defaultTeam); errDb != nil {
+	// 		return errDb
+	// 	}
 
-		return nil
-	})
+	// 	return nil
+	// })
 
-	if errTx != nil {
-		return nil, errTx
+	// if errTx != nil {
+	// 	return nil, errTx
+	// }
+
+	if errDb := r.organizationRepository.Create(ctx, newOrganizations); errDb != nil {
+		return nil, errDb
+	}
+
+	defaultTeam := aggregates.DefaultTeam(newOrganizations.ID)
+
+	if errDb := r.teamRepository.Create(ctx, defaultTeam); errDb != nil {
+		return nil, errDb
+	}
+
+	rootMember := aggregates.NewMember(
+		newOrganizations.ID,
+		loggedOperatorId,
+		valueobjects.MemberRoleRoot,
+	)
+
+	if errDb := r.memberRepository.Create(ctx, rootMember); errDb != nil {
+		return nil, errDb
 	}
 
 	return newOrganizations, nil

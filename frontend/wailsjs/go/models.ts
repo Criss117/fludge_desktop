@@ -1,22 +1,8 @@
 export namespace appstate {
 	
 	export class ActiveOperatorResponse {
-	    id: string;
-	    name: string;
-	    email: string;
-	    username: string;
-	    pin: string;
-	    operatorType: string;
-	    createdAt: number;
-	    updatedAt: number;
-	    deletedAt?: number;
-	    id: string;
-	    organizationId: string;
-	    operatorId: string;
-	    role: string;
-	    createdAt: number;
-	    updatedAt: number;
-	    deletedAt?: number;
+	    operator?: responses.Operator;
+	    member?: responses.Member;
 	    teams: responses.Team[];
 	
 	    static createFrom(source: any = {}) {
@@ -25,22 +11,8 @@ export namespace appstate {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	        this.email = source["email"];
-	        this.username = source["username"];
-	        this.pin = source["pin"];
-	        this.operatorType = source["operatorType"];
-	        this.createdAt = source["createdAt"];
-	        this.updatedAt = source["updatedAt"];
-	        this.deletedAt = source["deletedAt"];
-	        this.id = source["id"];
-	        this.organizationId = source["organizationId"];
-	        this.operatorId = source["operatorId"];
-	        this.role = source["role"];
-	        this.createdAt = source["createdAt"];
-	        this.updatedAt = source["updatedAt"];
-	        this.deletedAt = source["deletedAt"];
+	        this.operator = this.convertValues(source["operator"], responses.Operator);
+	        this.member = this.convertValues(source["member"], responses.Member);
 	        this.teams = this.convertValues(source["teams"], responses.Team);
 	    }
 	

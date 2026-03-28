@@ -35,9 +35,9 @@ type ActiveOperator struct {
 func BuildSessionState(
 	operator *iamAggregates.Operator,
 	org *iamAggregates.Organization,
-) *SessionState {
+) SessionState {
 	if operator == nil {
-		return &SessionState{
+		return SessionState{
 			ActiveOrganization: nil,
 			ActiveOperator:     nil,
 			UpdatedAt:          time.Now(),
@@ -52,10 +52,14 @@ func BuildSessionState(
 		teams = org.FindTeamsByOperatorId(operator.ID)
 
 		if member == nil {
-			return &SessionState{
+			return SessionState{
 				ActiveOrganization: nil,
-				ActiveOperator:     nil,
-				UpdatedAt:          time.Now(),
+				ActiveOperator: &ActiveOperator{
+					Operator: operator,
+					Member:   nil,
+					Teams:    nil,
+				},
+				UpdatedAt: time.Now(),
 			}
 		}
 
@@ -64,7 +68,7 @@ func BuildSessionState(
 		}
 	}
 
-	return &SessionState{
+	return SessionState{
 		ActiveOrganization: org,
 		ActiveOperator: &ActiveOperator{
 			Operator: operator,

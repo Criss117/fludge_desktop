@@ -6,7 +6,7 @@ import type {
   DeleteCategoriesSchema,
   UpdateCategorySchema,
 } from "@catalog/application/validators/category.validators";
-import { DeleteManyCategories } from "@wails/go/catalog/CatalogHandler";
+import { DeleteManyCategories } from "@wails/go/handlers/CatalogCategoryHandler";
 
 export function useMutateCategories() {
   const categoryCollection = useCategoryCollection();

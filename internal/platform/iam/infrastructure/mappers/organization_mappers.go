@@ -140,7 +140,7 @@ func MapTeamToDomain(team DBTeam) *aggregates.Team {
 		dbutils.TimeFromInt64(team.CreatedAt),
 		dbutils.TimeFromInt64(team.UpdatedAt),
 		dbutils.TimeFromSQLNullable(team.DeletedAt),
-		nil,
+		dMembers,
 	)
 }
 

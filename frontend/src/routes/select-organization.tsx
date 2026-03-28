@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { appStateQueryOptions } from "@/integrations/iam";
 
 import { SelectOrganizationScreen } from "@organizations/presentation/screens/select-organization.screen";
-import { FindManyOrganizationsByRootOperator } from "@wails/go/iam/IamHandler";
+import { FindManyOrganizationsByRootOperator } from "@wails/go/handlers/IamOrganizationHandler";
 
 export const Route = createFileRoute("/select-organization")({
   component: RouteComponent,
@@ -39,4 +39,6 @@ function RouteComponent() {
   const organizations = Route.useLoaderData();
 
   return <SelectOrganizationScreen organizations={organizations} />;
+
+  // return null;
 }

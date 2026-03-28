@@ -10,7 +10,6 @@ import (
 	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
 	"errors"
-	"log"
 )
 
 type SqliteOrganizationRepository struct {
@@ -19,9 +18,15 @@ type SqliteOrganizationRepository struct {
 	teamRepository   ports.OrganizationTeamRepository
 }
 
-func NewSqliteOrganizationRepository(queries *db.Queries) *SqliteOrganizationRepository {
+func NewSqliteOrganizationRepository(
+	queries *db.Queries,
+	memberRepository ports.OrganizationMemberRepository,
+	teamRepository ports.OrganizationTeamRepository,
+) *SqliteOrganizationRepository {
 	return &SqliteOrganizationRepository{
-		queries: queries,
+		queries:          queries,
+		memberRepository: memberRepository,
+		teamRepository:   teamRepository,
 	}
 }
 
@@ -118,8 +123,6 @@ func (r *SqliteOrganizationRepository) FindOneById(ctx context.Context, organiza
 
 func (r *SqliteOrganizationRepository) FindManyByRootOperator(ctx context.Context, operatorId string) ([]*aggregates.Organization, error) {
 	dbOrganizations, err := r.queries.FindManyOrganizationsByRootOperator(ctx, operatorId)
-
-	log.Println("FindManyByRootOperator", dbOrganizations)
 
 	if err != nil {
 		return nil, err

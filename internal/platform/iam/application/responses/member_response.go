@@ -15,12 +15,12 @@ type Member struct {
 	DeletedAt      *int64 `json:"deletedAt"`
 }
 
-func MemberFromDomain(member *aggregates.Member) *Member {
+func MemberFromDomain(member *aggregates.Member) Member {
 	if member == nil {
-		return nil
+		return Member{}
 	}
 
-	return &Member{
+	return Member{
 		ID:             member.ID,
 		OrganizationID: member.OrganizationID,
 		OperatorID:     member.OperatorID,

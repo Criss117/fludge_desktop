@@ -13,7 +13,7 @@ import {
   FindAllCategories,
   CreateCategory,
   UpdateCategory,
-} from "@wails/go/catalog/CatalogHandler";
+} from "@wails/go/handlers/CatalogCategoryHandler";
 
 export type Category = Awaited<ReturnType<typeof FindAllCategories>>[number] & {
   metadata?: {

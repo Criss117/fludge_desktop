@@ -13,7 +13,7 @@ import {
   FindAllProducts,
   CreateProduct,
   UpdateProduct,
-} from "@wails/go/catalog/CatalogHandler";
+} from "@wails/go/handlers/CatalogProductHandler";
 
 export type Product = Awaited<ReturnType<typeof FindAllProducts>>[number] & {
   metadata?: {

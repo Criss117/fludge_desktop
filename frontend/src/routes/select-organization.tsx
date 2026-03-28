@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { appStateQueryOptions } from "@/integrations/iam";
 
 import { SelectOrganizationScreen } from "@organizations/presentation/screens/select-organization.screen";
-import { FindManyOrganizationsByRootOperator } from "@wails/go/handlers/IamOrganizationHandler";
+import { organizationQueryOptions } from "@organizations/application/hooks/use-organization-queries";
 
 export const Route = createFileRoute("/select-organization")({
   component: RouteComponent,
@@ -18,7 +18,9 @@ export const Route = createFileRoute("/select-organization")({
         to: "/",
       });
 
-    const organizations = await FindManyOrganizationsByRootOperator();
+    const organizations = await context.queryClient.ensureQueryData(
+      organizationQueryOptions.findManyOrganizationsByRootOperator,
+    );
 
     if (organizations.length === 0) {
       throw redirect({

@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 
-import type { responses } from "@wails/go/models";
-
 import {
   Card,
   CardContent,
@@ -23,9 +21,10 @@ import {
 } from "@organizations/application/validators/organizations.validators";
 import { useRegisterOrganizationForm } from "@organizations/presentation/components/register-organization-form";
 import { useMutateOrganizations } from "@organizations/application/hooks/use-mutate-organizations";
+import type { Organization } from "@iam/domain/entities/organization.entity";
 
 interface Props {
-  organizations: responses.Organization[];
+  organizations: Organization[];
 }
 
 const defaultValues: CreateOrganizationSchema = {

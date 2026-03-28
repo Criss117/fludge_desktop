@@ -1,13 +1,13 @@
 import { Building2, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
-import type { responses } from "@wails/go/models";
-
 import { LinkButton } from "@shared/components/link-button";
 import { Avatar, AvatarFallback } from "@shared/components/ui/avatar";
 
+import type { Organization } from "@iam/domain/entities/organization.entity";
+
 interface Props {
-  organizations: responses.Organization[];
+  organizations: Organization[];
 }
 
 export function SelectOrganizationScreen({ organizations }: Props) {

@@ -27,7 +27,11 @@ export const productsTableColumns = [
     id: "category",
     header: "Categoria",
     cell: ({ getValue }) => {
-      return <span>{getValue()?.name || "-"}</span>;
+      const category = getValue()
+        ?.map((c) => c.name)
+        .at(0);
+
+      return <span>{category || "-"}</span>;
     },
   }),
   columnHelper.accessor((p) => p.stock, {

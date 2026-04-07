@@ -1,8 +1,9 @@
 import {
+  BasicIndex,
   createCollection,
   type Collection,
   type NonSingleResult,
-} from "@tanstack/db";
+} from "@tanstack/react-db";
 import {
   queryCollectionOptions,
   type QueryCollectionUtils,
@@ -29,9 +30,11 @@ export function categoryCollectionBuilder(orgId: string) {
     const newCategoryCollection = createCollection(
       queryCollectionOptions<Category>({
         queryKey: ["organization", orgId, "categories"],
+        queryClient,
         queryFn: () => categoryService.findAllCategories(),
         getKey: (p) => p.id,
-        queryClient,
+        defaultIndexType: BasicIndex,
+        autoIndex: "eager",
 
         onInsert: async ({ transaction, collection }) => {
           const values = transaction.mutations[0].modified;
@@ -60,6 +63,18 @@ export function categoryCollectionBuilder(orgId: string) {
             await categoryService.updateCategory(categoryToUpdate);
 
           collection.utils.writeUpdate(updatedCategory);
+
+          return { refetch: false };
+        },
+
+        onDelete: async ({ transaction, collection }) => {
+          const values = transaction.mutations.map((m) => m.original.id);
+
+          await categoryService.deleteManyCategories({
+            ids: values,
+          });
+
+          collection.utils.writeDelete(values);
 
           return { refetch: false };
         },

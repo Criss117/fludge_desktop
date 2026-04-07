@@ -1,8 +1,9 @@
 import {
+  BasicIndex,
   createCollection,
   type Collection,
   type NonSingleResult,
-} from "@tanstack/db";
+} from "@tanstack/react-db";
 import {
   queryCollectionOptions,
   type QueryCollectionUtils,
@@ -29,12 +30,13 @@ export function productCollectionBuilder(orgId: string) {
     const newProductCollection = createCollection(
       queryCollectionOptions<Product>({
         queryKey: ["organization", orgId, "products"],
+        queryClient,
         queryFn: () => {
           return productService.findAllProducts();
         },
         getKey: (p) => p.id,
-        queryClient,
-
+        defaultIndexType: BasicIndex,
+        autoIndex: "eager",
         onInsert: async ({ transaction, collection }) => {
           const values = transaction.mutations[0].modified;
 
@@ -87,6 +89,8 @@ export function productCollectionBuilder(orgId: string) {
         // },
       }),
     );
+
+    // newProductCollection.createIndex((row) => row.createdAt);
 
     collectionsCache.set(orgId, newProductCollection);
   }

@@ -39,8 +39,8 @@ const columns = [
   columnHelper.accessor((p) => p.category, {
     id: "category",
     header: "Categoria",
-    cell: ({ getValue }) => {
-      return <span>{getValue()?.name || "-"}</span>;
+    cell: () => {
+      return <span>-</span>;
     },
   }),
   columnHelper.accessor((p) => p.stock, {

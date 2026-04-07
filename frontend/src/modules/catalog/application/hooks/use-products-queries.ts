@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   count,
   eq,
@@ -10,8 +9,6 @@ import {
 
 import { useProductCollection } from "./use-product-collection";
 import { useCategoryCollection } from "./use-category-collection";
-import type { Product } from "@catalog/domain/entities/product.entity";
-import type { Category } from "@catalog/domain/entities/category.entity";
 
 interface Filters {
   limit?: number;
@@ -25,10 +22,6 @@ interface Filters {
     wholesalePrice?: "asc" | "desc" | null;
   };
 }
-
-export type ProductWithCategory = Product & {
-  category?: Category;
-};
 
 export function useCountProductsQuery() {
   const productsCollection = useProductCollection();
@@ -45,7 +38,7 @@ export function useCountProductsQuery() {
   return data?.total || 0;
 }
 
-export function useFindManyProducts(filters: Filters): ProductWithCategory[] {
+export function useFindManyProducts(filters: Filters) {
   const productsCollection = useProductCollection();
   const categoryCollection = useCategoryCollection();
 
@@ -65,66 +58,81 @@ export function useFindManyProducts(filters: Filters): ProductWithCategory[] {
     !!orderBySalePrice ||
     !!orderByWholesalePrice;
 
-  const { data } = useLiveSuspenseQuery(() => {
-    let query = new Query()
-      .from({ product: productsCollection })
-      .leftJoin({ category: categoryCollection }, ({ category, product }) =>
-        eq(product.categoryId, category.id),
-      );
+  const { data } = useLiveSuspenseQuery(
+    (q) => {
+      let query = new Query()
+        .from({ product: productsCollection })
+        .select(({ product }) => ({
+          id: product.id,
+          name: product.name,
+          sku: product.sku,
+          description: product.description,
+          wholesalePrice: product.wholesalePrice,
+          salePrice: product.salePrice,
+          costPrice: product.costPrice,
+          organizationId: product.organizationId,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
+          stock: product.stock,
+          minStock: product.minStock,
+          category: q
+            .from({ c: categoryCollection })
+            .select(({ c }) => ({
+              id: c.id,
+              name: c.name,
+              description: c.description,
+            }))
+            .where(({ c }) => eq(c.id, product.categoryId))
+            .findOne(),
+        }));
+      if (orderByCostPrice) {
+        query = query.orderBy(
+          ({ product }) => product.costPrice,
+          orderByCostPrice,
+        );
+      }
 
-    if (orderByCostPrice) {
-      query = query.orderBy(
-        ({ product }) => product.costPrice,
-        orderByCostPrice,
-      );
-    }
+      if (orderByStock) {
+        query = query.orderBy(({ product }) => product.stock, orderByStock);
+      }
 
-    if (orderByStock) {
-      query = query.orderBy(({ product }) => product.stock, orderByStock);
-    }
+      if (orderBySalePrice) {
+        query = query.orderBy(
+          ({ product }) => product.salePrice,
+          orderBySalePrice,
+        );
+      }
 
-    if (orderBySalePrice) {
-      query = query.orderBy(
-        ({ product }) => product.salePrice,
-        orderBySalePrice,
-      );
-    }
+      if (orderByWholesalePrice) {
+        query = query.orderBy(
+          ({ product }) => product.wholesalePrice,
+          orderByWholesalePrice,
+        );
+      }
 
-    if (orderByWholesalePrice) {
-      query = query.orderBy(
-        ({ product }) => product.wholesalePrice,
-        orderByWholesalePrice,
-      );
-    }
+      if (!anyOrderBy)
+        query = query.orderBy(({ product }) => product.createdAt, "desc");
 
-    if (!anyOrderBy)
-      query = query.orderBy(({ product }) => product.createdAt, "desc");
-
-    return query
-      .where(({ product }) =>
-        or(ilike(product.name, `%${name}%`), ilike(product.sku, `%${sku}%`)),
-      )
-      .limit(limit)
-      .offset(offset);
-  }, [
-    limit,
-    offset,
-    name,
-    sku,
-    orderByStock,
-    orderByCostPrice,
-    orderBySalePrice,
-    orderByWholesalePrice,
-  ]);
-
-  const res = useMemo(
-    () =>
-      data.map((d) => ({
-        ...d.product,
-        category: d.category,
-      })),
-    [data],
+      return query
+        .where(({ product }) =>
+          or(ilike(product.name, `%${name}%`), ilike(product.sku, `%${sku}%`)),
+        )
+        .limit(limit)
+        .offset(offset);
+    },
+    [
+      limit,
+      offset,
+      name,
+      sku,
+      orderByStock,
+      orderByCostPrice,
+      orderBySalePrice,
+      orderByWholesalePrice,
+    ],
   );
 
-  return res;
+  return data;
 }
+
+export type ProductWithCategory = ReturnType<typeof useFindManyProducts>[0];

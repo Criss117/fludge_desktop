@@ -182,18 +182,20 @@ func (q *Queries) DeleteCategory(ctx context.Context, arg DeleteCategoryParams) 
 }
 
 const deleteProduct = `-- name: DeleteProduct :exec
-DELETE FROM product
-WHERE id = ?1
-AND organization_id = ?2
+UPDATE product
+SET deleted_at = ?
+WHERE id = ? 
+AND organization_id = ?
 `
 
 type DeleteProductParams struct {
-	ProductID      string `json:"product_id"`
-	OrganizationID string `json:"organization_id"`
+	DeletedAt      sql.NullInt64 `json:"deleted_at"`
+	ID             string        `json:"id"`
+	OrganizationID string        `json:"organization_id"`
 }
 
 func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) error {
-	_, err := q.db.ExecContext(ctx, deleteProduct, arg.ProductID, arg.OrganizationID)
+	_, err := q.db.ExecContext(ctx, deleteProduct, arg.DeletedAt, arg.ID, arg.OrganizationID)
 	return err
 }
 
@@ -432,18 +434,18 @@ func (q *Queries) FindOneInventoryItem(ctx context.Context, arg FindOneInventory
 
 const findOneProduct = `-- name: FindOneProduct :one
 SELECT id, sku, name, description, wholesale_price, sale_price, cost_price, category_id, supplier_id, organization_id, created_at, updated_at, deleted_at FROM product
-WHERE product.id = ?1 
-AND product.organization_id = ?2 
-AND product.deleted_at IS NULL
+WHERE id = ?
+AND organization_id = ? 
+AND deleted_at IS NULL
 `
 
 type FindOneProductParams struct {
-	ProductID      string `json:"product_id"`
+	ID             string `json:"id"`
 	OrganizationID string `json:"organization_id"`
 }
 
 func (q *Queries) FindOneProduct(ctx context.Context, arg FindOneProductParams) (Product, error) {
-	row := q.db.QueryRowContext(ctx, findOneProduct, arg.ProductID, arg.OrganizationID)
+	row := q.db.QueryRowContext(ctx, findOneProduct, arg.ID, arg.OrganizationID)
 	var i Product
 	err := row.Scan(
 		&i.ID,
@@ -461,6 +463,66 @@ func (q *Queries) FindOneProduct(ctx context.Context, arg FindOneProductParams) 
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const saveProduct = `-- name: SaveProduct :exec
+INSERT INTO product (
+  id, 
+  sku, 
+  name, 
+  description, 
+  wholesale_price, 
+  sale_price, 
+  cost_price, 
+  category_id, 
+  supplier_id, 
+  organization_id, 
+  created_at, 
+  updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+  sku = excluded.sku, 
+  name = excluded.name, 
+  description = excluded.description, 
+  wholesale_price = excluded.wholesale_price, 
+  sale_price = excluded.sale_price, 
+  cost_price = excluded.cost_price, 
+  category_id = excluded.category_id, 
+  supplier_id = excluded.supplier_id, 
+  updated_at = excluded.updated_at
+`
+
+type SaveProductParams struct {
+	ID             string         `json:"id"`
+	Sku            string         `json:"sku"`
+	Name           string         `json:"name"`
+	Description    sql.NullString `json:"description"`
+	WholesalePrice int64          `json:"wholesale_price"`
+	SalePrice      int64          `json:"sale_price"`
+	CostPrice      int64          `json:"cost_price"`
+	CategoryID     sql.NullString `json:"category_id"`
+	SupplierID     sql.NullString `json:"supplier_id"`
+	OrganizationID string         `json:"organization_id"`
+	CreatedAt      int64          `json:"created_at"`
+	UpdatedAt      int64          `json:"updated_at"`
+}
+
+func (q *Queries) SaveProduct(ctx context.Context, arg SaveProductParams) error {
+	_, err := q.db.ExecContext(ctx, saveProduct,
+		arg.ID,
+		arg.Sku,
+		arg.Name,
+		arg.Description,
+		arg.WholesalePrice,
+		arg.SalePrice,
+		arg.CostPrice,
+		arg.CategoryID,
+		arg.SupplierID,
+		arg.OrganizationID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
 }
 
 const updateCategory = `-- name: UpdateCategory :exec

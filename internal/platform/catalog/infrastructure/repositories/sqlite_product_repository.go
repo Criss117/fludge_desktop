@@ -62,9 +62,14 @@ func (r *SqliteProductRepository) Update(ctx context.Context, product *aggregate
 }
 
 func (r *SqliteProductRepository) Delete(ctx context.Context, product *aggregates.Product) error {
+	if product.DeletedAt == nil {
+		return errors.New("product is not deleted")
+	}
+
 	if errDb := r.queries.DeleteProduct(ctx, db.DeleteProductParams{
-		ProductID:      product.ID,
+		ID:             product.ID,
 		OrganizationID: product.OrganizationID,
+		DeletedAt:      dbutils.TimeToSQLNullable(product.DeletedAt),
 	}); errDb != nil {
 		return errDb
 	}
@@ -112,7 +117,7 @@ func (r *SqliteProductRepository) ExistsBy(ctx context.Context, organizationId s
 
 func (r *SqliteProductRepository) FindOneById(ctx context.Context, organizationId, productId string) (*aggregates.Product, error) {
 	product, err := r.queries.FindOneProduct(ctx, db.FindOneProductParams{
-		ProductID:      productId,
+		ID:             productId,
 		OrganizationID: organizationId,
 	})
 

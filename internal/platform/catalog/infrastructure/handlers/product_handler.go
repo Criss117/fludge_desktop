@@ -76,3 +76,18 @@ func (h *CatalogProductHandler) UpdateProduct(cmd *commands.UpdateProduct) (*res
 
 	return responses.ProductFromDomain(product.Product, product.Stock, product.MinStock), nil
 }
+
+func (h *CatalogProductHandler) DeleteProduct(cmd *commands.DeleteProduct) error {
+	ctx := h.baseHandler.Context()
+	activeOrganization, err := h.baseHandler.CurrentOrganization()
+
+	if err != nil {
+		return err
+	}
+
+	if err = h.usecases.DeleteProducts.Execute(ctx, activeOrganization.ID, cmd.ID); err != nil {
+		return err
+	}
+
+	return nil
+}

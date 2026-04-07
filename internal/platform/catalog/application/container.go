@@ -16,6 +16,7 @@ type UseCasesContainer struct {
 	DeleteCategory *usecases.DeleteCategory
 	CreateProduct  *usecases.CreateProduct
 	UpdateProduct  *usecases.UpdateProduct
+	DeleteProducts *usecases.DeleteProducts
 }
 
 type QueriesContainer struct {
@@ -38,6 +39,7 @@ func NewUseCasesContainer(
 	// Product - UseCases
 	createProduct := usecases.NewCreateProduct(productRepository, createInventoryItem)
 	updateProduct := usecases.NewUpdateProduct(productRepository, updateInventoryItem)
+	deleteProducts := usecases.NewDeleteProducts(productRepository)
 
 	return &UseCasesContainer{
 		CreateCategory: createCategory,
@@ -45,6 +47,7 @@ func NewUseCasesContainer(
 		DeleteCategory: deleteCategory,
 		CreateProduct:  createProduct,
 		UpdateProduct:  updateProduct,
+		DeleteProducts: deleteProducts,
 	}
 }
 

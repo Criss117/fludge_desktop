@@ -26,3 +26,7 @@ type UpdateProduct struct {
 	CategoryID     *string `json:"categoryId"`
 	SupplierID     *string `json:"supplierId"`
 }
+
+type DeleteProduct struct {
+	ID string `json:"id"`
+}

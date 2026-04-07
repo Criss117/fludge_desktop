@@ -69,6 +69,33 @@ INSERT INTO product (
   updated_at
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+-- name: SaveProduct :exec
+INSERT INTO product (
+  id, 
+  sku, 
+  name, 
+  description, 
+  wholesale_price, 
+  sale_price, 
+  cost_price, 
+  category_id, 
+  supplier_id, 
+  organization_id, 
+  created_at, 
+  updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+  sku = excluded.sku, 
+  name = excluded.name, 
+  description = excluded.description, 
+  wholesale_price = excluded.wholesale_price, 
+  sale_price = excluded.sale_price, 
+  cost_price = excluded.cost_price, 
+  category_id = excluded.category_id, 
+  supplier_id = excluded.supplier_id, 
+  updated_at = excluded.updated_at;
+
+
 -- name: UpdateProduct :exec
 UPDATE product 
 SET 
@@ -84,15 +111,16 @@ SET
 WHERE id = ? AND organization_id = ? AND deleted_at IS NULL;
 
 -- name: DeleteProduct :exec
-DELETE FROM product
-WHERE id = sqlc.arg(product_id)
-AND organization_id = sqlc.arg(organization_id);
+UPDATE product
+SET deleted_at = ?
+WHERE id = ? 
+AND organization_id = ?;
 
 -- name: FindOneProduct :one
 SELECT * FROM product
-WHERE product.id = sqlc.arg(product_id) 
-AND product.organization_id = sqlc.arg(organization_id) 
-AND product.deleted_at IS NULL;
+WHERE id = ?
+AND organization_id = ? 
+AND deleted_at IS NULL;
 
 -- name: FindAllProducts :many
 SELECT product.*, inventory_item.stock, inventory_item.min_stock

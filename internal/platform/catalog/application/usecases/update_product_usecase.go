@@ -79,7 +79,7 @@ func (u *UpdateProduct) Execute(
 		return nil, errDb
 	}
 
-	if _, errDb := u.updateInventoryItem.Execute(ctx, existingProduct.ID, organizationId, cmd.Stock, cmd.MinStock); errDb != nil {
+	if _, errDb := u.updateInventoryItem.Execute(ctx, organizationId, existingProduct.ID, cmd.Stock, cmd.MinStock); errDb != nil {
 		return nil, errDb
 	}
 

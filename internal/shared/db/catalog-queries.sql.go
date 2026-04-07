@@ -407,8 +407,8 @@ func (q *Queries) FindOneCategoryByName(ctx context.Context, arg FindOneCategory
 
 const findOneInventoryItem = `-- name: FindOneInventoryItem :one
 SELECT product_id, organization_id, stock, min_stock, created_at, updated_at FROM inventory_item
-WHERE inventory_item.product_id = ?1 
-AND inventory_item.organization_id = ?2
+WHERE product_id = ?
+AND organization_id = ?
 `
 
 type FindOneInventoryItemParams struct {

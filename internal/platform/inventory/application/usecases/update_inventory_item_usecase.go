@@ -35,7 +35,6 @@ func (u *UpdateInventoryItem) Execute(
 	}
 
 	if inventoryItem == nil {
-
 		newItem, err := u.createInventoryItem.Execute(ctx, productId, organizationId, stock, minStock)
 
 		if err != nil {

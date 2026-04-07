@@ -134,5 +134,5 @@ WHERE product_id = ? AND organization_id = ?;
 
 -- name: FindOneInventoryItem :one
 SELECT * FROM inventory_item
-WHERE inventory_item.product_id = sqlc.arg(product_id) 
-AND inventory_item.organization_id = sqlc.arg(organization_id);
+WHERE product_id = ?
+AND organization_id = ?;

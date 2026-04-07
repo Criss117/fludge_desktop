@@ -2,10 +2,12 @@ package repositories
 
 import (
 	"context"
+	"database/sql"
 	"desktop/internal/platform/inventory/domain/aggregates"
 	"desktop/internal/platform/inventory/infrastructure/mappers"
 	"desktop/internal/shared/db"
 	"desktop/internal/shared/db/dbutils"
+	"errors"
 )
 
 type SqliteInventoryItemRepository struct {
@@ -54,6 +56,10 @@ func (r *SqliteInventoryItemRepository) FindOneByProductID(ctx context.Context, 
 	})
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 

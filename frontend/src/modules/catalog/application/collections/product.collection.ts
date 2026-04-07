@@ -77,16 +77,16 @@ export function productCollectionBuilder(orgId: string) {
           return { refetch: false };
         },
 
-        // onDelete: async ({ transaction, collection }) => {
-        //   const mutations = transaction.mutations;
+        onDelete: async ({ transaction, collection }) => {
+          const mutations = transaction.mutations;
 
-        //   const productIds = mutations.map((m) => ({ id: m.original.id }));
+          const productIds = mutations.map((m) => ({ id: m.original.id }));
 
-        //   await orpc.inventory.products.delete.call(productIds);
+          await productService.deleteProduct(productIds[0].id);
 
-        //   collection.utils.writeDelete(productIds.map((m) => m.id));
-        //   return { refetch: false };
-        // },
+          collection.utils.writeDelete(productIds.map((m) => m.id));
+          return { refetch: false };
+        },
       }),
     );
 

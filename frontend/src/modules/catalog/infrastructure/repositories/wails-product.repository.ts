@@ -1,5 +1,6 @@
 import {
   CreateProduct,
+  DeleteProduct,
   FindAllProducts,
   UpdateProduct,
 } from "@wails/go/handlers/CatalogProductHandler";
@@ -29,6 +30,10 @@ export class WailsProductRepository implements ProductRepository {
     const product = await UpdateProduct(cmd);
 
     return mapProductToDomain(product);
+  }
+
+  public async deleteProduct(id: string): Promise<void> {
+    await DeleteProduct({ id: id });
   }
 }
 

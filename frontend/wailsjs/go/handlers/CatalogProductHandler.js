@@ -6,6 +6,10 @@ export function CreateProduct(arg1) {
   return window['go']['handlers']['CatalogProductHandler']['CreateProduct'](arg1);
 }
 
+export function DeleteProduct(arg1) {
+  return window['go']['handlers']['CatalogProductHandler']['DeleteProduct'](arg1);
+}
+
 export function FindAllProducts() {
   return window['go']['handlers']['CatalogProductHandler']['FindAllProducts']();
 }

@@ -23,4 +23,8 @@ export class ProductService {
   public async updateProduct(cmd: UpdateProductCommand): Promise<Product> {
     return this.productRepository.updateProduct(cmd);
   }
+
+  public async deleteProduct(id: string): Promise<void> {
+    return this.productRepository.deleteProduct(id);
+  }
 }

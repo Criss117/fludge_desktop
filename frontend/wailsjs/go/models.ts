@@ -127,6 +127,18 @@ export namespace commands {
 	        this.ids = source["ids"];
 	    }
 	}
+	export class DeleteProduct {
+	    id: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteProduct(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	    }
+	}
 	export class FindOneOrganization {
 	    organizationId: string;
 	

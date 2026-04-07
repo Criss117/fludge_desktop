@@ -5,6 +5,8 @@ import {responses} from '../models';
 
 export function CreateProduct(arg1:commands.CreateProduct):Promise<responses.Product>;
 
+export function DeleteProduct(arg1:commands.DeleteProduct):Promise<void>;
+
 export function FindAllProducts():Promise<Array<responses.Product>>;
 
 export function UpdateProduct(arg1:commands.UpdateProduct):Promise<responses.Product>;

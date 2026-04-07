@@ -37,11 +37,20 @@ export function useMutateProducts() {
         draft.stock = values.stock ?? draft.stock;
         draft.minStock = values.minStock ?? draft.minStock;
         draft.updatedAt = new Date().getMilliseconds();
+        draft.categoryId = values.categoryId;
       });
 
       await tx.isPersisted.promise;
     },
   });
 
-  return { create, update };
+  const remove = useMutation({
+    mutationKey: ["catalog", "delete-product"],
+    mutationFn: async (id: string) => {
+      const tx = productCollection.delete(id);
+
+      await tx.isPersisted.promise;
+    },
+  });
+  return { create, update, remove };
 }

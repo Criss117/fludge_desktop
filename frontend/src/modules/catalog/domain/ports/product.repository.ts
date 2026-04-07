@@ -31,4 +31,5 @@ export interface ProductRepository {
   findAllProducts(): Promise<Product[]>;
   createProduct(cmd: CreateProductCommand): Promise<Product>;
   updateProduct(cmd: UpdateProductCommand): Promise<Product>;
+  deleteProduct(id: string): Promise<void>;
 }

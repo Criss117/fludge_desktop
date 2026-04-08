@@ -54,8 +54,35 @@ func (r *SqliteOrganizationTeamRepository) Create(ctx context.Context, team *agg
 	return nil
 }
 
-func (r *SqliteOrganizationTeamRepository) Delete(ctx context.Context, team *aggregates.Team) error {
-	if err := r.queries.DeleteTeam(ctx, team.ID); err != nil {
+func (r *SqliteOrganizationTeamRepository) Delete(
+	ctx context.Context,
+	organizationId, teamId string,
+) error {
+	if err := r.queries.DeleteTeam(ctx, db.DeleteTeamParams{
+		ID:             teamId,
+		OrganizationID: organizationId,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *SqliteOrganizationTeamRepository) Update(ctx context.Context, team *aggregates.Team) error {
+	permissions, err := team.Permissions.ToJSON()
+
+	if err != nil {
+		return err
+	}
+
+	if err := r.queries.UpdateTeam(ctx, db.UpdateTeamParams{
+		ID:             team.ID,
+		Name:           team.Name,
+		OrganizationID: team.OrganizationID,
+		Permissions:    permissions,
+		Description:    dbutils.StringToSQLNullable(team.Description),
+		UpdatedAt:      dbutils.TimeToInt64(team.UpdatedAt),
+	}); err != nil {
 		return err
 	}
 

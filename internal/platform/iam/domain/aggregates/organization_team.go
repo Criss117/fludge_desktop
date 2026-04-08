@@ -145,3 +145,26 @@ func (t *Team) RemoveMember(member *TeamMember) error {
 func (t *Team) CountMembers() int {
 	return len(t.Members)
 }
+
+func (t *Team) Update(
+	name string,
+	description *string,
+	permissions []string,
+) error {
+	if len(permissions) == 0 {
+		return derrors.ErrPermissionListEmpty
+	}
+
+	validPermissions, errPermissions := valueobjects.NewPermissionList(permissions)
+
+	if errPermissions != nil {
+		return errPermissions
+	}
+
+	t.Name = name
+	t.Permissions = validPermissions
+	t.Description = description
+	t.UpdatedAt = time.Now()
+
+	return nil
+}

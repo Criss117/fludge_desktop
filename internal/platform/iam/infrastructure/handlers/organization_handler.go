@@ -115,3 +115,71 @@ func (h *IamOrganizationHandler) FindManyOrganizationsByRootOperator() ([]respon
 
 	return organizations, nil
 }
+
+func (h *IamOrganizationHandler) CreateTeam(cmd *commands.CreateTeam) (*responses.Team, error) {
+	ctx := h.baseHandler.Context()
+	currentOrganization, err := h.baseHandler.CurrentOrganization()
+
+	if err != nil {
+		return nil, err
+	}
+
+	team, err := h.app.CreateTeam.Execute(ctx, currentOrganization, cmd)
+
+	if err != nil {
+		return nil, err
+	}
+
+	h.onStateChange(appstate.StateChangeEvent{
+		Type:         appstate.SwitchOrganization,
+		Organization: currentOrganization,
+	})
+
+	res := responses.TeamFromDomain(team)
+
+	return &res, nil
+}
+
+func (h *IamOrganizationHandler) DeleteTeam(cmd commands.DeleteTeam) error {
+	ctx := h.baseHandler.Context()
+	currentOrganization, err := h.baseHandler.CurrentOrganization()
+
+	if err != nil {
+		return err
+	}
+
+	deletedErr := h.app.DeleteTeam.Execute(ctx, currentOrganization, cmd)
+
+	if deletedErr != nil {
+		return deletedErr
+	}
+
+	h.onStateChange(appstate.StateChangeEvent{
+		Type:         appstate.SwitchOrganization,
+		Organization: currentOrganization,
+	})
+
+	return nil
+}
+
+func (h *IamOrganizationHandler) UpdateTeam(cmd commands.UpdateTeam) error {
+	ctx := h.baseHandler.Context()
+	currentOrganization, err := h.baseHandler.CurrentOrganization()
+
+	if err != nil {
+		return err
+	}
+
+	errUpdated := h.app.UpdateTeam.Execute(ctx, currentOrganization, cmd)
+
+	if errUpdated != nil {
+		return errUpdated
+	}
+
+	h.onStateChange(appstate.StateChangeEvent{
+		Type:         appstate.SwitchOrganization,
+		Organization: currentOrganization,
+	})
+
+	return nil
+}

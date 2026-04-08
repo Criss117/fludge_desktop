@@ -109,6 +109,37 @@ func (o *Organization) IsActive() bool {
 	return true
 }
 
+func (o *Organization) UpdateDetails(
+	name, legalName, address string,
+	logo, contactPhone, contactEmail *string,
+) error {
+	var contactEmailVO *valueobjects.Email = nil
+
+	if contactEmail != nil {
+		validContactEmail, errEmail := valueobjects.NewEmail(*contactEmail)
+
+		if errEmail != nil {
+			return errEmail
+		}
+
+		contactEmailVO = &validContactEmail
+	}
+
+	validSlug := valueobjects.NewSlug(name)
+
+	o.Name = name
+	o.Slug = validSlug
+	o.LegalName = legalName
+	o.Address = address
+	o.Logo = logo
+	o.ContactPhone = contactPhone
+	o.ContactEmail = contactEmailVO
+	o.UpdatedAt = time.Now()
+
+	return nil
+}
+
+// Member related methods
 func (o *Organization) FindMemberByOperatorId(operatorID string) *Member {
 	for _, member := range o.Members {
 		if member.OperatorID == operatorID {
@@ -117,18 +148,6 @@ func (o *Organization) FindMemberByOperatorId(operatorID string) *Member {
 	}
 
 	return nil
-}
-
-func (o *Organization) FindTeamsByOperatorId(operatorID string) []*Team {
-	teams := make([]*Team, 0, len(o.Teams))
-
-	for _, team := range o.Teams {
-		if team.OperatorIsMember(operatorID) {
-			teams = append(teams, team)
-		}
-	}
-
-	return teams
 }
 
 func (o *Organization) AddMember(member *Member) error {
@@ -160,32 +179,98 @@ func (o *Organization) RemoveMember(member *Member) error {
 	return derrors.ErrMemberNotFound
 }
 
-func (o *Organization) UpdateDetails(
-	name, legalName, address string,
-	logo, contactPhone, contactEmail *string,
-) error {
-	var contactEmailVO *valueobjects.Email = nil
+// Team related methods
+func (o *Organization) FindTeamsByOperatorId(operatorID string) []*Team {
+	teams := make([]*Team, 0, len(o.Teams))
 
-	if contactEmail != nil {
-		validContactEmail, errEmail := valueobjects.NewEmail(*contactEmail)
-
-		if errEmail != nil {
-			return errEmail
+	for _, team := range o.Teams {
+		if team.OperatorIsMember(operatorID) {
+			teams = append(teams, team)
 		}
-
-		contactEmailVO = &validContactEmail
 	}
 
-	validSlug := valueobjects.NewSlug(name)
+	return teams
+}
 
-	o.Name = name
-	o.Slug = validSlug
-	o.LegalName = legalName
-	o.Address = address
-	o.Logo = logo
-	o.ContactPhone = contactPhone
-	o.ContactEmail = contactEmailVO
-	o.UpdatedAt = time.Now()
+func (o *Organization) FindTeamByID(teamID string) *Team {
+	for _, team := range o.Teams {
+		if team.ID == teamID {
+			return team
+		}
+	}
 
 	return nil
+}
+
+func (o *Organization) TeamNameExists(name string) bool {
+	for _, team := range o.Teams {
+		if team.Name == name {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (o *Organization) NewTeam(
+	name string,
+	description *string,
+	permissions []string,
+) (*Team, error) {
+	if o.TeamNameExists(name) {
+		return nil, derrors.ErrTeamAlreadyExists
+	}
+
+	newTeam, err := NewTeam(
+		name,
+		o.ID,
+		permissions,
+		description,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	o.Teams = append(o.Teams, newTeam)
+	o.UpdatedAt = time.Now()
+
+	return newTeam, nil
+}
+
+func (o *Organization) RemoveTeam(teamId string) error {
+	for i, t := range o.Teams {
+		if t.ID == teamId {
+			o.Teams = append(o.Teams[:i], o.Teams[i+1:]...)
+			o.UpdatedAt = time.Now()
+			return nil
+		}
+	}
+
+	return derrors.ErrTeamNotFound
+}
+
+func (o *Organization) UpdateTeam(
+	teamId string,
+	name string,
+	description *string,
+	permissions []string,
+) (*Team, error) {
+	existingTeam := o.FindTeamByID(teamId)
+
+	if existingTeam == nil {
+		return nil, derrors.ErrTeamNotFound
+	}
+
+	if err := existingTeam.Update(
+		name,
+		description,
+		permissions,
+	); err != nil {
+		return nil, err
+	}
+
+	o.UpdatedAt = time.Now()
+
+	return existingTeam, nil
 }

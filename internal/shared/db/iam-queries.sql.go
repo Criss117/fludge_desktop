@@ -10,8 +10,39 @@ import (
 	"database/sql"
 )
 
+const addTeamMember = `-- name: AddTeamMember :exec
+INSERT INTO team_member (id, team_id, operator_id, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?)
+`
+
+type AddTeamMemberParams struct {
+	ID         string `json:"id"`
+	TeamID     string `json:"team_id"`
+	OperatorID string `json:"operator_id"`
+	CreatedAt  int64  `json:"created_at"`
+	UpdatedAt  int64  `json:"updated_at"`
+}
+
+func (q *Queries) AddTeamMember(ctx context.Context, arg AddTeamMemberParams) error {
+	_, err := q.db.ExecContext(ctx, addTeamMember,
+		arg.ID,
+		arg.TeamID,
+		arg.OperatorID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	return err
+}
+
 const createMember = `-- name: CreateMember :exec
-INSERT INTO member (id, organization_id, operator_id, role, created_at, updated_at) 
+INSERT INTO member (
+    id,
+    organization_id,
+    operator_id,
+    role,
+    created_at,
+    updated_at
+  )
 VALUES (?, ?, ?, ?, ?, ?)
 `
 
@@ -37,7 +68,16 @@ func (q *Queries) CreateMember(ctx context.Context, arg CreateMemberParams) erro
 }
 
 const createOperator = `-- name: CreateOperator :exec
-INSERT INTO operator (id, name, username, email, pin, operator_type, created_at, updated_at) 
+INSERT INTO operator (
+    id,
+    name,
+    username,
+    email,
+    pin,
+    operator_type,
+    created_at,
+    updated_at
+  )
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `
 
@@ -67,7 +107,19 @@ func (q *Queries) CreateOperator(ctx context.Context, arg CreateOperatorParams) 
 }
 
 const createOrganization = `-- name: CreateOrganization :exec
-INSERT INTO organization (id, name, slug, logo, metadata, legal_name, address, contact_phone, contact_email, created_at, updated_at) 
+INSERT INTO organization (
+    id,
+    name,
+    slug,
+    logo,
+    metadata,
+    legal_name,
+    address,
+    contact_phone,
+    contact_email,
+    created_at,
+    updated_at
+  )
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
@@ -103,7 +155,15 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganization
 }
 
 const createTeam = `-- name: CreateTeam :exec
-INSERT INTO team (id, name, organization_id, permissions, description, created_at, updated_at) 
+INSERT INTO team (
+    id,
+    name,
+    organization_id,
+    permissions,
+    description,
+    created_at,
+    updated_at
+  )
 VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
@@ -133,7 +193,8 @@ func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) error {
 const deleteMember = `-- name: DeleteMember :exec
 UPDATE member
 SET deleted_at = ?
-WHERE id = ? AND organization_id = ?
+WHERE id = ?
+  AND organization_id = ?
 `
 
 type DeleteMemberParams struct {
@@ -148,7 +209,7 @@ func (q *Queries) DeleteMember(ctx context.Context, arg DeleteMemberParams) erro
 }
 
 const deleteOperator = `-- name: DeleteOperator :exec
-DELETE FROM operator 
+DELETE FROM operator
 WHERE id = ?
 `
 
@@ -159,11 +220,17 @@ func (q *Queries) DeleteOperator(ctx context.Context, id string) error {
 
 const deleteTeam = `-- name: DeleteTeam :exec
 DELETE FROM team
-WHERE id = ?
+WHERE id = ? 
+  AND organization_id = ?
 `
 
-func (q *Queries) DeleteTeam(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, deleteTeam, id)
+type DeleteTeamParams struct {
+	ID             string `json:"id"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) DeleteTeam(ctx context.Context, arg DeleteTeamParams) error {
+	_, err := q.db.ExecContext(ctx, deleteTeam, arg.ID, arg.OrganizationID)
 	return err
 }
 
@@ -178,14 +245,14 @@ func (q *Queries) DeleteTeamMembers(ctx context.Context, teamID string) error {
 }
 
 const existsOrganization = `-- name: ExistsOrganization :one
-
-SELECT COUNT(id) as total FROM organization
+SELECT COUNT(id) as total
+FROM organization
 WHERE (
-  lower(name) = lower(?1) OR
-  lower(legal_name) = lower(?2) OR
-  lower(slug) = lower(?3)
-) 
-AND deleted_at IS NULL
+    lower(name) = lower(?1)
+    OR lower(legal_name) = lower(?2)
+    OR lower(slug) = lower(?3)
+  )
+  AND deleted_at IS NULL
 `
 
 type ExistsOrganizationParams struct {
@@ -205,10 +272,13 @@ func (q *Queries) ExistsOrganization(ctx context.Context, arg ExistsOrganization
 }
 
 const existsTeam = `-- name: ExistsTeam :one
-SELECT COUNT(id) as total FROM team
-WHERE lower(name) = lower(?1) OR 
-(organization_id = ?2
-AND deleted_at IS NULL)
+SELECT COUNT(id) as total
+FROM team
+WHERE lower(name) = lower(?1)
+  OR (
+    organization_id = ?2
+    AND deleted_at IS NULL
+  )
 `
 
 type ExistsTeamParams struct {
@@ -224,9 +294,10 @@ func (q *Queries) ExistsTeam(ctx context.Context, arg ExistsTeamParams) (int64, 
 }
 
 const findAllMembers = `-- name: FindAllMembers :many
-
-SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at FROM member
-WHERE organization_id = ? AND deleted_at IS NULL
+SELECT id, organization_id, operator_id, role, created_at, updated_at, deleted_at
+FROM member
+WHERE organization_id = ?
+  AND deleted_at IS NULL
 `
 
 // ------------------------------------------------------------------------------
@@ -264,9 +335,10 @@ func (q *Queries) FindAllMembers(ctx context.Context, organizationID string) ([]
 }
 
 const findAllTeams = `-- name: FindAllTeams :many
-
-SELECT id, name, organization_id, permissions, description, created_at, updated_at, deleted_at FROM team
-WHERE organization_id = ? AND deleted_at IS NULL
+SELECT id, name, organization_id, permissions, description, created_at, updated_at, deleted_at
+FROM team
+WHERE organization_id = ?
+  AND deleted_at IS NULL
 `
 
 // ------------------------------------------------------------------------------
@@ -305,8 +377,10 @@ func (q *Queries) FindAllTeams(ctx context.Context, organizationID string) ([]Te
 }
 
 const findAllTeamsMembersByTeam = `-- name: FindAllTeamsMembersByTeam :many
-SELECT id, team_id, operator_id, organization_id, created_at, updated_at, deleted_at FROM team_member
-WHERE team_id = ? AND deleted_at IS NULL
+SELECT id, team_id, operator_id, organization_id, created_at, updated_at, deleted_at
+FROM team_member
+WHERE team_id = ?
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) FindAllTeamsMembersByTeam(ctx context.Context, teamID string) ([]TeamMember, error) {
@@ -341,8 +415,8 @@ func (q *Queries) FindAllTeamsMembersByTeam(ctx context.Context, teamID string) 
 }
 
 const findAppState = `-- name: FindAppState :one
-
-SELECT id, active_organization_id, active_operator_id, updated_at FROM app_state
+SELECT id, active_organization_id, active_operator_id, updated_at
+FROM app_state
 WHERE id = 'local'
 `
 
@@ -362,9 +436,11 @@ func (q *Queries) FindAppState(ctx context.Context) (AppState, error) {
 }
 
 const findManyOrganizationsByRootOperator = `-- name: FindManyOrganizationsByRootOperator :many
-SELECT organization.id, organization.name, organization.slug, organization.logo, organization.metadata, organization.legal_name, organization.address, organization.contact_phone, organization.contact_email, organization.created_at, organization.updated_at, organization.deleted_at FROM member
-INNER JOIN organization ON member.organization_id = organization.id
-WHERE operator_id = ? AND role = 'ROOT'
+SELECT organization.id, organization.name, organization.slug, organization.logo, organization.metadata, organization.legal_name, organization.address, organization.contact_phone, organization.contact_email, organization.created_at, organization.updated_at, organization.deleted_at
+FROM member
+  INNER JOIN organization ON member.organization_id = organization.id
+WHERE operator_id = ?
+  AND role = 'ROOT'
 `
 
 func (q *Queries) FindManyOrganizationsByRootOperator(ctx context.Context, operatorID string) ([]Organization, error) {
@@ -404,9 +480,10 @@ func (q *Queries) FindManyOrganizationsByRootOperator(ctx context.Context, opera
 }
 
 const findOneOperatorByEmail = `-- name: FindOneOperatorByEmail :one
-
-SELECT id, name, email, username, pin, operator_type, created_at, updated_at, deleted_at FROM operator 
-WHERE email = ? AND deleted_at IS NULL
+SELECT id, name, email, username, pin, operator_type, created_at, updated_at, deleted_at
+FROM operator
+WHERE email = ?
+  AND deleted_at IS NULL
 `
 
 // -----------------------------------------------------------------------------
@@ -430,8 +507,10 @@ func (q *Queries) FindOneOperatorByEmail(ctx context.Context, email string) (Ope
 }
 
 const findOneOperatorById = `-- name: FindOneOperatorById :one
-SELECT id, name, email, username, pin, operator_type, created_at, updated_at, deleted_at FROM operator 
-WHERE id = ? AND deleted_at IS NULL
+SELECT id, name, email, username, pin, operator_type, created_at, updated_at, deleted_at
+FROM operator
+WHERE id = ?
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) FindOneOperatorById(ctx context.Context, id string) (Operator, error) {
@@ -452,8 +531,10 @@ func (q *Queries) FindOneOperatorById(ctx context.Context, id string) (Operator,
 }
 
 const findOneOperatorByUsername = `-- name: FindOneOperatorByUsername :one
-SELECT id, name, email, username, pin, operator_type, created_at, updated_at, deleted_at FROM operator 
-WHERE username = ? AND deleted_at IS NULL
+SELECT id, name, email, username, pin, operator_type, created_at, updated_at, deleted_at
+FROM operator
+WHERE username = ?
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) FindOneOperatorByUsername(ctx context.Context, username string) (Operator, error) {
@@ -474,8 +555,10 @@ func (q *Queries) FindOneOperatorByUsername(ctx context.Context, username string
 }
 
 const findOneOrganization = `-- name: FindOneOrganization :one
-SELECT id, name, slug, logo, metadata, legal_name, address, contact_phone, contact_email, created_at, updated_at, deleted_at FROM organization
-WHERE id = ? AND deleted_at IS NULL
+SELECT id, name, slug, logo, metadata, legal_name, address, contact_phone, contact_email, created_at, updated_at, deleted_at
+FROM organization
+WHERE id = ?
+  AND deleted_at IS NULL
 `
 
 func (q *Queries) FindOneOrganization(ctx context.Context, id string) (Organization, error) {
@@ -499,7 +582,7 @@ func (q *Queries) FindOneOrganization(ctx context.Context, id string) (Organizat
 }
 
 const softDeleteOperator = `-- name: SoftDeleteOperator :exec
-UPDATE operator 
+UPDATE operator
 SET deleted_at = ?
 WHERE id = ?
 `
@@ -515,8 +598,10 @@ func (q *Queries) SoftDeleteOperator(ctx context.Context, arg SoftDeleteOperator
 }
 
 const updateAppState = `-- name: UpdateAppState :exec
-UPDATE app_state 
-SET active_organization_id = ?, active_operator_id = ?, updated_at = ?  
+UPDATE app_state
+SET active_organization_id = ?,
+  active_operator_id = ?,
+  updated_at = ?
 WHERE id = 'local'
 `
 
@@ -532,9 +617,15 @@ func (q *Queries) UpdateAppState(ctx context.Context, arg UpdateAppStateParams) 
 }
 
 const updateOperator = `-- name: UpdateOperator :exec
-UPDATE operator 
-SET name = ?, username = ?, email = ?, pin = ?, operator_type = ?, updated_at = ?
-WHERE id = ? AND deleted_at IS NULL
+UPDATE operator
+SET name = ?,
+  username = ?,
+  email = ?,
+  pin = ?,
+  operator_type = ?,
+  updated_at = ?
+WHERE id = ?
+  AND deleted_at IS NULL
 `
 
 type UpdateOperatorParams struct {
@@ -561,9 +652,18 @@ func (q *Queries) UpdateOperator(ctx context.Context, arg UpdateOperatorParams) 
 }
 
 const updateOrganization = `-- name: UpdateOrganization :exec
-UPDATE organization 
-SET name = ?, slug = ?, logo = ?, metadata = ?, legal_name = ?, address = ?, contact_phone = ?, contact_email = ?, updated_at = ?
-WHERE id = ? AND deleted_at IS NULL
+UPDATE organization
+SET name = ?,
+  slug = ?,
+  logo = ?,
+  metadata = ?,
+  legal_name = ?,
+  address = ?,
+  contact_phone = ?,
+  contact_email = ?,
+  updated_at = ?
+WHERE id = ?
+  AND deleted_at IS NULL
 `
 
 type UpdateOrganizationParams struct {
@@ -591,6 +691,38 @@ func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganization
 		arg.ContactEmail,
 		arg.UpdatedAt,
 		arg.ID,
+	)
+	return err
+}
+
+const updateTeam = `-- name: UpdateTeam :exec
+UPDATE team
+SET name = ?,
+  permissions = ?,
+  description = ?,
+  updated_at = ?
+WHERE id = ?
+  AND organization_id = ?
+  AND deleted_at IS NULL
+`
+
+type UpdateTeamParams struct {
+	Name           string         `json:"name"`
+	Permissions    []byte         `json:"permissions"`
+	Description    sql.NullString `json:"description"`
+	UpdatedAt      int64          `json:"updated_at"`
+	ID             string         `json:"id"`
+	OrganizationID string         `json:"organization_id"`
+}
+
+func (q *Queries) UpdateTeam(ctx context.Context, arg UpdateTeamParams) error {
+	_, err := q.db.ExecContext(ctx, updateTeam,
+		arg.Name,
+		arg.Permissions,
+		arg.Description,
+		arg.UpdatedAt,
+		arg.ID,
+		arg.OrganizationID,
 	)
 	return err
 }

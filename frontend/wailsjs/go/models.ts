@@ -115,6 +115,22 @@ export namespace commands {
 	        this.supplierId = source["supplierId"];
 	    }
 	}
+	export class CreateTeam {
+	    name: string;
+	    description?: string;
+	    permissions: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CreateTeam(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.permissions = source["permissions"];
+	    }
+	}
 	export class DeleteManyCategories {
 	    ids: string[];
 	
@@ -132,6 +148,18 @@ export namespace commands {
 	
 	    static createFrom(source: any = {}) {
 	        return new DeleteProduct(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	    }
+	}
+	export class DeleteTeam {
+	    id: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeleteTeam(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -287,6 +315,24 @@ export namespace commands {
 	        this.minStock = source["minStock"];
 	        this.categoryId = source["categoryId"];
 	        this.supplierId = source["supplierId"];
+	    }
+	}
+	export class UpdateTeam {
+	    id: string;
+	    name: string;
+	    description?: string;
+	    permissions: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new UpdateTeam(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.permissions = source["permissions"];
 	    }
 	}
 

@@ -36,7 +36,8 @@ type OrganizationMemberRepository interface {
 
 type OrganizationTeamRepository interface {
 	Create(ctx context.Context, team *aggregates.Team) error
-	Delete(ctx context.Context, team *aggregates.Team) error
+	Update(ctx context.Context, team *aggregates.Team) error
+	Delete(ctx context.Context, organizationId, teamId string) error
 
 	FindAllByOrganization(ctx context.Context, organizationId string) ([]*aggregates.Team, error)
 }

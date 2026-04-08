@@ -12,6 +12,9 @@ type UseCasesContainer struct {
 	RegisterRootOperator *usecases.RegisterRootOperator
 	RegisterOrganization *usecases.RegisterOrganization
 	UpdateOrganization   *usecases.UpdateOrganization
+	UpdateTeam           *usecases.UpdateTeam
+	CreateTeam           *usecases.CreateTeam
+	DeleteTeam           *usecases.DeleteTeam
 }
 
 type QueriesContainer struct {
@@ -41,11 +44,25 @@ func NewUseCasesContainer(
 		organizationRepository,
 	)
 
+	// Team - UseCases
+	updateTeam := usecases.NewUpdateTeam(
+		teamRepository,
+	)
+	createTeam := usecases.NewCreateTeam(
+		teamRepository,
+	)
+	deleteTeam := usecases.NewDeleteTeam(
+		teamRepository,
+	)
+
 	return &UseCasesContainer{
 		SignIn:               signIn,
 		RegisterRootOperator: registerRootOperator,
 		RegisterOrganization: registerOrganization,
 		UpdateOrganization:   updateOrganization,
+		UpdateTeam:           updateTeam,
+		CreateTeam:           createTeam,
+		DeleteTeam:           deleteTeam,
 	}
 }
 

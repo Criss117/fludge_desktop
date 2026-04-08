@@ -29,8 +29,6 @@ export function CategoriesList() {
     name: search,
   });
 
-  console.log(categories);
-
   return (
     <Sheet>
       <SheetTrigger render={(props) => <Button {...props} variant="outline" />}>

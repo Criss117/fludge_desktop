@@ -2,11 +2,11 @@ import { Link, type LinkProps } from "@tanstack/react-router";
 import {
   Plus,
   LayoutDashboard,
-  Package,
   Users,
   CirclePile,
   Container,
   type LucideIcon,
+  Briefcase,
 } from "lucide-react";
 
 import {
@@ -52,11 +52,6 @@ const navMainItems: NavMenuItem[] = [
     icon: CirclePile,
     elements: [
       {
-        title: "Productos",
-        url: "/dashboard/$orgid/inventory/products",
-        icon: Package,
-      },
-      {
         title: "Proveedores",
         url: "/dashboard/$orgid/inventory/suppliers",
         icon: Container,
@@ -68,11 +63,11 @@ const navMainItems: NavMenuItem[] = [
     url: "/dashboard/$orgid/clients",
     icon: Users,
   },
-  // {
-  //   title: "Equipos",
-  //   url: "/dashboard/$orgslug/teams",
-  //   icon: Briefcase,
-  // },
+  {
+    title: "Equipos",
+    url: "/dashboard/$orgid/teams",
+    icon: Briefcase,
+  },
   // {
   //   title: "Empleados",
   //   url: "/dashboard/$orgslug/employees",
